@@ -1,4 +1,5 @@
 from deck import Deck
+from move import Move
 
 class Table:
     def __init__(self):
@@ -13,7 +14,7 @@ class Table:
         Function that represents putting cards on the table
 
         Parameters: 
-            move: Card | [Card]
+            move: Move
         '''
         self.moves.append(move)
 
@@ -22,9 +23,9 @@ class Table:
         Function that returns the last move
 
         Returns:
-            cards: Card | [Card]
+            cards: Move
         '''
-        return self.moves[-1] if self.moves else []
+        return self.moves[-1] if self.moves else Move([])
 
     def clear(self):
         '''
@@ -32,7 +33,9 @@ class Table:
         the deck.
         '''
         # Return the cards from the table to the deck
-        [ self.deck.return_cards(move) for move in self.moves ]
+        for move in self.moves:
+            if move:
+                self.deck.return_cards(move.cards) 
         # There are no cards on the table anymore
         self.moves = []
 

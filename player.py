@@ -40,10 +40,10 @@ class Player:
         Function that represents a player making a move in the game
 
         Parameters:
-            last_move: Card | [Card]
+            last_move: Move
 
         Returns: 
-            move: Skip | Card | [Card]
+            move: Skip | Move
         '''
         raise NotImplementedError
     

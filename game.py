@@ -2,6 +2,7 @@ from basicPlayer  import BasicPlayer
 from card import Card
 from table import Table
 from skip import Skip
+from move import Move
 
 
 class Game:
@@ -109,7 +110,7 @@ class Game:
         # Get the scum 
         scum = list(filter(lambda player: player not in finished_players, self.players))[0]
         # Let the scum return his card, by putting them on the table and clearing it
-        self.table.put(scum.return_cards())
+        self.table.put(Move(scum.return_cards()))
         self.table.clear()
         # Add him/her to the finishing_players for the finishing order
         finished_players.append(scum)
