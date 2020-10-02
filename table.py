@@ -45,3 +45,12 @@ class Table:
         '''
         return self.deck
 
+    def check_deck(self):
+        '''
+        Function that represents someone checking if the deck contains all cards
+
+        Raises:
+            ValueError
+        '''
+        if not self.deck.complete:
+            raise ValueError(f"The deck is not complete, it contains {len(self.deck.cards)} cards")

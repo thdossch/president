@@ -27,5 +27,15 @@ class Deck:
         '''
         shuffle(self.cards)
     
+    @property
+    def complete(self):
+        '''
+        Property that represents if the deck is completer
+        
+        Returns: 
+            complete: boolean
+        '''
+        return len(self.cards) == 52
+
     def __repr__(self):
         return '\n'.join([str(card) for card in self.cards])

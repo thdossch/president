@@ -1,4 +1,4 @@
-from simplePlayer import SimplePlayer
+from basicPlayer  import BasicPlayer
 from card import Card
 from table import Table
 from skip import Skip
@@ -90,7 +90,7 @@ class Game:
             # Play a round 
             print("++++++++++++++++++++++++++++++")
             print(f"Starting a new round, players are {list(map(lambda player: player.name, competing_players))}")
-            round_winner = self.round(player_loop)
+            round_winner = self.round(competing_players, player_loop)
             print(f"Round Finished, winning player {round_winner.name}")
             print("++++++++++++++++++++++++++++++")
 
@@ -117,12 +117,13 @@ class Game:
         # Finish the game
         self.finish_game(finished_players)
 
-    def round(self, player_loop):
+    def round(self, round_players, player_loop):
         '''
         Function that represents one round in a game, 
         this continues until all but one players skipped their turn.
 
         Parameters:
+            round_players: [Player]
             player_loop: Generator -> Player
 
         Returns: 
@@ -138,7 +139,7 @@ class Game:
                 continue
 
             # If all other players skipped, this player is the winner of this round
-            if len(round_skips) == len(self.players) - 1:
+            if len(round_skips) == len(round_players) - 1:
                 return current_player
             
             # The round is not finished so this player may make a move
@@ -176,7 +177,9 @@ class Game:
             self.high_scum = finish_order[-2]
             self.scum = finish_order[-1]
         
-        print(f"order: {list(map(lambda player: player.name, finish_order))}")
+        # Check if the deck is complete, this is to make sure not mistakes are made
+        self.table.check_deck()
+
         if len(self.players) < 4:
             result = f"""
             Game is finished: 
@@ -223,9 +226,9 @@ class Game:
             current_player_index = (current_player_index + 1) % len(players)
 
 
-players = [SimplePlayer("Player1"), SimplePlayer("Player2")]
-players.append(SimplePlayer("Player3"))
-players.append(SimplePlayer("Player4"))
+players = [BasicPlayer("Player1"), BasicPlayer("Player2")]
+players.append(BasicPlayer("Player3"))
+players.append(BasicPlayer("Player4"))
 
 game = Game(players)
 game.start()

@@ -48,9 +48,21 @@ class Player:
         raise NotImplementedError
     
     def is_finished(self):
+        '''
+        Function that checks if a player is finished
+
+        Returns:
+            finished: boolean
+        '''
         return not self.cards
 
     def return_cards(self):
+        '''
+        Function that represents a player giving his cards back
+
+        Returns
+            cards: [Card]
+        '''
         cards = self.cards
         self.cards = []
         return cards
