@@ -9,10 +9,22 @@ class Deck:
         self.cards = [ Card(rank, suit) for rank in range(1, 14) for suit in ['club', 'diamond', 'heart', 'spade'] ]
     
     def take_cards(self):
+        '''
+        Function that represents taking cards from the top of the deck
+
+        Returns:
+            cards: Generator -> Card
+        '''
         while self.cards and (card := self.cards.pop()):
             yield card
     
     def return_cards(self, cards):
+        '''
+        Function that represents putting cards back on the deck
+
+        Parameters:
+            cards: Card | [Card]
+        '''
         # Cards is only one card
         if isinstance(cards, Card):
             self.cards.append(cards)

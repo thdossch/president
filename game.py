@@ -229,6 +229,7 @@ class Game:
 players = [BasicPlayer("Player1"), BasicPlayer("Player2")]
 players.append(BasicPlayer("Player3"))
 players.append(BasicPlayer("Player4"))
+players.append(BasicPlayer("Player5"))
 
 game = Game(players)
 game.start()
