@@ -22,6 +22,17 @@ class Player:
         '''
         self.cards.append(card)
         self.cards.sort()
+
+    def get_cards_of_rank(self, rank):
+        '''
+        Function that returns all cards of a given rank
+
+        Parameters: 
+            rank: int
+        Returns:
+            cards: [Card]
+        '''
+        return list(filter(lambda card: card.rank == rank, self.cards))
     
     def has(self, card):
         '''

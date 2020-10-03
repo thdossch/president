@@ -2,6 +2,7 @@ from player import Player
 from skip import Skip
 from card import Card
 from move import Move
+from validator import Validator
 
 class BasicPlayer(Player):
     '''
@@ -16,8 +17,7 @@ class BasicPlayer(Player):
         if last_move.is_round_start():
             possible_moves = self.cards
         else:
-            possible_moves = list(filter(lambda card: last_move.rank <= card.rank and \
-                                         len(self.get_cards_of_rank(card.rank)) >= last_move.amount, self.cards))
+            possible_moves = Validator().default_possible_moves(self, last_move)
                 
         if possible_moves:
             # Get the cards with the same rank
@@ -32,14 +32,4 @@ class BasicPlayer(Player):
         print(f"{self.name} plays {move}")
         return move
 
-    def get_cards_of_rank(self, rank):
-        '''
-        Function that returns all cards of a given rank
-
-        Parameters: 
-            rank: int
-        Returns:
-            cards: [Card]
-        '''
-        return list(filter(lambda card: card.rank == rank, self.cards))
         
