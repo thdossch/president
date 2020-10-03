@@ -162,7 +162,7 @@ class Game:
 
     def finish_game(self, finish_order):
         '''
-        Function that represents the end of a game, now President, ..., Scum are set
+        Function that represents the end of a game, here President, ..., Scum are set
 
         Parameters:
             finish_order: [Player]
