@@ -212,7 +212,7 @@ class Game:
          
     def player_loop_generator(self, players, starting_player):
         '''
-        Function that returns a generator with an infinit playerloop
+        Function that returns a generator with an infinite playerloop
 
         Parameters:
             players: [Player]
