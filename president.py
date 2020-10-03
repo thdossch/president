@@ -24,26 +24,29 @@ class President:
         '''
         Function that starts the session, keeps looping until interrupted
         '''
-        game = Game(self.players, {})
-        ranks = game.start()
-        self.ranks = ranks
+        while True:
+            game = Game(self.players, self.ranks)
+            self.ranks = game.start()
 
-        if len(self.players) < 4:
-            result = f"""
-            Game is finished: 
-                President: {ranks['president'].name}
-                Scum: {ranks['scum'].name}
-                """
-            print(result)
-        else:
-            result = f"""
-            Game is finished: 
-                President: {ranks['president'].name}
-                Vice-President: {ranks['vice'].name}
-                High-Scum: {ranks['high_scum'].name}
-                Scum: {ranks['scum'].name}
-                """
-            print(result)
+            if len(self.players) < 4:
+                result = f"""
+                Game is finished: 
+                    President: {self.ranks['president'].name}
+                    Scum: {self.ranks['scum'].name}
+                    """
+                print(result)
+            else:
+                result = f"""
+                Game is finished: 
+                    President: {self.ranks['president'].name}
+                    Vice-President: {self.ranks['vice'].name}
+                    High-Scum: {self.ranks['high_scum'].name}
+                    Scum: {self.ranks['scum'].name}
+                    """
+                print(result)
+
+            if not (ans := input('Play agian? (y/n): ')) or ans == 'n':
+                break 
         
 if __name__ == '__main__':
     players = [BasicPlayer("Player1"), BasicPlayer("Player2")]
