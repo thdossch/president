@@ -46,10 +46,6 @@ class Game:
         self.players = players 
         self.table = Table()
 
-        self.president = None
-        self.vice = None
-        self.high_scum = None
-        self.scum = None
         
     def start(self):
         '''
@@ -66,9 +62,9 @@ class Game:
             self.players[i%(len(self.players))].give_card(card)
         
         # Start the gameloop
-        self.loop()
+        self.play()
     
-    def loop(self):
+    def play(self):
         '''
         Function that represents a game
         '''
