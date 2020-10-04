@@ -1,7 +1,7 @@
 class MoveGenerator:
     def __init__(self):
         '''
-        Class that can generate moves based on a player and the last placed card of the game.
+        Class that can generate moves based on cards and the last placed card of the game.
         '''
         self.special_cards = {7: (lambda card: card.rank < 7)}
 
