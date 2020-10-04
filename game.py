@@ -1,5 +1,5 @@
-from basicPlayer  import BasicPlayer
-from randomPlayer  import RandomPlayer
+from basicPlayer import BasicPlayer
+from randomPlayer import RandomPlayer
 from card import Card
 from table import Table
 from skip import Skip
