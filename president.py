@@ -39,7 +39,7 @@ class President:
                 result = f"""
                 Game is finished: 
                     President: {self.ranks['president'].name}
-                    Vice-President: {self.ranks['vice'].name}
+                    Vice-President: {self.ranks['vice_president'].name}
                     High-Scum: {self.ranks['high_scum'].name}
                     Scum: {self.ranks['scum'].name}
                     """

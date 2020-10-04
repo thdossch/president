@@ -57,6 +57,8 @@ class Game:
     
         # Deal the cards
         self.deal()
+        # Switch cards between ranks
+        self.switch()
         # Play the game
         finish_order = self.play()
         # Process the results
@@ -74,6 +76,14 @@ class Game:
         for (i, card) in enumerate(deck.take_cards()):
             self.players[i%(len(self.players))].give_card(card)
     
+    def switch(self):
+        '''
+        Function that represents switching the cards between ranks in the beginning of the game
+        '''
+        if self.ranks:
+            self.ranks['president'].switch_with_scum(self.ranks['scum']) 
+            if 'vice_president' in self.ranks:
+                self.ranks['vice_president'].switch_with_high_scum(self.ranks['high_scum']) 
     def play(self):
         '''
         Function that represents a game
@@ -184,7 +194,7 @@ class Game:
             ranks['scum'] = finish_order[-1]
         else:
             ranks['president'] = finish_order[0]
-            ranks['vice'] = finish_order[1]
+            ranks['vice_president'] = finish_order[1]
             ranks['high_scum'] = finish_order[-2]
             ranks['scum'] = finish_order[-1]
         
@@ -192,22 +202,6 @@ class Game:
         self.table.check_deck()
         
         return ranks
-        if len(self.players) < 4:
-            result = f"""
-            Game is finished: 
-                President: {self.president.name}
-                Scum: {self.scum.name}
-                """
-            print(result)
-        else:
-            result = f"""
-            Game is finished: 
-                President: {self.president.name}
-                Vice-President: {self.vice.name}
-                High-Scum: {self.high_scum.name}
-                Scum: {self.scum.name}
-                """
-            print(result)
 
 
     def get_starting_player(self):
