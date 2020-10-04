@@ -11,17 +11,17 @@ class BasicPlayer(Player):
 
     def play(self, last_move):
         move = None
-        possible_moves = []
+        possible_cards = []
         # Get possible moves
         # Check if the move is the first of the round 
         if last_move.is_round_start():
-            possible_moves = self.cards
+            possible_cards = self.cards
         else:
-            possible_moves = MoveGenerator().default_possible_moves(self, last_move)
+            possible_cards = MoveGenerator().possible_cards(self, last_move)
                 
-        if possible_moves:
+        if possible_cards:
             # Get the cards with the same rank
-            cards_to_play = self.get_cards_of_rank(possible_moves[0].rank)
+            cards_to_play = self.get_cards_of_rank(possible_cards[0].rank)
             # Update own cards
             self.cards = list(filter(lambda card: card not in cards_to_play, self.cards))
             # Create the move
