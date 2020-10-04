@@ -1,4 +1,3 @@
-from basicPlayer  import BasicPlayer
 from card import Card
 from table import Table
 from skip import Skip
@@ -6,7 +5,7 @@ from move import Move
 
 
 class Game:
-    def __init__(self, players):
+    def __init__(self, players, ranks):
         '''
         Class that represents a game of President
 
@@ -45,11 +44,8 @@ class Game:
         '''
         self.players = players 
         self.table = Table()
+        self.ranks = ranks
 
-        self.president = None
-        self.vice = None
-        self.high_scum = None
-        self.scum = None
         
     def start(self):
         '''
@@ -59,18 +55,41 @@ class Game:
         if len(self.players) < 2:
             raise ValueError(f"A game can't be played with {len(self.players)} players.")
     
+        # Deal the cards
+        self.deal()
+        # Switch cards between ranks
+        self.switch()
+        # Play the game
+        finish_order = self.play()
+        # Process the results
+        ranks = self.finish(finish_order)
+        # Return the ranks
+        return ranks
+
+    def deal(self):
+        ''' 
+        Function that represents dealing the cards
+        '''
         # Take the deck of the table, shuffel it, deal the cards
         deck = self.table.take_deck()
         deck.shuffle()
         for (i, card) in enumerate(deck.take_cards()):
             self.players[i%(len(self.players))].give_card(card)
-        
-        # Start the gameloop
-        self.loop()
     
-    def loop(self):
+    def switch(self):
+        '''
+        Function that represents switching the cards between ranks in the beginning of the game
+        '''
+        if self.ranks:
+            self.ranks['president'].switch_with_scum(self.ranks['scum']) 
+            if 'vice_president' in self.ranks:
+                self.ranks['vice_president'].switch_with_high_scum(self.ranks['high_scum']) 
+    def play(self):
         '''
         Function that represents a game
+
+        Returns:
+            finish_order: [Player]
         '''
         # Get the starting player for the first round
         starting_player = self.get_starting_player()
@@ -116,7 +135,7 @@ class Game:
         finished_players.append(scum)
 
         # Finish the game
-        self.finish_game(finished_players)
+        return finished_players
 
     def round(self, round_players, player_loop):
         '''
@@ -140,7 +159,7 @@ class Game:
                 continue
 
             # If all other players skipped, this player is the winner of this round
-            if len(round_skips) == len(round_players) - 1:
+            if len(round_skips) == len(round_players) - 1: #TODO check if player can play extra cards even when others skipped
                 return current_player
             
             # The round is not finished so this player may make a move
@@ -160,43 +179,29 @@ class Game:
             if current_player.is_finished():
                 return current_player
 
-    def finish_game(self, finish_order):
+    def finish(self, finish_order):
         '''
-        Function that represents the end of a game, now President, ..., Scum are set
+        Function that represents the end of a game, here President, ..., Scum are set
 
         Parameters:
             finish_order: [Player]
         '''
 
         # If the game has 2 or 3 players only President and Scum is used
+        ranks = {}
         if len(self.players) < 4:
-            self.president = finish_order[0]
-            self.scum = finish_order[-1]
+            ranks['president'] = finish_order[0]
+            ranks['scum'] = finish_order[-1]
         else:
-            self.president = finish_order[0]
-            self.vice = finish_order[1]
-            self.high_scum = finish_order[-2]
-            self.scum = finish_order[-1]
+            ranks['president'] = finish_order[0]
+            ranks['vice_president'] = finish_order[1]
+            ranks['high_scum'] = finish_order[-2]
+            ranks['scum'] = finish_order[-1]
         
-        # Check if the deck is complete, this is to make sure not mistakes are made
+        # Check if the deck is complete, this is to make sure no mistakes are made
         self.table.check_deck()
-
-        if len(self.players) < 4:
-            result = f"""
-            Game is finished: 
-                President: {self.president.name}
-                Scum: {self.scum.name}
-                """
-            print(result)
-        else:
-            result = f"""
-            Game is finished: 
-                President: {self.president.name}
-                Vice-President: {self.vice.name}
-                High-Scum: {self.high_scum.name}
-                Scum: {self.scum.name}
-                """
-            print(result)
+        
+        return ranks
 
 
     def get_starting_player(self):
@@ -227,11 +232,3 @@ class Game:
             current_player_index = (current_player_index + 1) % len(players)
 
 
-players = [BasicPlayer("Player1"), BasicPlayer("Player2")]
-players.append(BasicPlayer("Player3"))
-players.append(BasicPlayer("Player4"))
-players.append(BasicPlayer("Player5"))
-
-game = Game(players)
-game.start()
-        

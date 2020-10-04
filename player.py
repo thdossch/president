@@ -67,6 +67,48 @@ class Player:
         self.cards = []
         return cards
 
+    def take_worst_card(self):
+        '''
+        Function that takes the worst card of a player
+
+        Returns:
+            worst_card: Card
+        '''
+        return self.cards.pop(0)
+
+    def take_best_card(self):
+        '''
+        Function that takes the best card of a player
+
+        Returns:
+            best_card: Card
+        '''
+        return self.cards.pop(-1)
+
+    def switch_with_high_scum(self, high_scum):
+        '''
+        Function that represents the vice-president switching hit worst card for the best
+        card of the scum
+
+        Parameters:
+            high_scum: Player
+        '''
+        high_scum.give_card(self.take_worst_card()) 
+        self.give_card(high_scum.take_best_card())
+
+    def switch_with_scum(self, scum):
+        '''
+        Function that represents the president switching hit 2 worst cards for the 2 best
+        cards of the scum
+
+        Parameters:
+            scum: Player
+        '''
+        scum.give_card(self.take_worst_card()) 
+        scum.give_card(self.take_worst_card()) 
+        self.give_card(scum.take_best_card())
+        self.give_card(scum.take_best_card())
+
     def __repr__(self):
         return f"{self.name}: {self.cards}"
 
