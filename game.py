@@ -1,4 +1,5 @@
 from basicPlayer  import BasicPlayer
+from randomPlayer  import RandomPlayer
 from card import Card
 from table import Table
 from skip import Skip
@@ -227,7 +228,7 @@ class Game:
             current_player_index = (current_player_index + 1) % len(players)
 
 
-players = [BasicPlayer("Player1"), BasicPlayer("Player2")]
+players = [RandomPlayer("Player1"), BasicPlayer("Player2")]
 players.append(BasicPlayer("Player3"))
 players.append(BasicPlayer("Player4"))
 players.append(BasicPlayer("Player5"))
