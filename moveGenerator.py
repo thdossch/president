@@ -5,7 +5,7 @@ class MoveGenerator:
         Class that can generate moves based on a player and the last placed card of the game.
 
         '''
-        self.special_cards = {7: (lambda card: 7 > card.rank)}
+        self.special_cards = {7: (lambda card: card.rank < 7)}
 
         # 2 should be the joker card
         self.joker = 2
