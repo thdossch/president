@@ -22,7 +22,7 @@ class Player:
         '''
         self.cards.append(card)
         self.cards.sort()
-    
+
     def has(self, card):
         '''
         Function that represents asking if a player has a card

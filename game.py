@@ -230,5 +230,3 @@ class Game:
         while True:
             yield players[current_player_index]
             current_player_index = (current_player_index + 1) % len(players)
-
-
