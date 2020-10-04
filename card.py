@@ -9,7 +9,11 @@ class Card:
         '''
         if rank < 1 or rank > 13:
             raise ValueError(f"'{rank} is not a valid card rank")
-        self.rank = rank
+        # We like to construct an 'A' with rank 1 but actually it is the highest rank
+        if rank == 1:
+            self.rank = 14
+        else:
+            self.rank = rank
 
         if suit not in ['club', 'diamond', 'heart', 'spade']:
             raise ValueError(f"'{suit} is not a valid card suit")
@@ -17,7 +21,7 @@ class Card:
 
     def __repr__(self):
         suit_signs = {'club': '♣', 'diamond': '♦', 'heart': '♥', 'spade': '♠'}
-        rank_signs = {1: 'A', 11: 'J', 12: 'Q', 13: 'K'}
+        rank_signs = {11: 'J', 12: 'Q', 13: 'K', 14: 'A'}
         rank_sign = self.rank if self.rank not in rank_signs else rank_signs[self.rank]
         return f"({rank_sign} {suit_signs[self.suit]})" 
 
