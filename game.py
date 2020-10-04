@@ -159,7 +159,7 @@ class Game:
                 continue
 
             # If all other players skipped, this player is the winner of this round
-            if len(round_skips) == len(round_players) - 1:
+            if len(round_skips) == len(round_players) - 1: #TODO check if player can play extra cards even when others skipped
                 return current_player
             
             # The round is not finished so this player may make a move
