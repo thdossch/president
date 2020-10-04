@@ -68,9 +68,21 @@ class Player:
         return cards
 
     def take_worst_card(self):
+        '''
+        Function that takes the worst card of a player
+
+        Returns:
+            worst_card: Card
+        '''
         return self.cards.pop(0)
 
     def take_best_card(self):
+        '''
+        Function that takes the best card of a player
+
+        Returns:
+            best_card: Card
+        '''
         return self.cards.pop(-1)
 
     def switch_with_high_scum(self, high_scum):
