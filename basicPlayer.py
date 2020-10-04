@@ -2,7 +2,7 @@ from player import Player
 from skip import Skip
 from card import Card
 from move import Move
-from validator import Validator
+from moveGenerator import MoveGenerator
 
 class BasicPlayer(Player):
     '''
@@ -17,7 +17,7 @@ class BasicPlayer(Player):
         if last_move.is_round_start():
             possible_moves = self.cards
         else:
-            possible_moves = Validator().default_possible_moves(self, last_move)
+            possible_moves = MoveGenerator().default_possible_moves(self, last_move)
                 
         if possible_moves:
             # Get the cards with the same rank
