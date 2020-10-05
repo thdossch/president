@@ -3,7 +3,7 @@ from skip import Skip
 from card import Card
 from move import Move
 from moveGenerator import MoveGenerator
-from random import randint
+import random
 
 class RandomPlayer(Player):
     '''
@@ -16,9 +16,8 @@ class RandomPlayer(Player):
 
         if possible_moves:
             # Get the cards with the same rank
-            cards_to_play = possible_moves[randint(0, len(possible_moves)-1)]
+            cards_to_play = random.choice(possible_moves)
             # Update own cards
-            print(cards_to_play)
             self.cards = list(filter(lambda card: card not in cards_to_play, self.cards))
             # Create the move
             move = Move(cards_to_play)

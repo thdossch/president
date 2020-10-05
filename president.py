@@ -9,11 +9,11 @@ class President:
 
         A session exists out of multiple games, every game players compete to
         become the President.
-        The first game every players have equal ranks but after one game they
+        The first game all players have equal ranks but after one game they
         can become: 
 
         President: Receives the 2 best cards of the Scum and returns his lowest cards.
-        Vice-President: Receives the best card of the High-Scum and returns his lowest cards
+        Vice-President: Receives the best card of the High-Scum and returns his lowest card.
         Person: No extra rules here
         High-Scum: Receives the worst card of the Vice-President and returns his best cards
         Scum: Receives the 2 worst card of the President and returns his 2 best cards
@@ -46,14 +46,14 @@ class President:
                     """
                 print(result)
 
-            if not (ans := input('Play agian? (y/n): ')) or ans == 'n':
+            if not (ans := input('Play again? (y/n): ')) or ans == 'n':
                 break 
         
 if __name__ == '__main__':
-    players = [BasicPlayer("Player1"), BasicPlayer("Player2")]
-    players.append(BasicPlayer("Player3"))
-    players.append(BasicPlayer("Player4"))
-    players.append(BasicPlayer("Player5"))
+    players = [RandomPlayer("Player1"), RandomPlayer("Player2")]
+    players.append(RandomPlayer("Player3"))
+    players.append(RandomPlayer("Player4"))
+    players.append(RandomPlayer("Player5"))
    
     session = President(players)
     session.play()
