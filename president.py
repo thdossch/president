@@ -1,5 +1,6 @@
 from game import Game
 from basicPlayer  import BasicPlayer
+from randomPlayer  import RandomPlayer
 
 class President:
     def __init__(self, players, ranks=None):
