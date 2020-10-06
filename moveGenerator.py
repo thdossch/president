@@ -25,6 +25,9 @@ class MoveGenerator:
         return possible_moves
 
     def generate_possible_moves(self, cards, last_move):
+        print('---')
+        print(cards)
+        print('---')
         if last_move.is_round_start():
             return self.get_all_card_combos(cards)
 
