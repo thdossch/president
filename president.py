@@ -1,6 +1,5 @@
 from game import Game
 from basicPlayer  import BasicPlayer
-from randomPlayer  import RandomPlayer
 
 class President:
     def __init__(self, players, ranks=None):
@@ -50,10 +49,10 @@ class President:
                 break 
         
 if __name__ == '__main__':
-    players = [RandomPlayer("Player1"), RandomPlayer("Player2")]
-    players.append(RandomPlayer("Player3"))
-    players.append(RandomPlayer("Player4"))
-    players.append(RandomPlayer("Player5"))
+    players = [BasicPlayer("Player1"), BasicPlayer("Player2")]
+    players.append(BasicPlayer("Player3"))
+    players.append(BasicPlayer("Player4"))
+    players.append(BasicPlayer("Player5"))
    
     session = President(players)
     session.play()
