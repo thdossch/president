@@ -9,7 +9,8 @@ class Card:
         '''
         if rank < 1 or rank > 13:
             raise ValueError(f"'{rank} is not a valid card rank")
-        # We like to construct an 'A' with rank 1 but actually it is the highest rank
+        # We like to construct an 'A' with rank 1 but actually it is the highest rank,
+        # the same for '2' which is a joker and can be higher than 'A'
         if rank == 1:
             self.rank = 14
         else:
