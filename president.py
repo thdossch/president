@@ -50,9 +50,9 @@ class President:
         
 if __name__ == '__main__':
     players = [BasicPlayer("Player1"), BasicPlayer("Player2")]
-    players.append(BasicPlayer("Player3"))
-    players.append(BasicPlayer("Player4"))
-    players.append(BasicPlayer("Player5"))
+    #players.append(BasicPlayer("Player3"))
+    #players.append(BasicPlayer("Player4"))
+    #players.append(BasicPlayer("Player5"))
    
     session = President(players)
     session.play()

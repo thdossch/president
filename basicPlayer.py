@@ -12,11 +12,14 @@ class BasicPlayer(Player):
     def play(self, last_move):
         move = None
         
-        #Get all possible moves
+        # Get all possible moves
         possible_moves = MoveGenerator().generate_possible_moves(self.cards, last_move)
                 
         if possible_moves:
-            cards_to_play = self.filter_cards(possible_moves)
+            # Get the best move for this playertype
+            move = self.find_best_move(possible_moves)
+            # Get the cards that will be played
+            cards_to_play = move.cards 
             # Update own cards
             self.cards = list(filter(lambda card: card not in cards_to_play, self.cards))
             # Create the move
@@ -27,19 +30,26 @@ class BasicPlayer(Player):
         print(f"{self.name} plays {move}")
         return move
 
-    def filter_cards(self, moves):
-        #TODO: cleaner
-        min = float('inf')
-        best_move = moves[0]
-        max_amount = 0
-        for move in moves:
-            for card in move:
-                if card.rank <= min:
-                    min = card.rank
-                    if len(move) >= max_amount:
-                        best_move = move
-                        max_amount = len(best_move)
-                        break
-        return best_move
-
+    def find_best_move(self, possible_moves):
+        moves_dict = {} 
+        for move in possible_moves:
+            if not move.rank in moves_dict:
+                moves_dict[move.rank] = [move]
+            else:
+                moves_dict[move.rank].append(move) 
         
+        # Check if the player can make a move without a joker
+        for rank in moves_dict.keys():
+            if moves_without_joker := self.moves_without_joker(moves_dict[rank]):
+                return moves_without_joker[-1]
+        
+        # Check if the player can make a move with a joker
+        for rank in moves_dict.keys():
+            if moves_with_joker := self.moves_with_joker(moves_dict[rank]):
+                return moves_with_joker[0]
+    
+    def moves_without_joker(self, moves):
+        return list(filter(lambda move: move.jokers == 0, moves))
+
+    def moves_with_joker(self, moves):
+        return list(filter(lambda move: move.jokers >= 0, moves))
