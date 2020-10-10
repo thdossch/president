@@ -43,6 +43,14 @@ class Move:
         return self.roundstart
 
     def extract_jokers(self, cards):
+        '''
+        Function that splits a list of cards in normalcards and jokercards
+
+        Parameters:
+            cards: [Card]
+        Returns:
+            (normal_cards, jokers): ([Card], [Card])
+        '''
         normal_cards = list(filter(lambda card: card.rank != 2, cards))
         jokers = list(filter(lambda card: card.rank == 2, cards))
         return normal_cards, jokers
