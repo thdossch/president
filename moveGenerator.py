@@ -1,38 +1,16 @@
-import itertools
+from move import Move
 
 class MoveGenerator:
     def __init__(self):
         '''
         Class that can generate moves based on cards and the last placed card of the game.
         '''
-        # 2 should be the joker card
         self.joker = 2
         self.special_cards = {7: (lambda card: card.rank < 7)}
 
-    def get_all_combinations(self, cards, jokers):
-        return [ (cards + jokers)[0:i+1] for i in range(len(cards + jokers)) ]
-
-    def get_all_card_combos(self, cards):
-        #TODO: cleaner? / fix joker another way?
-        ranks = set([c.rank for c in cards]) # set doesn't allow duplicates, so this returns all unique ranks
-
-        # separate jokers and other cards
-        jokers = list(filter(lambda card: card.rank == self.joker, cards))
-        not_jokers =  list(filter(lambda card: card.rank != self.joker, cards))
-        
-        possible_moves = []
-
-        for rank in ranks:
-            moves = self.get_all_combinations(list(filter(lambda card: card.rank == rank, not_jokers)), jokers)
-            possible_moves += moves
-        joker_only_moves = self.get_all_combinations(list(filter(lambda card: card.rank == self.joker, not_jokers)), [])
-        possible_moves += joker_only_moves
-
-        return possible_moves
-
     def generate_possible_moves(self, cards, last_move):
         if last_move.is_round_start():
-            return self.get_all_card_combos(cards)
+            return [Move(cards) for cards in self.get_all_card_combinations(cards)]
 
         # check if last card has a special rule
         if last_move.rank in self.special_cards.keys():
@@ -44,5 +22,34 @@ class MoveGenerator:
 
         # TODO: think it would be better to already filter out cards before passing them to get_all_card_combos?
         # valid_cards = list(filter(lambda card: [c.rank for c in valid_cards].count(card.rank) >= last_move.amount, valid_cards))
-        possible_moves = self.get_all_card_combos(valid_cards)
-        return list(filter(lambda move: len(move) >= last_move.amount, possible_moves))
+
+        possible_moves = self.get_all_card_combinations(valid_cards)
+        return [Move(cards) for cards in list(filter(lambda move: len(move) >= last_move.amount, possible_moves))]
+
+    def get_all_card_combinations(self, cards):
+        cards_dict = {} 
+        for card in cards:
+            if not card.rank in cards_dict:
+                cards_dict[card.rank] = [card]
+            else:
+                cards_dict[card.rank].append(card) 
+        
+        # Check if the cardsdict contains joker key, if not add it
+        if not self.joker in cards_dict:
+            cards_dict[self.joker] = []
+
+        possible_moves = []
+
+        # Generate all moves
+        for rank in cards_dict.keys():
+            if rank != self.joker:
+                possible_moves += self.get_all_combinations(cards_dict[rank], cards_dict[self.joker])
+
+        # Add the moves that only contains jokers
+        joker_only_moves = self.get_all_combinations(cards_dict[self.joker])
+        possible_moves += joker_only_moves
+
+        return possible_moves
+
+    def get_all_combinations(self, cards, jokers=[]):
+        return [ (cards + jokers)[0:i+1] for i in range(len(cards + jokers)) ]
