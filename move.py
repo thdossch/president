@@ -15,11 +15,22 @@ class Move:
             self.roundstart = False
             # Check if the move is just one card
             if isinstance(cards, Card):
-                self.rank = cards.rank
+                # Check if the move is not only a joker
+                if cards.rank == 2:
+                    self.rank = 15
+                else:
+                    self.rank = cards.rank
                 self.amount = 1
+                self.jokers = 0
             else: # The move contains multiple cards
-                self.rank = cards[0].rank
-                self.amount = len(cards)
+                normal_cards, jokers = self.extract_jokers(cards)
+                # Check if the move is not only jokers
+                if normal_cards == []:
+                    self.rank = 15
+                else:
+                    self.rank = normal_cards[0].rank
+                self.amount = len(normal_cards) + len(jokers)
+                self.jokers = len(jokers)
         self.cards = cards
 
     def is_round_start(self):
@@ -30,6 +41,11 @@ class Move:
             is_start: boolean
         '''
         return self.roundstart
+
+    def extract_jokers(self, cards):
+        normal_cards = list(filter(lambda card: card.rank != 2, cards))
+        jokers = list(filter(lambda card: card.rank == 2, cards))
+        return normal_cards, jokers
 
     def __in__(self, other):
         return other in self.cards
