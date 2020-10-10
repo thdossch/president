@@ -31,6 +31,14 @@ class BasicPlayer(Player):
         return move
 
     def find_best_move(self, possible_moves):
+        '''
+        Function that determines the best move to play for the BasicPlayer
+
+        Parameters:
+            possible_moves: [Move]
+        Returns:
+            best_move: Move
+        '''
         moves_dict = {} 
         for move in possible_moves:
             if not move.rank in moves_dict:
@@ -49,7 +57,23 @@ class BasicPlayer(Player):
                 return moves_with_joker[0]
     
     def moves_without_joker(self, moves):
+        '''
+        Function that filers a list of moves and returns a list without jokers
+
+        Parameters:
+            moves: [Card]
+        Returns:
+            moves_without_joker: [Card]
+        '''
         return list(filter(lambda move: move.jokers == 0, moves))
 
     def moves_with_joker(self, moves):
+        '''
+        Function that filers a list of moves and returns a list with moves containing a joker
+
+        Parameters:
+            moves: [Card]
+        Returns:
+            moves_with_joker: [Card]
+        '''
         return list(filter(lambda move: move.jokers >= 0, moves))
