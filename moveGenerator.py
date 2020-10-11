@@ -28,8 +28,6 @@ class MoveGenerator:
         else:
             valid_cards = list(filter(lambda card: last_move.rank <= card.rank, cards))
 
-        # TODO: think it would be better to already filter out cards before passing them to get_all_card_combos?
-
         possible_moves = self.get_all_card_combinations(valid_cards)
         return [Move(cards) for cards in list(filter(lambda move: len(move) >= last_move.amount, possible_moves))]
 

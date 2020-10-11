@@ -52,15 +52,16 @@ class President:
     def simulate(self, games, verbose = True):
         history = dict()
         for player in players:
-            history[player] = {"p": 0, "vp": 0, "hs": 0, "s": 0 }
+            history[player] = {'p': 0, 'vp': 0, 'hs': 0, 's': 0 }
 
         for _ in range(games):
             game = Game(self.players, self.ranks)
             self.ranks = game.start()
 
             if len(self.players) < 4:
-                history[self.ranks['president']]["p"] += 1
-                history[self.ranks['scum']]["s"] += 1
+                history[self.ranks['president']]['p'] += 1
+                history[self.ranks['scum']]['s'] += 1
+
                 if verbose:
                     result = f"""
                     Game is finished: 
@@ -69,6 +70,11 @@ class President:
                         """
                     print(result)
             else:
+                history[self.ranks['president']]['p'] += 1
+                history[self.ranks['vice_president']]['vp'] += 1
+                history[self.ranks['high_scum']]['hs'] += 1
+                history[self.ranks['scum']]['s'] += 1
+
                 if verbose:
                     result = f"""
                     Game is finished: 
@@ -82,6 +88,24 @@ class President:
         for player in players:
             print(history[player])
 
+            if len(self.players) < 4:
+                result = f"""
+                Player {player.name}:
+                    President: {history[player]['p']} times
+                    Scum: {history[player]['s']} times
+                
+                """
+                print(result)
+            else:
+                    result = f"""
+                    Player {player.name}: 
+                        President: {history[player]['p']} times
+                        Vice-President: {history[player]['vp']} times
+                        High-Scum: {history[player]['hs']} times
+                        Scum: {history[player]['s']} times
+                        """
+                    print(result)
+
 
         
 if __name__ == '__main__':
@@ -91,4 +115,5 @@ if __name__ == '__main__':
     #players.append(BasicPlayer("Player5"))
    
     session = President(players)
-    session.simulate(10)
+    #session.play()
+    session.simulate(10, False)
