@@ -47,12 +47,48 @@ class President:
 
             if not (ans := input('Play again? (y/n): ')) or ans == 'n':
                 break 
+
+
+    def simulate(self, games, verbose = True):
+        history = dict()
+        for player in players:
+            history[player] = {"p": 0, "vp": 0, "hs": 0, "s": 0 }
+
+        for _ in range(games):
+            game = Game(self.players, self.ranks)
+            self.ranks = game.start()
+
+            if len(self.players) < 4:
+                history[self.ranks['president']]["p"] += 1
+                history[self.ranks['scum']]["s"] += 1
+                if verbose:
+                    result = f"""
+                    Game is finished: 
+                        President: {self.ranks['president'].name}
+                        Scum: {self.ranks['scum'].name}
+                        """
+                    print(result)
+            else:
+                if verbose:
+                    result = f"""
+                    Game is finished: 
+                        President: {self.ranks['president'].name}
+                        Vice-President: {self.ranks['vice_president'].name}
+                        High-Scum: {self.ranks['high_scum'].name}
+                        Scum: {self.ranks['scum'].name}
+                        """
+                    print(result)
+
+        for player in players:
+            print(history[player])
+
+
         
 if __name__ == '__main__':
     players = [BasicPlayer("Player1"), BasicPlayer("Player2")]
-    #players.append(BasicPlayer("Player3"))
+    players.append(BasicPlayer("Player3"))
     #players.append(BasicPlayer("Player4"))
     #players.append(BasicPlayer("Player5"))
    
     session = President(players)
-    session.play()
+    session.simulate(10)
