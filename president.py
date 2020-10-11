@@ -50,6 +50,11 @@ class President:
 
 
     def simulate(self, games, verbose = True):
+        '''
+        Function that starts the session, then plays given amount of games and prints history of players' roles.
+        It returns this history so that these statistics can possibly be used somewhere else.
+        '''
+
         history = dict()
         for player in players:
             history[player] = {'p': 0, 'vp': 0, 'hs': 0, 's': 0 }
@@ -86,19 +91,16 @@ class President:
                     print(result)
 
         for player in players:
-            print(history[player])
-
             if len(self.players) < 4:
                 result = f"""
-                Player {player.name}:
+                Player {player.name}
                     President: {history[player]['p']} times
                     Scum: {history[player]['s']} times
-                
                 """
                 print(result)
             else:
                     result = f"""
-                    Player {player.name}: 
+                    Player {player.name}
                         President: {history[player]['p']} times
                         Vice-President: {history[player]['vp']} times
                         High-Scum: {history[player]['hs']} times
@@ -106,6 +108,7 @@ class President:
                         """
                     print(result)
 
+        return history
 
         
 if __name__ == '__main__':
