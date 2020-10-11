@@ -24,7 +24,6 @@ class RandomPlayer(Player):
         else:
             move = Skip()
         
-        print(f"{self.name} plays {move}")
         return move
 
         

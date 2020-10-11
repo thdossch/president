@@ -1,5 +1,6 @@
 from game import Game
 from basicPlayer  import BasicPlayer
+from util import vprint
 
 class President:
     def __init__(self, players, ranks=None):
@@ -60,35 +61,34 @@ class President:
             history[player] = {'p': 0, 'vp': 0, 'hs': 0, 's': 0 }
 
         for _ in range(games):
-            game = Game(self.players, self.ranks)
+            game = Game(self.players, self.ranks, verbose)
             self.ranks = game.start()
 
             if len(self.players) < 4:
                 history[self.ranks['president']]['p'] += 1
                 history[self.ranks['scum']]['s'] += 1
 
-                if verbose:
-                    result = f"""
-                    Game is finished: 
-                        President: {self.ranks['president'].name}
-                        Scum: {self.ranks['scum'].name}
-                        """
-                    print(result)
+                result = f"""
+                Game is finished: 
+                    President: {self.ranks['president'].name}
+                    Scum: {self.ranks['scum'].name}
+                    """
+                vprint(result, verbose)
+
             else:
                 history[self.ranks['president']]['p'] += 1
                 history[self.ranks['vice_president']]['vp'] += 1
                 history[self.ranks['high_scum']]['hs'] += 1
                 history[self.ranks['scum']]['s'] += 1
 
-                if verbose:
-                    result = f"""
-                    Game is finished: 
-                        President: {self.ranks['president'].name}
-                        Vice-President: {self.ranks['vice_president'].name}
-                        High-Scum: {self.ranks['high_scum'].name}
-                        Scum: {self.ranks['scum'].name}
-                        """
-                    print(result)
+                result = f"""
+                Game is finished: 
+                    President: {self.ranks['president'].name}
+                    Vice-President: {self.ranks['vice_president'].name}
+                    High-Scum: {self.ranks['high_scum'].name}
+                    Scum: {self.ranks['scum'].name}
+                    """
+                vprint(result, verbose)
 
         for player in players:
             if len(self.players) < 4:
