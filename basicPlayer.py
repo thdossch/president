@@ -26,8 +26,7 @@ class BasicPlayer(Player):
             move = Move(cards_to_play)
         else:
             move = Skip()
-        
-        print(f"{self.name} plays {move}")
+
         return move
 
     def find_best_move(self, possible_moves):

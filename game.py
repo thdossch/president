@@ -2,10 +2,11 @@ from card import Card
 from table import Table
 from skip import Skip
 from move import Move
+from util import vprint
 
 
 class Game:
-    def __init__(self, players, ranks):
+    def __init__(self, players, ranks, verbose = True):
         '''
         Class that represents a game of President
 
@@ -45,6 +46,9 @@ class Game:
         self.players = players 
         self.table = Table()
         self.ranks = ranks
+
+        # Should game be printed or not
+        self.verbose = verbose
 
         
     def start(self):
@@ -97,8 +101,8 @@ class Game:
         # List to keep track of finished players
         finished_players = []
        
-        print("Start Game") 
-        print(f"{starting_player.name} is the starting player") 
+        vprint("Start Game", self.verbose) 
+        vprint(f"{starting_player.name} is the starting player", self.verbose) 
 
         # Play rounds until one player lost the game
         while len(finished_players) < len(self.players) - 1:
@@ -108,16 +112,17 @@ class Game:
             player_loop = self.player_loop_generator(competing_players, starting_player)
 
             # Play a round 
-            print("++++++++++++++++++++++++++++++")
-            print(f"Starting a new round, players are {list(map(lambda player: player.name, competing_players))}")
+
+            vprint("++++++++++++++++++++++++++++++", self.verbose)
+            vprint(f"Starting a new round, players are {list(map(lambda player: player.name, competing_players))}", self.verbose)
             round_winner = self.round(competing_players, player_loop)
-            print(f"Round Finished, winning player {round_winner.name}")
-            print("++++++++++++++++++++++++++++++")
+            vprint(f"Round Finished, winning player {round_winner.name}", self.verbose)
+            vprint("++++++++++++++++++++++++++++++", self.verbose)
 
             # Check if round_winner is out of cards, if so add to finished_players
             if round_winner.is_finished():
                 finished_players.append(round_winner)
-                print(f"{round_winner.name} is finished")
+                vprint(f"{round_winner.name} is finished", self.verbose)
                 # The next player in rotation is now the starting player
                 starting_player = next(player_loop)
             else: # round_winner is now the starting_player for the next round
@@ -166,6 +171,7 @@ class Game:
 
             # Let the player make a move
             move = current_player.play(self.table.last_move())
+            vprint(f"{current_player.name} plays {move}", self.verbose)
 
             # Check if the player skips his turn
             if move is skip:
