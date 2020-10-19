@@ -57,7 +57,7 @@ class President:
         '''
 
         history = dict()
-        for player in players:
+        for player in self.players:
             history[player] = {'p': 0, 'vp': 0, 'hs': 0, 's': 0 }
 
         for _ in range(games):
@@ -90,7 +90,7 @@ class President:
                     """
                 vprint(result, verbose)
 
-        for player in players:
+        for player in self.players:
             if len(self.players) < 4:
                 result = f"""
                 Player {player.name}
