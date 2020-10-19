@@ -1,5 +1,7 @@
 from game import Game
 from basicPlayer  import BasicPlayer
+from randomPlayer  import RandomPlayer
+from ai  import AIPlayer
 from util import vprint
 
 class President:
@@ -60,7 +62,22 @@ class President:
         for player in self.players:
             history[player] = {'p': 0, 'vp': 0, 'hs': 0, 's': 0 }
 
-        for _ in range(games):
+        win_percentage = []
+        last_hun = []
+        for i in range(games):
+            if i % 1000 == 0 and i != 0:
+                print(f"After {i} iterations:")
+                wins = dict()
+                for player in self.players:
+                    wins[player.name] = 0
+                for win_for_player in last_hun:
+                    wins[win_for_player] = wins[win_for_player] + 1
+                print()
+                print("For the last 1000 games:")
+                for player in wins:
+                    print(f"\t{player} won {wins[player]} times")
+                win_percentage.append(round(wins['Player1']/1000, 2))
+
             game = Game(self.players, self.ranks, verbose)
             self.ranks = game.start()
 
@@ -90,6 +107,30 @@ class President:
                     """
                 vprint(result, verbose)
 
+            if len(last_hun) < 1000:
+                last_hun.append(self.ranks['president'].name)
+            else:
+                last_hun.pop(0)
+                last_hun.append(self.ranks['president'].name)
+
+        print("\n++++++++++++++++++++++++++++++++++++")
+        print("Simulation finished")
+        print("++++++++++++++++++++++++++++++++++++")
+        wins = dict()
+        for player in self.players:
+            wins[player.name] = 0
+        for win_for_player in last_hun:
+            wins[win_for_player] = wins[win_for_player] + 1
+        print()
+        print("For the last 1000 games:")
+        for player in wins:
+            print(f"{player} won {wins[player]} times")
+        win_percentage.append(round(wins['Player1']/1000, 2))
+        
+        for perc in win_percentage:
+            print(f"{perc}% -> ", end='')
+        print()
+
         for player in self.players:
             if len(self.players) < 4:
                 result = f"""
@@ -112,11 +153,13 @@ class President:
 
         
 if __name__ == '__main__':
-    players = [BasicPlayer("Player1"), BasicPlayer("Player2")]
-    players.append(BasicPlayer("Player3"))
+    players = [AIPlayer("Player1"), RandomPlayer("Player2")]
+    #players.append(BasicPlayer("Player3"))
     #players.append(BasicPlayer("Player4"))
     #players.append(BasicPlayer("Player5"))
    
     session = President(players)
     #session.play()
-    session.simulate(10, False)
+    session.simulate(10000, False)
+    ai = players[0]
+    ai.print_data()
