@@ -16,7 +16,7 @@ class AIPlayer(Player):
         self.epsilon = 0.2
         self.S = None
         self.A = None
-        self.amount_cards_played = 0
+        self.amount_cards_played = 0 
         
 
     def get_best_action(self, state, possible_moves=[]):
