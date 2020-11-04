@@ -101,7 +101,9 @@ class Game:
         # List to keep track of finished players
         finished_players = []
        
-        vprint("Start Game", self.verbose) 
+        vprint("==============================", self.verbose)
+        vprint("Start new game", self.verbose) 
+        vprint("==============================\n", self.verbose)
         vprint(f"{starting_player.name} is the starting player", self.verbose) 
 
         # Play rounds until one player lost the game
@@ -113,11 +115,10 @@ class Game:
 
             # Play a round 
 
-            vprint("++++++++++++++++++++++++++++++", self.verbose)
-            vprint(f"Starting a new round, players are {list(map(lambda player: player.name, competing_players))}", self.verbose)
+            vprint(f"Next round with: {list(map(lambda player: player.name, competing_players))}", self.verbose)
             round_winner = self.round(competing_players, player_loop)
-            vprint(f"Round Finished, winning player {round_winner.name}", self.verbose)
-            vprint("++++++++++++++++++++++++++++++", self.verbose)
+            vprint(f"Round Finished, winning player: {round_winner.name}", self.verbose)
+            vprint("++++++++++++++++++++++++++++++++++++", self.verbose)
 
             # Check if round_winner is out of cards, if so add to finished_players
             if round_winner.is_finished():
@@ -128,6 +129,8 @@ class Game:
             else: # round_winner is now the starting_player for the next round
                 starting_player = round_winner
 
+            for player in self.players:
+                player.notify_round_end()
             # Clear the table so a new round can begin
             self.table.clear()
             

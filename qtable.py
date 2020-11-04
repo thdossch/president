@@ -26,5 +26,14 @@ class QTable:
             return [ (rank, amount) for rank in range(3, 16) for amount in range(1, 9) \
                     if amount >= state[1] and rank >= state[0]]
     
+    def show(self):
+        for state in self.table.keys():
+            print(state)
+            for action in self.table[state]:
+                if self.table[state][action] != 0:
+                    print(f"{action}: {round(self.table[state][action], 2)}", end=" ")
+            print()
+            print()
+
     def __getitem__(self, arg):
         return self.table[arg]

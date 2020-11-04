@@ -32,15 +32,13 @@ class President:
             self.ranks = game.start()
 
             if len(self.players) < 4:
-                result = f"""
-                Game is finished: 
+                result = f"""Game is finished: 
                     President: {self.ranks['president'].name}
                     Scum: {self.ranks['scum'].name}
                     """
                 print(result)
             else:
-                result = f"""
-                Game is finished: 
+                result =  f"""Game is finished: 
                     President: {self.ranks['president'].name}
                     Vice-President: {self.ranks['vice_president'].name}
                     High-Scum: {self.ranks['high_scum'].name}
@@ -52,32 +50,18 @@ class President:
                 break 
 
 
-    def simulate(self, games, verbose = True):
+    def simulate(self, games, verbose = False):
         '''
         Function that starts the session, then plays given amount of games and prints history of players' roles.
         It returns this history so that these statistics can possibly be used somewhere else.
         '''
 
+        print(f"Start simulations for {games} games")
         history = dict()
         for player in self.players:
             history[player] = {'p': 0, 'vp': 0, 'hs': 0, 's': 0 }
 
-        win_percentage = []
-        last_hun = []
         for i in range(games):
-            if i % 1000 == 0 and i != 0:
-                print(f"After {i} iterations:")
-                wins = dict()
-                for player in self.players:
-                    wins[player.name] = 0
-                for win_for_player in last_hun:
-                    wins[win_for_player] = wins[win_for_player] + 1
-                print()
-                print("For the last 1000 games:")
-                for player in wins:
-                    print(f"\t{player} won {wins[player]} times")
-                win_percentage.append(round(wins['Player1']/1000, 2))
-
             game = Game(self.players, self.ranks, verbose)
             self.ranks = game.start()
 
@@ -85,12 +69,11 @@ class President:
                 history[self.ranks['president']]['p'] += 1
                 history[self.ranks['scum']]['s'] += 1
 
-                result = f"""
-                Game is finished: 
-                    President: {self.ranks['president'].name}
-                    Scum: {self.ranks['scum'].name}
-                    """
-                vprint(result, verbose)
+                if verbose:
+                    print("++++++++++++++++++++++++++++++++++++")
+                    print(f"RESULTS:")
+                    print(f"\tPresident: {self.ranks['president'].name}")
+                    print(f"\tScum: {self.ranks['scum'].name}\n")
 
             else:
                 history[self.ranks['president']]['p'] += 1
@@ -98,38 +81,17 @@ class President:
                 history[self.ranks['high_scum']]['hs'] += 1
                 history[self.ranks['scum']]['s'] += 1
 
-                result = f"""
-                Game is finished: 
-                    President: {self.ranks['president'].name}
-                    Vice-President: {self.ranks['vice_president'].name}
-                    High-Scum: {self.ranks['high_scum'].name}
-                    Scum: {self.ranks['scum'].name}
-                    """
-                vprint(result, verbose)
-
-            if len(last_hun) < 1000:
-                last_hun.append(self.ranks['president'].name)
-            else:
-                last_hun.pop(0)
-                last_hun.append(self.ranks['president'].name)
+                if verbose:
+                    print("++++++++++++++++++++++++++++++++++++")
+                    print(f"RESULTS:")
+                    print(f"\tPresident: {self.ranks['president'].name}")
+                    print(f"\tVice-President: {self.ranks['vice_president'].name}")
+                    print(f"\tHigh-Scum: {self.ranks['high_scum'].name}")
+                    print(f"\tScum: {self.ranks['scum'].name}\n")
 
         print("\n++++++++++++++++++++++++++++++++++++")
         print("Simulation finished")
         print("++++++++++++++++++++++++++++++++++++")
-        wins = dict()
-        for player in self.players:
-            wins[player.name] = 0
-        for win_for_player in last_hun:
-            wins[win_for_player] = wins[win_for_player] + 1
-        print()
-        print("For the last 1000 games:")
-        for player in wins:
-            print(f"{player} won {wins[player]} times")
-        win_percentage.append(round(wins['Player1']/1000, 2))
-        
-        for perc in win_percentage:
-            print(f"{perc}% -> ", end='')
-        print()
 
         for player in self.players:
             if len(self.players) < 4:
@@ -137,29 +99,38 @@ class President:
                 Player {player.name}
                     President: {history[player]['p']} times
                     Scum: {history[player]['s']} times
+                    W/L: {round(history[player]['p']/games*100, 2)}%"
                 """
                 print(result)
             else:
-                    result = f"""
-                    Player {player.name}
-                        President: {history[player]['p']} times
-                        Vice-President: {history[player]['vp']} times
-                        High-Scum: {history[player]['hs']} times
-                        Scum: {history[player]['s']} times
-                        """
-                    print(result)
+                result = f"""
+                Player {player.name}
+                    President: {history[player]['p']} times
+                    Vice-President: {history[player]['vp']} times
+                    High-Scum: {history[player]['hs']} times
+                    Scum: {history[player]['s']} times
+                    W/L: {round(history[player]['p']/games*100, 2)}%"
+                    """
+                print(result)
 
         return history
 
+    def train(self, games, show_every=None):
+        for i in range(games):
+            if show_every and ( i % show_every == 0):
+                print(f"Trained for {i} games")
+            game = Game(self.players, self.ranks, False)
+            self.ranks = game.start()
+
         
 if __name__ == '__main__':
-    players = [AIPlayer("Player1"), RandomPlayer("Player2")]
-    #players.append(BasicPlayer("Player3"))
-    #players.append(BasicPlayer("Player4"))
+    ai = AIPlayer("Player1", 0.3, 0.6, 0.1)
+    players = [ai, BasicPlayer("Player2")]
+    players.append(BasicPlayer("Player3"))
+    players.append(BasicPlayer("Player4"))
     #players.append(BasicPlayer("Player5"))
    
     session = President(players)
-    #session.play()
-    session.simulate(10000, False)
-    ai = players[0]
-    ai.print_data()
+    session.train(1000)
+    ai.epsilon = 0.001
+    res = session.simulate(100)
