@@ -1,18 +1,18 @@
 from player import Player
 from move import Move
 from card import Card
-from moveGenerator import MoveGenerator
+from move_generator import MoveGenerator
 from qtable import QTable
 from random import randint
 from skip import Skip
 
 class TemporalDifferenceAgent(Player):
 
-    def __init__(self, name, learning_rate, discound_factor, epsilon):
+    def __init__(self, name, learning_rate, discount_factor, epsilon):
         super().__init__(name)
         self.table = QTable() 
         self.learning_rate = learning_rate #0.05
-        self.discound_factor = discound_factor #0.6
+        self.discount_factor = discount_factor #0.6
         self.epsilon = epsilon #0.2
         self.S = None
         self.A = None
@@ -62,7 +62,7 @@ class TemporalDifferenceAgent(Player):
             r += (self.amount_cards_played * 0.5)
         r += 0.2 * self.amount_cards_played_round
         best_next_action = self.get_best_action(new_state, possible_moves)
-        temporal_difference_target = r + self.discound_factor*self.table[new_state][best_next_action]
+        temporal_difference_target = r + self.discount_factor*self.table[new_state][best_next_action]
         temporal_difference = temporal_difference_target - self.table[self.S][self.A]
         self.table[self.S][self.A] += self.learning_rate*temporal_difference
 

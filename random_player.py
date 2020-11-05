@@ -2,7 +2,7 @@ from player import Player
 from skip import Skip
 from card import Card
 from move import Move
-from moveGenerator import MoveGenerator
+from move_generator import MoveGenerator
 import random
 
 class RandomPlayer(Player):

@@ -1,6 +1,6 @@
 from game import Game
-from basicPlayer  import BasicPlayer
-from randomPlayer  import RandomPlayer
+from basic_player  import BasicPlayer
+from random_player  import RandomPlayer
 from temporal_difference_learning_agent  import TemporalDifferenceAgent
 from util import vprint
 
@@ -131,6 +131,6 @@ if __name__ == '__main__':
     #players.append(BasicPlayer("Player5"))
    
     session = President(players)
-    session.train(1000)
+    session.train(10000, 1000)
     ai.epsilon = 0.001
     res = session.simulate(100)
