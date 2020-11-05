@@ -26,10 +26,13 @@ class MoveGenerator:
 
         # use the default rules if not
         else:
-            valid_cards = list(filter(lambda card: last_move.rank <= card.rank, cards))
+            valid_cards = list(filter(lambda card: last_move.rank <= card.rank \
+                                                or card.rank == self.joker, cards))
 
         possible_moves = self.get_all_card_combinations(valid_cards)
-        return [Move(cards) for cards in list(filter(lambda move: len(move) >= last_move.amount, possible_moves))]
+        m = [Move(cards) for cards in list(filter(lambda move: len(move) >= last_move.amount, possible_moves))]
+        print(m)
+        return m
 
     def get_all_card_combinations(self, cards):
         '''
@@ -59,7 +62,10 @@ class MoveGenerator:
                 possible_combinations += self.get_all_combinations(cards_dict[rank], cards_dict[self.joker])
 
         # Add the moves that only contains jokers
+        print("--")
         joker_only_moves = self.get_all_combinations(cards_dict[self.joker])
+        print(joker_only_moves)
+        print("--")
         possible_combinations += joker_only_moves
 
         return possible_combinations
@@ -75,4 +81,4 @@ class MoveGenerator:
         Returns:
             combinations: [[Card]]
         '''
-        return [ (cards + jokers)[0:i+1] for i in range(len(cards + jokers)) ]
+        return [ (cards + jokers)[0:i+1] for i in range(len(cards + jokers)) if i < 4 ]
