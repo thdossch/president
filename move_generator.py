@@ -26,7 +26,7 @@ class MoveGenerator:
 
         # use the default rules if not
         else:
-            valid_cards = list(filter(lambda card: last_move.rank <= card.rank, cards))
+            valid_cards = list(filter(lambda card: last_move.rank <= card.rank or card.rank == self.joker, cards))
 
         possible_moves = self.get_all_card_combinations(valid_cards)
         return [Move(cards) for cards in list(filter(lambda move: len(move) >= last_move.amount, possible_moves))]
