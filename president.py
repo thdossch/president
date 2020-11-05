@@ -1,7 +1,7 @@
 from game import Game
 from basicPlayer  import BasicPlayer
 from randomPlayer  import RandomPlayer
-from ai  import AIPlayer
+from temporal_difference_learning_agent  import TemporalDifferenceAgent
 from util import vprint
 
 class President:
@@ -124,7 +124,7 @@ class President:
 
         
 if __name__ == '__main__':
-    ai = AIPlayer("Player1", 0.3, 0.6, 0.1)
+    ai = TemporalDifferenceAgent("Player1", 0.3, 0.6, 0.1)
     players = [ai, BasicPlayer("Player2")]
     players.append(BasicPlayer("Player3"))
     players.append(BasicPlayer("Player4"))

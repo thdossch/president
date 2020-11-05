@@ -6,7 +6,7 @@ from qtable import QTable
 from random import randint
 from skip import Skip
 
-class AIPlayer(Player):
+class TemporalDifferenceAgent(Player):
 
     def __init__(self, name, learning_rate, discound_factor, epsilon):
         super().__init__(name)
