@@ -14,20 +14,20 @@ class QTable:
         self.table[None] = { None: 0 }
     
     def possible_states(self):
-        """"
+        '''
         Generate all possible states
-        """
+        '''
         return [ (rank, amount) for rank in range(3, 16) for amount in range(1, 5) ]
     
     def possible_actions(self, state):
-        """
+        '''
         Generate all possible actions given a state
 
         Parameters:
             state: (rank, amount)
         Returns:
             actions: [(rank, amount)]
-        """
+        '''
         if state[0] == 7:
             actions = [ (rank, amount) for rank in range(3, 8) for amount in range(1, 5) \
                     if amount >= state[1] and rank <= 7]
@@ -39,9 +39,9 @@ class QTable:
                     if amount >= state[1] and rank >= state[0]]
     
     def show(self):
-        """
+        '''
         Method that prints the QTable
-        """
+        '''
         for state in self.table.keys():
             if state == (0,):
                 print(f"State: roundstart")

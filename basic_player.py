@@ -10,6 +10,9 @@ class BasicPlayer(Player):
     '''
 
     def play(self, last_move):
+        '''
+        Overwriting parent method
+        '''
         move = None
         
         # Get all possible moves

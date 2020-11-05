@@ -10,6 +10,9 @@ class RandomPlayer(Player):
     Player class that implements a random playing strategy
     '''
     def play(self, last_move):
+        '''
+        Overwriting parent method
+        '''
         move = None
         # Get possible moves
         possible_moves = MoveGenerator().generate_possible_moves(self.cards, last_move)
