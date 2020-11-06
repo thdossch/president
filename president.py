@@ -54,6 +54,10 @@ class President:
         '''
         Function that starts the session, then plays given amount of games and prints history of players' roles.
         It returns this history so that these statistics can possibly be used somewhere else.
+
+        Parameters:
+            games: int
+            verbose: boolean
         '''
 
         print(f"Start simulations for {games} games")
@@ -116,6 +120,13 @@ class President:
         return history
 
     def train(self, games, show_every=None):
+        '''
+        Method that runs a number of games to train agents
+
+        Parameters:
+            games: int
+            show_every: int
+        '''
         for i in range(games):
             if show_every and ( i % show_every == 0):
                 print(f"Trained for {i} games")
@@ -124,13 +135,14 @@ class President:
 
         
 if __name__ == '__main__':
-    ai = TemporalDifferenceAgent("Player1", 0.3, 0.6, 0.1)
-    players = [ai, BasicPlayer("Player2")]
-    players.append(BasicPlayer("Player3"))
-    players.append(BasicPlayer("Player4"))
+    ai = TemporalDifferenceAgent("Player1", 0.1, 0.75, 0.1)
+    players = [ai, RandomPlayer("Player2")]
+    #players.append(BasicPlayer("Player3"))
+    #players.append(BasicPlayer("Player4"))
     #players.append(BasicPlayer("Player5"))
    
     session = President(players)
-    session.train(10000, 1000)
+    session.train(100000, 1000)
+    ai.print_data()
     ai.epsilon = 0.001
-    res = session.simulate(100)
+    session.simulate(10000)

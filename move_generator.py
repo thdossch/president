@@ -75,4 +75,4 @@ class MoveGenerator:
         Returns:
             combinations: [[Card]]
         '''
-        return [ (cards + jokers)[0:i+1] for i in range(len(cards + jokers)) ]
+        return [ (cards + jokers)[0:i+1] for i in range(len(cards + jokers)) if i < 4 ]
