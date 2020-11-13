@@ -11,10 +11,11 @@ from random import randint
 from skip import Skip
 
 
-
 N_ACTIONS = 13*4 + 1 
+SKIP = (0,0)
+START = (3,0)
 
-output_to_action_mapping = [ (0,0) ] + [ (rank, amount) for rank in range(3,16) for amount in (1,5) ]
+output_to_action_mapping = [ SKIP ] + [ (rank, amount) for rank in range(3,16) for amount in (1,5) ]
 
 class PresidentNetwork(torch.nn.Module):
     def __init__(self, hidden_nodes):
@@ -55,8 +56,10 @@ class DeepQLearningAgent(Player):
                                            
         state = self.get_state(last_move)
 
-        #if not self.train:
-        action = self.actual_play(state)
+        if not self.train:
+            action = self.actual_play(state)
+        else:
+            action = self.test_play(state)
         
         next_move = self.action_to_move(action, possible_moves)
         if not next_move is Skip():
@@ -65,8 +68,11 @@ class DeepQLearningAgent(Player):
 
         return next_move 
 
-
     def actual_play(self, state):
+        return output_to_action_mapping(self.select_action(state, 0))
+
+    def test_play(self, state):
+        # zie dqn pract, trainingslus
         return output_to_action_mapping(self.select_action(state, 0))
 
     def select_action(self, state, eps):
@@ -75,6 +81,8 @@ class DeepQLearningAgent(Player):
             with torch.no_grad():
                 return self.network(state).argmax().item()
         else:
+            # kies random actie zonder te kijken naar state
+            # uiteindelijk zal de ai leren welke acties wel en niet mogen door rewards ?
             return random.randrange(self.N_ACTIONS)     
 
     def get_state(self, move):
@@ -114,7 +122,7 @@ class DeepQLearningAgent(Player):
             action: (rank, amount)
         '''
         if move is Skip():
-            return (0, 0) 
+            return  SKIP
         return (move.rank, move.amount)
 
     def action_to_move(self, action, possible_moves):
