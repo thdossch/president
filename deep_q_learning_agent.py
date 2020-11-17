@@ -14,7 +14,7 @@ N_ACTIONS = 13*4 + 1
 SKIP = (0,0)
 START = (3,0)
 
-output_to_action_mapping = [ SKIP ] + [ (rank, amount) for rank in range(3,16) for amount in (1,5) ]
+output_to_action_mapping = [ SKIP ] + [ (rank, amount) for rank in range(3,16) for amount in range(1,5) ]
 
 class PresidentNetwork(torch.nn.Module):
     def __init__(self, hidden_nodes):
@@ -59,11 +59,15 @@ class DeepQLearningAgent(Player):
         state = self.get_state(last_move)
 
         if not self.train:
-            action = self.actual_play(torch.tensor(state))
+            action = self.actual_play(torch.tensor(state).float())
         else:
             action = self.test_play(state)
-        
+         
         next_move = self.action_to_move(action, possible_moves)
+        while next_move == -1:
+            action = self.actual_play(torch.tensor(state).float())
+            next_move = self.action_to_move(action, possible_moves)
+
         if not next_move is Skip():
             cards_to_play = next_move.cards 
             self.cards = list(filter(lambda card: card not in cards_to_play, self.cards))
@@ -72,7 +76,9 @@ class DeepQLearningAgent(Player):
 
     def actual_play(self, state):
         # of action = torch.argmax(network(state)).item()
-        return output_to_action_mapping(self.select_action(state, 0))
+        action = self.select_action(state, 1)
+        actual = output_to_action_mapping[action]
+        return actual
 
     def test_play(self, _state):
         ep_reward = 0
@@ -137,7 +143,7 @@ class DeepQLearningAgent(Player):
 
 
     def select_action(self, state, eps):
-        sample = random.random()
+        sample = random.random() #Return the next random floating point number in the range [0.0, 1.0).
         if sample > eps:
             with torch.no_grad():
                 return self.network(state).argmax().item()
@@ -165,10 +171,10 @@ class DeepQLearningAgent(Player):
             move: [ amount_3 amount_4 ... value_last amount_last ]
         '''
         if move is Skip():
-            return self.cards_to_list + [ 0, 0 ]
+            return self.cards_to_list() + [ 0, 0 ]
         if move.is_round_start():
-            return self.cards_to_list + [ 3, 0 ]
-        return self.cards_to_list + [move.rank, move.amount]
+            return self.cards_to_list() + [ 3, 0 ]
+        return self.cards_to_list() + [move.rank, move.amount]
 
     def cards_to_list(self):
         card_count = 13
@@ -178,7 +184,7 @@ class DeepQLearningAgent(Player):
             if card.rank == 2:
                 cards[card_count-1] += 1
             else:
-                cards[cards.rank-3] += 1
+                cards[card.rank-3] += 1
         
         return cards
 
@@ -205,12 +211,19 @@ class DeepQLearningAgent(Player):
         Returns:
             move: Move
         '''
-        return list(filter(lambda move: self.move_to_action(move) == action, possible_moves))[0]
+        # todo: for now is dit de oplossing voor illegale moves gekozen door het netwerk
+        l = list(filter(lambda move: self.move_to_action(move) == action, possible_moves))
+        if len(l) == 0: return -1
+        else: return l[0]
+
 
     
     def notify_round_end(self):
         '''
         Overwriting parent method
         '''
-        self.round_end = true
+        self.round_end = True
+        # self.last_action = None
+        # self.last_state = None
+
 

@@ -1,8 +1,10 @@
 from game import Game
 from basic_player  import BasicPlayer
 from random_player  import RandomPlayer
+from deep_q_learning_agent import DeepQLearningAgent
 from temporal_difference_learning_agent  import TemporalDifferenceAgent
 from util import vprint
+import random
 
 class President:
     def __init__(self, players, ranks=None):
@@ -130,19 +132,21 @@ class President:
         for i in range(games):
             if show_every and ( i % show_every == 0):
                 print(f"Trained for {i} games")
+            random.shuffle(self.players)
             game = Game(self.players, self.ranks, False)
             self.ranks = game.start()
 
         
 if __name__ == '__main__':
-    ai = TemporalDifferenceAgent("Player1", 0.1, 0.75, 0.1)
-    players = [ai, RandomPlayer("Player2")]
-    #players.append(BasicPlayer("Player3"))
-    #players.append(BasicPlayer("Player4"))
+    ai = DeepQLearningAgent("Anton")
+    #ai = TemporalDifferenceAgent("Player1", 0.1, 0.75, 0.1)
+    players = [ai, RandomPlayer("Random player 1")]
+    players.append(BasicPlayer("Basic player 1"))
+    players.append(BasicPlayer("Basic player 2"))
     #players.append(BasicPlayer("Player5"))
    
     session = President(players)
-    session.train(100000, 1000)
-    ai.print_data()
+    session.train(10000, 1000)
+    #ai.print_data()
     ai.epsilon = 0.001
     session.simulate(10000)
