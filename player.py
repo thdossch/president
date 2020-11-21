@@ -115,6 +115,12 @@ class Player:
         '''
         pass
 
+    def notify_game_end(self, rank):
+        '''
+        Function notifies the player that the round is over
+        '''
+        pass
+
     def __repr__(self):
         return f"{self.name}: {self.cards}"
 

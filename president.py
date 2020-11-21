@@ -138,7 +138,7 @@ class President:
 
         
 if __name__ == '__main__':
-    ai = DeepQLearningAgent("Anton")
+    ai = DeepQLearningAgent("Anton", True)
     #ai = TemporalDifferenceAgent("Player1", 0.1, 0.75, 0.1)
     players = [ai, RandomPlayer("Random player 1")]
     players.append(BasicPlayer("Basic player 1"))
@@ -148,5 +148,5 @@ if __name__ == '__main__':
     session = President(players)
     session.train(10000, 1000)
     #ai.print_data()
-    ai.epsilon = 0.001
+    ai.set_training(False)
     session.simulate(10000)

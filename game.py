@@ -142,6 +142,9 @@ class Game:
         # Add him/her to the finishing_players for the finishing order
         finished_players.append(scum)
 
+        for i, player in enumerate(finished_players):
+            # pass player ranking to the player at end of game
+            player.notify_game_end(i)
         # Finish the game
         return finished_players
 
