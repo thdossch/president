@@ -117,7 +117,7 @@ class Player:
 
     def notify_game_end(self, rank):
         '''
-        Function notifies the player that the round is over
+        Function notifies the player that the game is over
         '''
         pass
 

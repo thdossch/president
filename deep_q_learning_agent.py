@@ -14,7 +14,6 @@ N_ACTIONS = 13*4 + 1
 SKIP = (0,0)
 START = (3,0)
 
-output_to_action_mapping = [ SKIP ] + [ (rank, amount) for rank in range(3,16) for amount in range(1,5) ]
 
 class PresidentNetwork(torch.nn.Module):
     def __init__(self, hidden_nodes):
@@ -33,7 +32,7 @@ class DeepQLearningAgent(Player):
     '''
     def __init__(self, name, train = False):
         super().__init__(name)
-        self.train = train
+        self.training = train
         self.name = name
         self.BATCH_SIZE = 16 
         self.MEM_SIZE = 50000
@@ -50,9 +49,6 @@ class DeepQLearningAgent(Player):
         self.last_state = None
         self.done = False
     
-    def set_training(self,train):
-        self.train = train
-
     def play(self, last_move):
         '''
         Overwriting parent method
@@ -63,11 +59,17 @@ class DeepQLearningAgent(Player):
         state = self.get_state(last_move)
 
         # depending on if we want to train the agent or not, use different methods
-        if not self.train:
-            action = self.actual_play(torch.tensor([state]).float())
-        else:
-            action = self.test_play(state)
+        if not self.training:
+            # get action
+            action = self.optimal_play(state)
+            # transform action to move
+            next_move = self.action_to_move(action, possible_moves)
+            # check if move is a valid move
+            return next_move if next_move != -1 else Skip()
 
+
+        
+        action = self.train_play(state)
         #safe this action and state so we can use them when we get the new state, also reset last_action_illegal
         self.last_action = action
         self.last_state = state
@@ -85,23 +87,51 @@ class DeepQLearningAgent(Player):
 
         return next_move 
 
-    # state moet tensor zijn!
-    def actual_play(self, state):
-        # of action = torch.argmax(network(state)).item()
-        action = self.select_action(state, 0)
-        actual = output_to_action_mapping[action]
-        return actual
 
-    def test_play(self, _state):
+    def train_play(self, _state):
+        '''
+        Method that will update the network and get a action from the network 
+
+        Parameters:
+            state: [int]
+        Returns:
+            action: (amount, rank)
+        '''
         # _state is de state dus [ .. ] maar nog niet in een tensor!
-        print(_state)
-        ep_reward = 0
-        eps = 1.0 #moet eig globale var zijn, zie dqn.ipybn
+        print(state)
 
         # if we didn't do anything yet, generate a random move
         # hoe groot kiezen we de eps?
         if self.last_action == None: 
-            return self.select_action(torch.tensor([_state]).float(), 0.5)
+            return self.select_action(torch.tensor([state]).float(), 1)
+
+
+        return self.select_action(torch.tensor(state), eps)
+
+    def optimal_play(self, state):
+        '''
+        Method that will get the optimal play from the network
+
+        Parameters:
+            state: [int]
+        Returns:
+            action: (amount, rank)
+        '''
+        state = torch.tensor([state]).float()
+        output = self.select_action(state, 0)
+        action = self.output_to_action(output)
+        return action
+
+    def update(self, _state):
+        '''
+        Method for updating the network
+
+        Parameters: 
+            _state: [int[
+        '''
+            
+        ep_reward = 0
+        eps = 1.0 #moet eig globale var zijn, zie dqn.ipybn
 
         for t in count():
             print(count())
@@ -155,14 +185,21 @@ class DeepQLearningAgent(Player):
             # Decay exploration rate
             eps *= self.EPS_DECAY
             eps = max(self.EPS_END, eps)
-
+                
             if done: 
                 break
 
-        return self.select_action(torch.tensor(_state), eps)
-
-
     def select_action(self, state, eps):
+        '''
+        Method that selects a action to play
+
+        Parameters:
+            state: tensor([[int]])
+            eps: float
+        Returns:
+            action: (rank, amount)
+        '''
+        
         sample = random.random() #Return the next random floating point number in the range [0.0, 1.0).
         if sample > eps:
             with torch.no_grad():
@@ -173,11 +210,25 @@ class DeepQLearningAgent(Player):
             return random.randrange(self.N_ACTIONS)    
 
     def get_reward(self, state):
+        '''
+        Method that calculates the rewards for a given state
+
+        Parameters:
+            state: [int]
+        Returns:
+            reward: float
+        '''
         start_score = self.get_hand_score(self.last_state) 
         current_score = self.get_hand_score(state)
         return current_score/start_score
 
     def get_hand_score(self, state):
+        '''
+        Method to calculate the score of a hand
+
+        Parameters:
+            state: [int]
+        '''
         return sum([i*state[i-1] for i in range(1,14)]) / sum(state[:13])
 
 
@@ -196,17 +247,36 @@ class DeepQLearningAgent(Player):
             return self.cards_to_list() + [ 3, 0 ]
         return self.cards_to_list() + [move.rank, move.amount]
 
-    def cards_to_list(self):
-        card_count = 13
-        cards = [ 0 for _ in range(card_count) ]
+    def cards_to_list(self, cards):
+        '''
+        Method that transforms a hand
 
-        for card in self.cards:
+        Parameters:
+            cards: [Card]
+        Returns:
+            cards_int: [int]
+        '''
+        card_count = 13
+        cards_ints = [ 0 for _ in range(card_count) ]
+
+        for card in cards:
             if card.rank == 2:
-                cards[card_count-1] += 1
+                cards_ints[card_count-1] += 1
             else:
-                cards[card.rank-3] += 1
+                cards_ints[card.rank-3] += 1
         
-        return cards
+        return cards_ints
+
+    def output_to_action(self, output):
+        '''
+        Method that transforms a output of the network to a action
+
+        Parameters:
+            output: int
+        Returns:
+            action: (rank, amount) | Skip
+        '''
+        return ([ SKIP ] + [ (rank, amount) for rank in range(3,16) for amount in range(1,5) ])[output]
 
     def move_to_action(self, move):
         '''
@@ -236,9 +306,17 @@ class DeepQLearningAgent(Player):
         if len(l) == 0: return -1
         else: return l[0]
 
+    def notify_round_end(self):
+        '''
+        Overwriting parent method
+        '''
+        pass
+
     def notify_game_end(self, rank):
-       #TODO: gebruik ranking mss ook in reward functie
-       self.done = True 
+        '''
+        Overwriting parent method
+        '''
+        self.done = True 
         
 
 

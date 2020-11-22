@@ -148,5 +148,5 @@ if __name__ == '__main__':
     session = President(players)
     session.train(10000, 1000)
     #ai.print_data()
-    ai.set_training(False)
+    ai.training = False
     session.simulate(10000)
