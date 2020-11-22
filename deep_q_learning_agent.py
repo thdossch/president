@@ -65,7 +65,11 @@ class DeepQLearningAgent(Player):
             # transform action to move
             next_move = self.action_to_move(action, possible_moves)
             # check if move is a valid move
-            return next_move if next_move != -1 else Skip()
+            if next_move == -1 or next_move is Skip():
+                return Skip()
+            else:
+                self.cards = list(filter(lambda card: card not in next_move.cards, self.cards))
+                return next_move 
 
 
         
@@ -82,8 +86,7 @@ class DeepQLearningAgent(Player):
             self.last_action_illegal = True
 
         if not next_move is Skip():
-            cards_to_play = next_move.cards 
-            self.cards = list(filter(lambda card: card not in cards_to_play, self.cards))
+            self.cards = list(filter(lambda card: card not in next_move.cards, self.cards))
 
         return next_move 
 
@@ -93,31 +96,31 @@ class DeepQLearningAgent(Player):
         Method that will update the network and get a action from the network 
 
         Parameters:
-            state: [int]
+            _state: [int]
         Returns:
             action: (amount, rank)
         '''
         # _state is de state dus [ .. ] maar nog niet in een tensor!
-        print(state)
 
         # if we didn't do anything yet, generate a random move
         # hoe groot kiezen we de eps?
         if self.last_action == None: 
-            return self.select_action(torch.tensor([state]).float(), 1)
+            return self.select_action(torch.tensor([_state]).float(), 1)
 
+        self.update(_state)
 
-        return self.select_action(torch.tensor(state), eps)
+        return self.select_action(torch.tensor([_state]).float(), self.eps)
 
-    def optimal_play(self, state):
+    def optimal_play(self, _state):
         '''
         Method that will get the optimal play from the network
 
         Parameters:
-            state: [int]
+            _state: [int]
         Returns:
             action: (amount, rank)
         '''
-        state = torch.tensor([state]).float()
+        state = torch.tensor([_state]).float()
         output = self.select_action(state, 0)
         action = self.output_to_action(output)
         return action
@@ -127,68 +130,66 @@ class DeepQLearningAgent(Player):
         Method for updating the network
 
         Parameters: 
-            _state: [int[
+            _state: [int]
         '''
             
-        ep_reward = 0
-        eps = 1.0 #moet eig globale var zijn, zie dqn.ipybn
+        #ep_reward = 0
+        #eps = 1.0 #moet eig globale var zijn, zie dqn.ipybn
 
-        for t in count():
-            print(count())
-            # Select and perform an action
-            action = self.last_action 
-            done = self.done #if the game is over
-            reward = self.get_reward(_state)
-            state = torch.tensor([self.last_state])
-            next_state = torch.tensor([_state])
+        #for t in count():
+        #    print(count())
 
-            # next_state, reward, done, _ = env.step(action)
-            ep_reward += reward
+        # Select and perform an action
+        action = self.last_action 
+        done = self.done #if the game is over
+        reward = self.get_reward(_state)
+        state = torch.tensor([self.last_state])
+        next_state = torch.tensor([_state])
 
-            # Store the transition in memory
-            self.memory.append((state, action, reward, next_state, int(done)))
+        # next_state, reward, done, _ = env.step(action)
+        #ep_reward += reward
 
-            # Move to the next state
-            state = next_state
+        # Store the transition in memory
+        self.memory.append((state, action, reward, next_state, int(done)))
 
-            # Experience replay
-            if len(self.memory) >= self.BATCH_SIZE:
-                batch = random.sample(self.memory, self.BATCH_SIZE)
-                states, actions, rewards, n_states, dones = zip(*batch)
-                state_batch = torch.cat(states,0)
-                action_batch = torch.tensor(actions)
-                reward_batch = torch.tensor(rewards)
-                n_states = torch.cat(n_states)
-                dones = torch.tensor(dones)
-                
-                # EXPERIENCE REPLAY
-                
-                # Bereken de Q-values voor de gegeven toestanden
-                curr_Q = self.network(state_batch.float()).gather(1, action_batch.unsqueeze(1))
-                curr_Q = curr_Q.squeeze(1)
-                            
-                # Bereken de Q-values voor de volgende toestanden (n_states)
-                max_next_Q = (1-dones) * self.network(n_states.float()).max(1)[0].detach()
+        # Move to the next state
+        state = next_state
 
-                # Gebruik deze Q-values om targets te berekenen
-                targets = reward_batch + (self.GAMMA*max_next_Q)
-                
-                # Bereken de loss
-                loss_fn = torch.nn.MSELoss()
-                loss = loss_fn(curr_Q, targets)
-                self.optimizer.zero_grad()
-                loss.backward()
-                
-                # Voer een optimalisatiestap uit
-                self.optimizer.step()
+        # Experience replay
+        if len(self.memory) >= self.BATCH_SIZE:
+            batch = random.sample(self.memory, self.BATCH_SIZE)
+            states, actions, rewards, n_states, dones = zip(*batch)
+            state_batch = torch.cat(states,0)
+            action_batch = torch.tensor(actions)
+            reward_batch = torch.tensor(rewards)
+            n_states = torch.cat(n_states)
+            dones = torch.tensor(dones)
+            
+            # EXPERIENCE REPLAY
+            
+            # Bereken de Q-values voor de gegeven toestanden
+            curr_Q = self.network(state_batch.float()).gather(1, action_batch.unsqueeze(1))
+            curr_Q = curr_Q.squeeze(1)
+                        
+            # Bereken de Q-values voor de volgende toestanden (n_states)
+            max_next_Q = (1-dones) * self.network(n_states.float()).max(1)[0].detach()
+
+            # Gebruik deze Q-values om targets te berekenen
+            targets = reward_batch + (self.GAMMA*max_next_Q)
+            
+            # Bereken de loss
+            loss_fn = torch.nn.MSELoss()
+            loss = loss_fn(curr_Q, targets)
+            self.optimizer.zero_grad()
+            loss.backward()
+            
+            # Voer een optimalisatiestap uit
+            self.optimizer.step()
 
             # Decay exploration rate
-            eps *= self.EPS_DECAY
-            eps = max(self.EPS_END, eps)
+            self.eps *= self.EPS_DECAY
+            self.eps = max(self.EPS_END, self.eps)
                 
-            if done: 
-                break
-
     def select_action(self, state, eps):
         '''
         Method that selects a action to play
@@ -242,10 +243,10 @@ class DeepQLearningAgent(Player):
             move: [ amount_3 amount_4 ... value_last amount_last ]
         '''
         if move is Skip():
-            return self.cards_to_list() + [ 0, 0 ]
+            return self.cards_to_list(self.cards) + [ 0, 0 ]
         if move.is_round_start():
-            return self.cards_to_list() + [ 3, 0 ]
-        return self.cards_to_list() + [move.rank, move.amount]
+            return self.cards_to_list(self.cards) + [ 3, 0 ]
+        return self.cards_to_list(self.cards) + [move.rank, move.amount]
 
     def cards_to_list(self, cards):
         '''
@@ -303,8 +304,10 @@ class DeepQLearningAgent(Player):
         '''
         # todo: for now is dit de oplossing voor illegale moves gekozen door het netwerk
         l = list(filter(lambda move: self.move_to_action(move) == action, possible_moves))
-        if len(l) == 0: return -1
-        else: return l[0]
+        if not l: 
+            return -1
+        else: 
+            return l[0]
 
     def notify_round_end(self):
         '''

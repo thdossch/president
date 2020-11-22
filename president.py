@@ -140,13 +140,12 @@ class President:
 if __name__ == '__main__':
     ai = DeepQLearningAgent("Anton", True)
     #ai = TemporalDifferenceAgent("Player1", 0.1, 0.75, 0.1)
-    players = [ai, RandomPlayer("Random player 1")]
-    players.append(BasicPlayer("Basic player 1"))
+    players = [ai, BasicPlayer("Basic player 1")]
     players.append(BasicPlayer("Basic player 2"))
+    players.append(BasicPlayer("Basic player 3"))
     #players.append(BasicPlayer("Player5"))
    
     session = President(players)
     session.train(10000, 1000)
-    #ai.print_data()
     ai.training = False
-    session.simulate(10000)
+    session.simulate(1000)
