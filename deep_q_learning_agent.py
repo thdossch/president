@@ -14,6 +14,7 @@ N_ACTIONS = 13*4 + 1
 SKIP = (0,0)
 START = (3,0)
 
+output_to_action_mapping = [ SKIP ] + [ (rank, amount) for rank in range(3,16) for amount in range(1,5) ]
 
 class PresidentNetwork(torch.nn.Module):
     def __init__(self, hidden_nodes):
@@ -35,7 +36,7 @@ class DeepQLearningAgent(Player):
         self.training = train
         self.name = name
         self.BATCH_SIZE = 16 
-        self.MEM_SIZE = 50000
+        self.MEM_SIZE = 1000
         self.GAMMA = 0.99
         self.EPS_END = 0.05
         self.eps = 1.0
@@ -55,6 +56,7 @@ class DeepQLearningAgent(Player):
         '''
         possible_moves = MoveGenerator().generate_possible_moves(self.cards, last_move)
         possible_moves.append(Skip())
+        self.possible_moves = possible_moves
                                            
         state = self.get_state(last_move)
 
@@ -65,7 +67,7 @@ class DeepQLearningAgent(Player):
             # transform action to move
             next_move = self.action_to_move(action, possible_moves)
             # check if move is a valid move
-            if next_move == -1 or next_move is Skip():
+            if next_move is None or next_move is Skip():
                 return Skip()
             else:
                 self.cards = list(filter(lambda card: card not in next_move.cards, self.cards))
@@ -73,15 +75,15 @@ class DeepQLearningAgent(Player):
 
 
         
-        action = self.train_play(state)
+        output = self.train_play(state)
         #safe this action and state so we can use them when we get the new state, also reset last_action_illegal
-        self.last_action = action
+        self.last_action = output
         self.last_state = state
         self.last_action_illegal = False
-        next_move = self.action_to_move(action, possible_moves)
+        next_move = self.action_to_move(self.output_to_action(output), possible_moves)
 
         # if move is impossible, let move be a skip and remember we played an illegal action
-        if next_move == -1:
+        if next_move is None:
             next_move = Skip()
             self.last_action_illegal = True
 
@@ -98,7 +100,7 @@ class DeepQLearningAgent(Player):
         Parameters:
             _state: [int]
         Returns:
-            action: (amount, rank)
+            output: network_output
         '''
         # _state is de state dus [ .. ] maar nog niet in een tensor!
 
@@ -204,6 +206,15 @@ class DeepQLearningAgent(Player):
         sample = random.random() #Return the next random floating point number in the range [0.0, 1.0).
         if sample > eps:
             with torch.no_grad():
+
+                x = self.network(state)
+                probs, indices = torch.topk(x, 53, sorted=True)
+                move = None
+                for action in indices[0]:
+                    move = self.action_to_move(self.output_to_action(action.item()), self.possible_moves)
+                    if not move is None:
+                        return action.item()
+
                 return self.network(state).argmax().item()
         else:
             # kies random actie zonder te kijken naar state
@@ -219,8 +230,10 @@ class DeepQLearningAgent(Player):
         Returns:
             reward: float
         '''
+            return -4
         start_score = self.get_hand_score(self.last_state) 
         current_score = self.get_hand_score(state)
+        #print(round(start_score, 2), round(current_score, 2), round(current_score/start_score, 2))
         return current_score/start_score
 
     def get_hand_score(self, state):
@@ -277,7 +290,7 @@ class DeepQLearningAgent(Player):
         Returns:
             action: (rank, amount) | Skip
         '''
-        return ([ SKIP ] + [ (rank, amount) for rank in range(3,16) for amount in range(1,5) ])[output]
+        return output_to_action_mapping[output]
 
     def move_to_action(self, move):
         '''
@@ -305,7 +318,7 @@ class DeepQLearningAgent(Player):
         # todo: for now is dit de oplossing voor illegale moves gekozen door het netwerk
         l = list(filter(lambda move: self.move_to_action(move) == action, possible_moves))
         if not l: 
-            return -1
+            return None 
         else: 
             return l[0]
 

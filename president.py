@@ -146,6 +146,7 @@ if __name__ == '__main__':
     #players.append(BasicPlayer("Player5"))
    
     session = President(players)
-    session.train(10000, 1000)
+    session.train(100000, 1000)
     ai.training = False
-    session.simulate(1000)
+    session.simulate(3, True)
+    session.simulate(100)
