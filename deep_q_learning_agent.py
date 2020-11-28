@@ -20,11 +20,13 @@ class PresidentNetwork(torch.nn.Module):
     def __init__(self, hidden_nodes):
         super(PresidentNetwork, self).__init__()
         self.linear1 = torch.nn.Linear(15, hidden_nodes)
-        self.linear2 = torch.nn.Linear(hidden_nodes, N_ACTIONS)
+        self.linear2 = torch.nn.Linear(hidden_nodes, hidden_nodes)
+        self.linear3 = torch.nn.Linear(hidden_nodes, N_ACTIONS)
     
     def forward(self, x):
         x = torch.nn.functional.relu(self.linear1(x))
-        return self.linear2(x)
+        y = torch.nn.functional.relu(self.linear2(x))
+        return self.linear3(y)
 
 
 class DeepQLearningAgent(Player):
@@ -35,14 +37,14 @@ class DeepQLearningAgent(Player):
         super().__init__(name)
         self.training = train
         self.name = name
-        self.BATCH_SIZE = 16 
+        self.BATCH_SIZE = 64 
         self.MEM_SIZE = 1000
         self.GAMMA = 0.99
         self.EPS_END = 0.05
         self.eps = 1.0
         self.EPS_DECAY = 0.99
         self.N_ACTIONS = N_ACTIONS 
-        self.network = PresidentNetwork(132)
+        self.network = PresidentNetwork(64)
         self.optimizer = torch.optim.Adam(self.network.parameters(), lr=1e-3)
         self.memory = deque(maxlen=self.MEM_SIZE)
         self.last_action = None
@@ -135,21 +137,12 @@ class DeepQLearningAgent(Player):
             _state: [int]
         '''
             
-        #ep_reward = 0
-        #eps = 1.0 #moet eig globale var zijn, zie dqn.ipybn
-
-        #for t in count():
-        #    print(count())
-
         # Select and perform an action
         action = self.last_action 
         done = self.done #if the game is over
         reward = self.get_reward(_state)
         state = torch.tensor([self.last_state])
         next_state = torch.tensor([_state])
-
-        # next_state, reward, done, _ = env.step(action)
-        #ep_reward += reward
 
         # Store the transition in memory
         self.memory.append((state, action, reward, next_state, int(done)))
@@ -192,6 +185,7 @@ class DeepQLearningAgent(Player):
             self.eps *= self.EPS_DECAY
             self.eps = max(self.EPS_END, self.eps)
                 
+
     def select_action(self, state, eps):
         '''
         Method that selects a action to play
@@ -200,11 +194,9 @@ class DeepQLearningAgent(Player):
             state: tensor([[int]])
             eps: float
         Returns:
-            action: (rank, amount)
+            action: network_output
         '''
-        
-        sample = random.random() #Return the next random floating point number in the range [0.0, 1.0).
-        if sample > eps:
+        if random.random() >= eps:
             with torch.no_grad():
 
                 x = self.network(state)
@@ -215,7 +207,7 @@ class DeepQLearningAgent(Player):
                     if not move is None:
                         return action.item()
 
-                return self.network(state).argmax().item()
+#                return self.network(state).argmax().item()
         else:
             # kies random actie zonder te kijken naar state
             # uiteindelijk zal de ai leren welke acties wel en niet mogen door rewards ?
@@ -232,7 +224,12 @@ class DeepQLearningAgent(Player):
         '''
         start_score = self.get_hand_score(self.last_state) 
         current_score = self.get_hand_score(state)
-        #print(round(start_score, 2), round(current_score, 2), round(current_score/start_score, 2))
+        # you won
+        if current_score == 0:
+            return 5
+        # you skipped
+        if current_score == start_score:
+            return 0
         return current_score/start_score
 
     def get_hand_score(self, state):
@@ -242,6 +239,8 @@ class DeepQLearningAgent(Player):
         Parameters:
             state: [int]
         '''
+        if not sum(state[:13]):
+            return 0;
         return sum([i*state[i-1] for i in range(1,14)]) / sum(state[:13])
 
 
@@ -314,24 +313,23 @@ class DeepQLearningAgent(Player):
         Returns:
             move: Move
         '''
-        # todo: for now is dit de oplossing voor illegale moves gekozen door het netwerk
         l = list(filter(lambda move: self.move_to_action(move) == action, possible_moves))
         if not l: 
             return None 
-        else: 
-            return l[0]
+        return l[0]
 
     def notify_round_end(self):
         '''
         Overwriting parent method
         '''
-        pass
+        self.update(self.get_state(Skip()))
 
     def notify_game_end(self, rank):
         '''
         Overwriting parent method
         '''
         self.done = True 
+        self.update(self.get_state(Skip()))
         
 
 

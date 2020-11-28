@@ -5,6 +5,7 @@ from deep_q_learning_agent import DeepQLearningAgent
 from temporal_difference_learning_agent  import TemporalDifferenceAgent
 from util import vprint
 import random
+from time import time
 
 class President:
     def __init__(self, players, ranks=None):
@@ -139,14 +140,25 @@ class President:
         
 if __name__ == '__main__':
     ai = DeepQLearningAgent("Anton", True)
-    #ai = TemporalDifferenceAgent("Player1", 0.1, 0.75, 0.1)
-    players = [ai, BasicPlayer("Basic player 1")]
-    players.append(BasicPlayer("Basic player 2"))
-    players.append(BasicPlayer("Basic player 3"))
-    #players.append(BasicPlayer("Player5"))
-   
+
+    random_players = True
+    if random_players: 
+        players = [ai, RandomPlayer("Random 1")]
+        players.append(RandomPlayer("Random 2"))
+        players.append(RandomPlayer("Random 3"))
+    else:
+        players = [ai, BasicPlayer("Basic 1")]
+        players.append(BasicPlayer("Basic 2"))
+        players.append(BasicPlayer("Basic 3"))
+    
     session = President(players)
-    session.train(100000, 1000)
+    session.train(110000, 1000)
     ai.training = False
-    session.simulate(3, True)
-    session.simulate(100)
+    session.simulate(10, True)
+    session.simulate(2000)
+    
+#    session = President(players)
+#    t = time()
+#    session.train(1000, 1000)
+#    print(f"time: {time() - t}")
+
