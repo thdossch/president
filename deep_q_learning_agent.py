@@ -230,7 +230,6 @@ class DeepQLearningAgent(Player):
         Returns:
             reward: float
         '''
-            return -4
         start_score = self.get_hand_score(self.last_state) 
         current_score = self.get_hand_score(state)
         #print(round(start_score, 2), round(current_score, 2), round(current_score/start_score, 2))
