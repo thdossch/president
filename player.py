@@ -115,6 +115,12 @@ class Player:
         '''
         pass
 
+    def notify_game_start(self):
+        '''
+        Function notifies the player that a game starts
+        '''
+        pass
+
     def notify_game_end(self, rank):
         '''
         Function notifies the player that the game is over

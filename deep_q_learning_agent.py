@@ -9,6 +9,7 @@ from move_generator import MoveGenerator
 from qtable import QTable
 from random import randint
 from skip import Skip
+from termcolor import colored
 
 N_ACTIONS = 13*4 + 1 
 SKIP = (0,0)
@@ -19,21 +20,21 @@ output_to_action_mapping = [ SKIP ] + [ (rank, amount) for rank in range(3,16) f
 class PresidentNetwork(torch.nn.Module):
     def __init__(self, hidden_nodes):
         super(PresidentNetwork, self).__init__()
-        self.linear1 = torch.nn.Linear(15, hidden_nodes)
+        self.linear1 = torch.nn.Linear(16, hidden_nodes)
         self.linear2 = torch.nn.Linear(hidden_nodes, hidden_nodes)
         self.linear3 = torch.nn.Linear(hidden_nodes, N_ACTIONS)
     
     def forward(self, x):
         x = torch.nn.functional.relu(self.linear1(x))
-        y = torch.nn.functional.relu(self.linear2(x))
-        return self.linear3(y)
+        x = torch.nn.functional.relu(self.linear2(x))
+        return self.linear3(x)
 
 
 class DeepQLearningAgent(Player):
     '''
     Player class that implements a deep Q learning agent
     '''
-    def __init__(self, name, train = False):
+    def __init__(self, name, train = False, network_path=None):
         super().__init__(name)
         self.training = train
         self.name = name
@@ -44,13 +45,20 @@ class DeepQLearningAgent(Player):
         self.eps = 1.0
         self.EPS_DECAY = 0.99
         self.N_ACTIONS = N_ACTIONS 
-        self.network = PresidentNetwork(64)
+        if network_path:
+            self.network = torch.load(network_path)
+            self.network.eval()
+        else:
+            self.network = PresidentNetwork(64)
         self.optimizer = torch.optim.Adam(self.network.parameters(), lr=1e-3)
         self.memory = deque(maxlen=self.MEM_SIZE)
         self.last_action = None
         self.last_action_illegal = False
         self.last_state = None
         self.done = False
+        self.plays_this_game = 0
+        self.cards_played_this_round = 0
+        self.plays_this_round = 0
     
     def play(self, last_move):
         '''
@@ -61,6 +69,10 @@ class DeepQLearningAgent(Player):
         self.possible_moves = possible_moves
                                            
         state = self.get_state(last_move)
+
+        # update plays counter
+        self.plays_this_game += 1
+        self.plays_this_round += 1
 
         # depending on if we want to train the agent or not, use different methods
         if not self.training:
@@ -90,8 +102,9 @@ class DeepQLearningAgent(Player):
             self.last_action_illegal = True
 
         if not next_move is Skip():
+            self.cards_played_this_round += next_move.amount
             self.cards = list(filter(lambda card: card not in next_move.cards, self.cards))
-
+        
         return next_move 
 
 
@@ -224,13 +237,25 @@ class DeepQLearningAgent(Player):
         '''
         start_score = self.get_hand_score(self.last_state) 
         current_score = self.get_hand_score(state)
+
+        longer_game_penalty = min((1.2)**(self.plays_this_game - 5), 4)
+        longer_game_penalty = 0
+        skip_penalty = 1.2**(self.plays_this_round - 2)
+        #print(f"skip_penalty: {skip_penalty}")
+        rel_hand_score = current_score/start_score
+        
+        #print(round(current_score, 2), round(start_score, 2), round(rel_hand_score, 2))
+
         # you won
         if current_score == 0:
-            return 5
+            return 10 
         # you skipped
         if current_score == start_score:
-            return 0
-        return current_score/start_score
+            return -1.5 + skip_penalty 
+        ## others skipped, you won round
+        #if state[13:15] == [0,0] and not self.done:
+        #    return 3  
+        return rel_hand_score - longer_game_penalty
 
     def get_hand_score(self, state):
         '''
@@ -240,8 +265,16 @@ class DeepQLearningAgent(Player):
             state: [int]
         '''
         if not sum(state[:13]):
-            return 0;
-        return sum([i*state[i-1] for i in range(1,14)]) / sum(state[:13])
+            return 0
+
+        def score(rank, amount):
+            mapping = [4,2,1,0.5]
+            score = 0
+            for i in range(amount):
+                score += rank*mapping[i]
+            return score
+
+        return sum([score(i,state[i-1]) for i in range(1,14)]) / sum(state[:13])
 
 
     def get_state(self, move):
@@ -254,10 +287,10 @@ class DeepQLearningAgent(Player):
             move: [ amount_3 amount_4 ... value_last amount_last ]
         '''
         if move is Skip():
-            return self.cards_to_list(self.cards) + [ 0, 0 ]
+            return self.cards_to_list(self.cards) + [ 0, 0 ] + [self.plays_this_game]
         if move.is_round_start():
-            return self.cards_to_list(self.cards) + [ 3, 0 ]
-        return self.cards_to_list(self.cards) + [move.rank, move.amount]
+            return self.cards_to_list(self.cards) + [ 3, 0 ] + [self.plays_this_game]
+        return self.cards_to_list(self.cards) + [move.rank, move.amount] + [self.plays_this_game]
 
     def cards_to_list(self, cards):
         '''
@@ -322,14 +355,23 @@ class DeepQLearningAgent(Player):
         '''
         Overwriting parent method
         '''
-        self.update(self.get_state(Skip()))
+        if self.training:
+            self.update(self.get_state(Skip()))
+        self.cards_played_this_round = 0
+        self.plays_this_round = 0
 
     def notify_game_end(self, rank):
         '''
         Overwriting parent method
         '''
-        self.done = True 
-        self.update(self.get_state(Skip()))
+        self.done = True
+        if self.training:
+            self.update(self.get_state(Skip()))
+        self.plays_this_game = 0
         
 
-
+    def notify_game_start(self):
+        '''
+        Overwriting parent method
+        '''
+        self.done = False

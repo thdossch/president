@@ -6,6 +6,7 @@ from temporal_difference_learning_agent  import TemporalDifferenceAgent
 from util import vprint
 import random
 from time import time
+import torch
 
 class President:
     def __init__(self, players, ranks=None):
@@ -139,7 +140,9 @@ class President:
 
         
 if __name__ == '__main__':
+    network_name = 'new_dones.pt'
     ai = DeepQLearningAgent("Anton", True)
+    #ai = DeepQLearningAgent("Anton", False, network_name)
 
     random_players = True
     if random_players: 
@@ -150,20 +153,14 @@ if __name__ == '__main__':
         players = [ai, BasicPlayer("Basic 1")]
         players.append(BasicPlayer("Basic 2"))
         players.append(BasicPlayer("Basic 3"))
-    
-    players = [BasicPlayer("BasicPlayer"), RandomPlayer("Random 1")]
-    players.append(RandomPlayer("Random 2"))
-    players.append(RandomPlayer("Random 3"))
 
+    
     session = President(players)
-    #session.train(30000, 1000)
-    #ai.training = False
-    #session.simulate(10, True)
-    session.simulate(10000)
 
-    
-#    session = President(players)
-#    t = time()
-#    session.train(1000, 1000)
-#    print(f"time: {time() - t}")
+    session.train(10000, 1000)
+    torch.save(ai.network, network_name)
+
+    ai.training = False
+    session.simulate(5, True)
+    session.simulate(1000)
 

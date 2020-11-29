@@ -3,7 +3,8 @@ from table import Table
 from skip import Skip
 from move import Move
 from util import vprint
-
+from termcolor import colored
+from move_generator import MoveGenerator
 
 class Game:
     def __init__(self, players, ranks, verbose = True):
@@ -100,6 +101,9 @@ class Game:
         
         # List to keep track of finished players
         finished_players = []
+
+        for player in finished_players:
+            player.notify_game_start()
        
         vprint("==============================", self.verbose)
         vprint("Start new game", self.verbose) 
@@ -176,8 +180,16 @@ class Game:
             # The round is not finished so this player may make a move
 
             # Let the player make a move
+            if current_player.name == "Anton":
+                possible_moves = MoveGenerator().generate_possible_moves(current_player.cards, self.table.last_move())
+                possible_moves.append(Skip())
+                vprint(colored(str(possible_moves), "red"), self.verbose)
+
             move = current_player.play(self.table.last_move())
-            vprint(f"{current_player.name} plays {move}", self.verbose)
+            if current_player.name == "Anton":
+                vprint(colored(f"{current_player.name} plays {move}", "yellow"), self.verbose)
+            else:
+                vprint(f"{current_player.name} plays {move}", self.verbose)
 
             # Check if the player skips his turn
             if move is skip:
