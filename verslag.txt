@@ -1,0 +1,46 @@
+simulation van 1.5 u
+++++++++++++++++++++++++++++++++++++
+Simulation finished
+++++++++++++++++++++++++++++++++++++
+
+                Player Random 3
+                    President: 555 times
+                    Vice-President: 590 times
+                    High-Scum: 503 times
+                    Scum: 352 times
+                    W/L: 27.75%"
+
+
+                Player Random 2
+                    President: 418 times
+                    Vice-President: 513 times
+                    High-Scum: 544 times
+                    Scum: 525 times
+                    W/L: 20.9%"
+
+
+                Player Random 1
+                    President: 332 times
+                    Vice-President: 405 times
+                    High-Scum: 558 times
+                    Scum: 705 times
+                    W/L: 16.6%"
+
+
+                Player Anton
+                    President: 695 times
+                    Vice-President: 492 times
+                    High-Scum: 395 times
+                    Scum: 418 times
+                    W/L: 34.75%"
+reward functie:
+start_score = self.get_hand_score(self.last_state)
+        current_score = self.get_hand_score(state)
+        # you won
+        if current_score == 0:
+            return 5
+        # you skipped
+        if current_score == start_score:
+            return 0
+        #gemiddelde van hand waarde
+        return current_score/start_score

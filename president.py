@@ -151,11 +151,16 @@ if __name__ == '__main__':
         players.append(BasicPlayer("Basic 2"))
         players.append(BasicPlayer("Basic 3"))
     
+    players = [BasicPlayer("BasicPlayer"), RandomPlayer("Random 1")]
+    players.append(RandomPlayer("Random 2"))
+    players.append(RandomPlayer("Random 3"))
+
     session = President(players)
-    session.train(110000, 1000)
-    ai.training = False
-    session.simulate(10, True)
-    session.simulate(2000)
+    #session.train(30000, 1000)
+    #ai.training = False
+    #session.simulate(10, True)
+    session.simulate(10000)
+
     
 #    session = President(players)
 #    t = time()
