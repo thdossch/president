@@ -20,7 +20,7 @@ output_to_action_mapping = [ SKIP ] + [ (rank, amount) for rank in range(3,16) f
 class PresidentNetwork(torch.nn.Module):
     def __init__(self, hidden_nodes):
         super(PresidentNetwork, self).__init__()
-        self.linear1 = torch.nn.Linear(16, hidden_nodes)
+        self.linear1 = torch.nn.Linear(28, hidden_nodes)
         self.linear2 = torch.nn.Linear(hidden_nodes, hidden_nodes)
         self.linear3 = torch.nn.Linear(hidden_nodes, N_ACTIONS)
     
@@ -30,7 +30,7 @@ class PresidentNetwork(torch.nn.Module):
         return self.linear3(x)
 
 
-class DeepQLearningAgent(Player):
+class BigDeepQLearningAgent(Player):
     '''
     Player class that implements a deep Q learning agent
     '''
@@ -43,7 +43,7 @@ class DeepQLearningAgent(Player):
         self.GAMMA = 0.99
         self.EPS_END = 0.05
         self.eps = 1.0
-        self.EPS_DECAY = 0.99
+        self.EPS_DECAY = 0.9999
         self.N_ACTIONS = N_ACTIONS 
         if network_path:
             self.network = torch.load(network_path)
@@ -56,9 +56,6 @@ class DeepQLearningAgent(Player):
         self.last_action_illegal = False
         self.last_state = None
         self.done = False
-        self.plays_this_game = 0
-        self.cards_played_this_round = 0
-        self.plays_this_round = 0
     
     def play(self, last_move):
         '''
@@ -69,10 +66,6 @@ class DeepQLearningAgent(Player):
         self.possible_moves = possible_moves
                                            
         state = self.get_state(last_move)
-
-        # update plays counter
-        self.plays_this_game += 1
-        self.plays_this_round += 1
 
         # depending on if we want to train the agent or not, use different methods
         if not self.training:
@@ -102,7 +95,6 @@ class DeepQLearningAgent(Player):
             self.last_action_illegal = True
 
         if not next_move is Skip():
-            self.cards_played_this_round += next_move.amount
             self.cards = list(filter(lambda card: card not in next_move.cards, self.cards))
         
         return next_move 
@@ -235,27 +227,10 @@ class DeepQLearningAgent(Player):
         Returns:
             reward: float
         '''
-        start_score = self.get_hand_score(self.last_state) 
-        current_score = self.get_hand_score(state)
-
-        longer_game_penalty = min((1.2)**(self.plays_this_game - 5), 4)
-        longer_game_penalty = 0
-        skip_penalty = 1.2**(self.plays_this_round - 2)
-        #print(f"skip_penalty: {skip_penalty}")
-        rel_hand_score = current_score/start_score
-        
-        #print(round(current_score, 2), round(start_score, 2), round(rel_hand_score, 2))
-
-        # you won
-        if current_score == 0:
-            return 10 
-        # you skipped
-        if current_score == start_score:
-            return -1.5 + skip_penalty 
-        ## others skipped, you won round
-        #if state[13:15] == [0,0] and not self.done:
-        #    return 3  
-        return rel_hand_score - longer_game_penalty + self.output_to_action(self.last_action)[1]*0.05
+        if not self.done:
+            return 0
+        else: 
+            return [10, 5, -5, -10][self.rank] 
 
     def get_hand_score(self, state):
         '''
@@ -287,10 +262,10 @@ class DeepQLearningAgent(Player):
             move: [ amount_3 amount_4 ... value_last amount_last ]
         '''
         if move is Skip():
-            return self.cards_to_list(self.cards) + [ 0, 0 ] + [self.plays_this_game]
+            return self.cards_to_list(self.cards) + self.cards_to_list(self.game.table.current_cards() + self.game.table.deck.cards) + [ 0, 0 ]
         if move.is_round_start():
-            return self.cards_to_list(self.cards) + [ 3, 0 ] + [self.plays_this_game]
-        return self.cards_to_list(self.cards) + [move.rank, move.amount] + [self.plays_this_game]
+            return self.cards_to_list(self.cards) + self.cards_to_list(self.game.table.current_cards() + self.game.table.deck.cards) + [ 3, 0 ]
+        return self.cards_to_list(self.cards) + self.cards_to_list(self.game.table.current_cards() + self.game.table.deck.cards) + [move.rank, move.amount]
 
     def cards_to_list(self, cards):
         '''
@@ -357,8 +332,6 @@ class DeepQLearningAgent(Player):
         '''
         if self.training:
             self.update(self.get_state(Skip()))
-        self.cards_played_this_round = 0
-        self.plays_this_round = 0
 
     def notify_game_end(self, rank):
         '''
@@ -366,8 +339,8 @@ class DeepQLearningAgent(Player):
         '''
         self.done = True
         if self.training:
+            self.rank = rank
             self.update(self.get_state(Skip()))
-        self.plays_this_game = 0
         
 
     def notify_game_start(self):
@@ -375,3 +348,9 @@ class DeepQLearningAgent(Player):
         Overwriting parent method
         '''
         self.done = False
+
+    def add_game_ref(self, game):
+        '''
+        Overwriting parent method
+        '''
+        self.game = game

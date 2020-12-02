@@ -60,6 +60,10 @@ class Game:
         if len(self.players) < 2:
             raise ValueError(f"A game can't be played with {len(self.players)} players.")
     
+        # Give game ref (for DQN)
+        for player in self.players:
+            player.add_game_ref(self)
+
         # Deal the cards
         self.deal()
         # Switch cards between ranks
@@ -102,7 +106,7 @@ class Game:
         # List to keep track of finished players
         finished_players = []
 
-        for player in finished_players:
+        for player in self.players:
             player.notify_game_start()
        
         vprint("==============================", self.verbose)

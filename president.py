@@ -2,11 +2,13 @@ from game import Game
 from basic_player  import BasicPlayer
 from random_player  import RandomPlayer
 from deep_q_learning_agent import DeepQLearningAgent
+from bigger_deep_q_learning_agent import BigDeepQLearningAgent
 from temporal_difference_learning_agent  import TemporalDifferenceAgent
 from util import vprint
 import random
 from time import time
 import torch
+import threading
 
 class President:
     def __init__(self, players, ranks=None):
@@ -138,11 +140,39 @@ class President:
             game = Game(self.players, self.ranks, False)
             self.ranks = game.start()
 
+    def t_input(self, container):
+        inp = input()
+        while inp != 'stop':
+            time.sleep(1)
+            inp = input()
+        container.append(1)
+
+    def train_with_cancel(self, show_every=None):
+        '''
+        Method that runs a number of games to train agents
+
+        Parameters:
+            games: int
+            show_every: int
+        '''
+        container = []
+        t = threading.Thread(target=self.t_input, args=(container,))
+        t.start()
+
+        i = 0
+        while not container:
+            if show_every and ( i % show_every == 0):
+                print(f"Trained for {i} games")
+            random.shuffle(self.players)
+            game = Game(self.players, self.ranks, False)
+            self.ranks = game.start()
+            i+=1
+
         
 if __name__ == '__main__':
-    network_name = 'new_dones.pt'
-    ai = DeepQLearningAgent("Anton", True)
-    #ai = DeepQLearningAgent("Anton", False, network_name)
+    network_name = 'BIGANTON.pt'
+    #ai = BigDeepQLearningAgent("Anton", True)
+    ai = BigDeepQLearningAgent("Anton", True, network_name)
 
     random_players = True
     if random_players: 
@@ -157,7 +187,7 @@ if __name__ == '__main__':
     
     session = President(players)
 
-    session.train(10000, 1000)
+    session.train_with_cancel(1000)
     torch.save(ai.network, network_name)
 
     ai.training = False
