@@ -2,7 +2,7 @@ from game import Game
 from basic_player  import BasicPlayer
 from random_player  import RandomPlayer
 from deep_q_learning_agent import DeepQLearningAgent
-from bigger_deep_q_learning_agent import BigDeepQLearningAgent
+from big_deep_q_learning_agent import BigDeepQLearningAgent
 from temporal_difference_learning_agent  import TemporalDifferenceAgent
 from util import vprint
 import random
@@ -164,13 +164,13 @@ class President:
             if show_every and ( i % show_every == 0):
                 print(f"Trained for {i} games")
             random.shuffle(self.players)
-            game = Game(self.players, self.ranks, False)
+            game = Game(self.players, None, False)
             self.ranks = game.start()
             i+=1
 
         
 if __name__ == '__main__':
-    network_name = 'BIGANTON.pt'
+    network_name = 'BIGANTON_2.pt'
     #ai = BigDeepQLearningAgent("Anton", True)
     ai = BigDeepQLearningAgent("Anton", True, network_name)
 
