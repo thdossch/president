@@ -3,6 +3,7 @@
 \usepackage{float}
 \usepackage{graphicx}
 \usepackage{hyperref}
+\graphicspath{ {./images/} }
 
 \begin{document}
 
@@ -17,7 +18,7 @@
 
 \section{Inleiding}
 In dit project zullen we bestuderen hoe reinforcement learning kan toegepast worden op een kaartspel. Het kaartspel dat we gaan bekijken is presidenten. Dit is een perfect voorbeeld van een spel waarbij we incomplete informatie hebben: er kan namelijk niet in de kaarten van de tegenstanders gekeken worden. Daarbij is elke toestand discreet, waardoor het probleem kan gemodelleerd worden als een Partially Observable Markov Decision Process (POMDP). \\\\ Voor dit soort problemen zijn er al heel wat oplossingsmethodes, waarvan we er een paar zullen uitproberen en vergelijken. Daarbij kunnen we ons ook de vraag stellen of het wel degelijk gunt om een Reinforcement Learning algoritme te gebruiken. Zou het kunnen dat minder complexe oplossingen ons betere resultaten bieden?
-\subsection{Het probleem}
+\subsection{Het probleem -todo: mss beter dan in puntjes overlopen}
 Presidenten kent veel varianten, de regels liggen namelijk niet hard vast en kunnen daarom vaak besproken worden onder de spelers. Afhankelijk van welke regels je gebruikt, kan het spel moeilijker worden. \\\\Er zijn wel een paar vaste regels die de meeste spelers volgen:\\\\
 - De speler die de ‘klaver 3’ heeft, mag als eerste leggen in de ronde. 
 - Spelers moeten altijd een kaart leggen die hoger of gelijk aan de vorige kaart is. Het aantal van die kaart moet hoger of gelijk zijn aan de kaart(en) van de vorige beurt.
@@ -45,7 +46,53 @@ Een eerste interessante weg is Q-learning. Alhoewel dit een algoritme is dat we 
 Het is daarom misschien interessanter om met een DQN of Deep Q-Network te werken, waarmee we kunnen werken met grotere states om zo meer informatie over het spel bij te houden. Een succesvol voorbeeld met neurale netwerken is \cite{nn-paper}, waar ze werken met spel dat een gelijkaardige complexiteit heeft als presidenten. Waarom ze niet met DQN werken, wordt ook besproken, en is interessant om later in dit onderzoek nog eens aan te halen. \\\\
 Ten laatste zou Monte Carlo Tree Search een zelfde beperkingen geven als Q-learning, namelijk de grootte van de state. Hoe groot kunnen we de state maken tot we in een situatie komen waar we te veel paden hebben om te simuleren? Hiervoor zijn er wel al oplossingen, waaronder Partially Observable Monte-Carlo Planning (POMCP), wat een aangepaste Monte Carlo tree search is om POMDPs op te lossen \cite{mct-1}. Er bestaan ook andere manieren door Monte Carlo te combineren met andere oplossingen, zoals in \cite{mct-2} of \cite{mct-3}.
 
+\section{Methodiek}
+Uit de bovenstaande besproken oplossingsmethodes, bespreken we enkel de eerste twee, namelijk Q-learning en DQN. Interessant hieraan is dat de tweede methode, die met een Deep Q-Network werkt, gebaseerd is op het Q-learning van de eerste methode. Ook bekijken we een alternatieve, simpelere oplossingsmethode die aan de hand van heuristieken of vuistregels van presidenten werkt.
+\subsection{Heuristiek}
 
+Om te toetsen hoe goed de andere oplossingsmethoden zijn, hebben we een goede speler nodig. Hiervoor hebben we een heuristiek geimplementeerd die ongeveer volgt wat echte spelers in het spel zouden doen, namelijk:
+\begin{itemize}
+	\item Leg altijd de laagste kaart mogelijk. Als je meerdere van die kaart hebt, leg ze allemaal.
+	\item Leg enkel een joker als je niet anders kan.
+	\item Pas enkel wanneer je niets kan leggen.
+\end{itemize}
+Een echte speler zal natuurlijk ook rekening houden met details zoals welke kaarten al gelegd zijn doorheen het spel, hoeveel spelers al uitgespeeld zijn, ... Maar we zullen toch zien dat deze heuristiek opvallend goede resultaten behaald. \\\\
+Ook hebben we een extra speler geimplementeerd: de random speler. Deze speler kiest een willekeurige zet uit alle mogelijke zetten in zijn hand. Zo hebben we nu een goede en slechte speler, waarop veel getest kan worden.
+
+
+\subsection{Q-learning}
+\subsubsection{Theorie}
+Q-learning helpt ons zoeken naar een zo goed mogelijke policy \textbf{(todo: leg policy uit?, en mss bellman eq? + zeg q-learning model free is)}. De letter "Q" slaat op de functie die gebruikt wordt om, gegeven een state en een actie, de waarde van deze combinatie te vinden. Deze waarde geeft aan hoe goed - of slecht - een bepaalde actie is in een bepaalde state.\\\\
+Zoals we zien in onderstaande formule, zal een Q-waarde van een bepaald state-actie paar veranderen met de tijd. De Q(s,a) waarden blijven dus niet perse hetzelfde. Daarom moeten we in het begin de Q-waarden initialiseren, om die dan wanneer nodig aan te passen.
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.70]{images/qformula.png}
+\caption{Q function - todo source wiki}
+\end{figure}
+
+Er zijn nog een aantal belangrijke parameters aanwezig in de formule. 
+\begin{itemize}
+	\item Learning rate: Geeft aan in welke mate we de Q-waarde updaten, een grote learning rate zal dus meer impact hebben op de uiteindelijke Q-waarde dan een kleinere.
+	\item Reward: Score die berekend wordt op basis van de state waar we in waren en de gekozen actie. Door deze actie uit te voeren, komen we in een nieuwe state en kunnen we kijken hoe waardevol deze actie was. 
+	\item Discount factor: Geeft aan hoe belangrijk toekomstige rewards zijn. Een hoge discount factor zal meer belang hechten aan rewards over een lange tijd, een lage discount factor laat het algoritme enkel rewards in een korte tijdsperiode beschouwen.
+	\item Estimate of optimal future value: In deze stap gaan we de Q-waarden overlopen over alle mogelijke acties in de volgende state, en halen we de hoogste Q-waarde eruit. Merk op dat als de discount factor 0 is, dit niet uitmaakt, en dus niet naar toekomstige states of rewards kijken.
+\end{itemize}
+
+Daarbij is het in Q-learning belangrijk om te beschouwen hoe we de volgende actie a kiezen, om dan overeenkomende Q(s,a) aan te passen. We zouden elke keer de beste actie kunnen kiezen op basis van de Q-waardem, maar dit zal in begin niet werken, aangezien er dan nog helemaal niets geleerd is. We willen dus genoeg exploratie hebben, zeker in het begin! Een oplossing hiervoor is om een \(\epsilon\)-greedy policy te volgen. Waarbij we met kans \(\epsilon\) een willekeurige actie kiezen, en met kans 1-\(\epsilon\) een actie kiezen gebaseerd op de huidige policy. We kunnen deze \(\epsilon\) eventueel laten variëren met de tijd.
+
+\subsubsection{Implementatie}
+De Q-waarden die doorheen het algoritme geupdate worden, worden bijgehouden in een Q-table. In onze eerste implementatie houdt de state 1 variabele bij: de laatst gelegde kaart. De state wordt gegeven als een tuple (rang, aantal), en acties worden op dezelfde manier voorgesteld. Zo indexeren we de Q-table met deze 2 tuples. \\\\
+We kunnen natuurlijk bediscussiëren of het niet beter zou zijn om een grotere state bij te houden, maar hier komen we later bij onze testresultaten op terug. Er is wel een beperking in hoe groot we de state kunnen maken, aangeziener een punt zou zijn waar de tabel zo groot wordt dat veel states niet meer bezocht worden. \\\\
+De initiele Q-waarden in de tabel zijn 0 voor alle acties behalve "skip". Vanaf nu zullen we het over een skip hebben als het over een beurt passen gaat. De waarden voor skip in elke mogelijke state wordt op -1 gezet, wat betekent dat we die al in het begin afstraffen. Op deze manier proberen we ervoor te zorgen dat de agent zo veel mogelijk beslist om wel een kaart te leggen. \\\\
+Aangezien we hier de state beperkt moeten houden, moeten we best ook de taktiek van de agent beperkt houden, door hem op zo een goed mogelijke manier de rondes te laten spelen spelen, en niet te kijken naar winnen van het spel. Dit is ook wat onze heuristieke speler doet.\\\\
+Daarom werkt de reward functie als volgt: \textbf{todo + thor zijn probeersels met andere manieren om de qtable voor te stellen?}.
+
+\subsection{Deep Q-Network}
+\subsubsection{Theorie}
+
+
+\subsubsection{Implementatie}
 
 \begin{thebibliography}{9}
 \bibitem{simple-qlearning} 
