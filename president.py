@@ -139,37 +139,69 @@ class President:
             self.ranks = game.start()
 
         
-if __name__ == '__main__':
-    network_name = 'test.pt'
-    ai = DeepQLearningAgent("Anton", True)
-    #ai = DeepQLearningAgent("Anton", False, network_name)
+    def results_for_gamma_0_100_dqn_training():
+        for g in range(0, 11):
+            gamma = g/10
+            network_name = f"dqn_with_gamma_0_results/gamma_{g}.pt"
+            
+            ai = DeepQLearningAgent("Anton", True)
+            ai.GAMMA = gamma
 
-    random_players = True
-    if random_players: 
-        players = [ai, RandomPlayer("Random 1")]
-        players.append(RandomPlayer("Random 2"))
-        players.append(RandomPlayer("Random 3"))
-    else:
-        players = [ai, BasicPlayer("Basic 1")]
-        players.append(BasicPlayer("Basic 2"))
-        players.append(BasicPlayer("Basic 3"))
+            random_players = True
+            players = [ai, RandomPlayer("Random 1")]
+            players.append(RandomPlayer("Random 2"))
+            players.append(RandomPlayer("Random 3"))
+            
+            session = President(players)
+            
+            print(f"Start training for {gamma}")
+            session.train(100000, 10000)
+            torch.save(ai.network, network_name)
 
-    
-    ai.GAMMA = 1
+    def results_for_gamma_0_100_dqn_simulation():
+        for g in range(0, 7):
+            gamma = g/10
+            network_name = f"dqn_with_gamma_0_results/gamma_{g}.pt"
+            
+            ai = DeepQLearningAgent("Anton", False, network_name)
 
-    session = President(players)
+            random_players = True
+            players = [ai, RandomPlayer("Random 1")]
+            players.append(RandomPlayer("Random 2"))
+            players.append(RandomPlayer("Random 3"))
+            
+            session = President(players)
+            
+            print(f"Start training for {gamma}")
+            session.simulate(1000)
 
-    session.train(10000, 1000)
+    if __name__ == '__main__':
 
-    ai.training = False
-    session.simulate(5, True)
-    session.simulate(1000)
+        #results_for_gamma_0_100_dqn_training()
+        #results_for_gamma_0_100_dqn_simulation()
+        #exit()
 
-    ai.training = True
-    session.train(20000, 1000)
+        network_name = 'test_gamma.pt'
 
-    ai.training = False
-    session.simulate(5, True)
-    session.simulate(1000)
+        ai = BigDeepQLearningAgent("Anton", True)
+        #ai = BigDeepQLearningAgent("Anton", True, network_name)
 
-    torch.save(ai.network, network_name)
+        random_players = True
+        if random_players: 
+            players = [ai, RandomPlayer("Random 1")]
+            players.append(RandomPlayer("Random 2"))
+            players.append(RandomPlayer("Random 3"))
+        else:
+            players = [ai, BasicPlayer("Basic 1")]
+            players.append(BasicPlayer("Basic 2"))
+            players.append(BasicPlayer("Basic 3"))
+
+
+        session = President(players)
+
+        ai.GAMMA = 0
+        session.train(30000, 5000)
+        torch.save(ai.network, network_name)
+
+        ai.training = False
+        session.simulate(1000)
