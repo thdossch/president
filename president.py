@@ -140,7 +140,7 @@ class President:
 
         
 if __name__ == '__main__':
-    network_name = 'new_dones.pt'
+    network_name = 'test.pt'
     ai = DeepQLearningAgent("Anton", True)
     #ai = DeepQLearningAgent("Anton", False, network_name)
 
@@ -155,12 +155,21 @@ if __name__ == '__main__':
         players.append(BasicPlayer("Basic 3"))
 
     
+    ai.GAMMA = 1
+
     session = President(players)
 
     session.train(10000, 1000)
-    torch.save(ai.network, network_name)
 
     ai.training = False
     session.simulate(5, True)
     session.simulate(1000)
 
+    ai.training = True
+    session.train(20000, 1000)
+
+    ai.training = False
+    session.simulate(5, True)
+    session.simulate(1000)
+
+    torch.save(ai.network, network_name)

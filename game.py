@@ -102,7 +102,7 @@ class Game:
         # List to keep track of finished players
         finished_players = []
 
-        for player in finished_players:
+        for player in self.players:
             player.notify_game_start()
        
         vprint("==============================", self.verbose)
