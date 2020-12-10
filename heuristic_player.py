@@ -4,7 +4,7 @@ from card import Card
 from move import Move
 from move_generator import MoveGenerator
 
-class BasicPlayer(Player):
+class HeuristicPlayer(Player):
     '''
     Player class that implements a very simple playing strategy
     '''
