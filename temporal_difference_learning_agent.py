@@ -16,7 +16,8 @@ class TemporalDifferenceAgent(Player):
         self.table = QTable() 
         self.learning_rate = learning_rate #0.05
         self.discount_factor = discount_factor #0.6
-        self.epsilon = epsilon #0.2
+        self.epsilon = 1
+        self.epsilon_decay = 0.9999
         self.S = None
         self.A = None
         self.amount_cards_played = 0 
@@ -50,11 +51,8 @@ class TemporalDifferenceAgent(Player):
         return self.action_to_move(self.A, possible_moves)
 
     def update(self, new_state, possible_moves):
-        r = -0.1
-        if self.amount_cards_played == -1:
-            r = -2
-        else:
-            r += (self.amount_cards_played * 0.5)
+      
+        r = (self.amount_cards_played * 0.5)
         r += 0.2 * self.amount_cards_played_round
 
         temporal_difference_target = r + self.discount_factor*self.get_best_q_value(new_state)
@@ -104,6 +102,8 @@ class TemporalDifferenceAgent(Player):
             val = randint(0, len(possible_moves)-2)
             best = self.get_best_action(state, possible_moves)
             return list(filter(lambda action: action != best, [self.move_to_action(move) for move in possible_moves]))[val]
+
+        self.epsilon *= self.epsilon_decay
 
     def notify_round_end(self):
         '''

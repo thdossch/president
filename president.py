@@ -128,7 +128,7 @@ class President:
         for i in range(games):
             if show_every and ( i % show_every == 0):
                 print(f"Trained for {i} games")
-            random.shuffle(self.players)
+            #random.shuffle(self.players)
             game = Game(self.players, self.ranks, False)
             self.ranks = game.start()
             
