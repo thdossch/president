@@ -83,11 +83,10 @@ Er zijn nog een aantal belangrijke parameters aanwezig in de formule.
 Daarbij is het in Q-learning belangrijk om te beschouwen hoe we de volgende actie a kiezen, om dan overeenkomende Q(s,a) aan te passen. We zouden elke keer de beste actie kunnen kiezen op basis van de Q-waardem, maar dit zal in begin niet werken, aangezien er dan nog helemaal niets geleerd is. We willen dus genoeg exploratie hebben, zeker in het begin! Een oplossing hiervoor is om een \(\epsilon\)-greedy policy te volgen. Waarbij we met kans \(\epsilon\) een willekeurige actie kiezen, en met kans 1-\(\epsilon\) een actie kiezen gebaseerd op de huidige policy. We kunnen deze \(\epsilon\) eventueel laten variëren met de tijd.
 
 \subsubsection{Implementatie}
-De Q-waarden die doorheen het algoritme geupdate worden, worden bijgehouden in een Q-table. In onze eerste implementatie houdt de state 1 variabele bij: de laatst gelegde kaart. De state wordt gegeven als een tuple (rang, aantal), en acties worden op dezelfde manier voorgesteld. Zo indexeren we de Q-table met deze 2 tuples. \\\\
-We kunnen natuurlijk bediscussiëren of het niet beter zou zijn om een grotere state bij te houden, maar hier komen we later bij onze testresultaten op terug. Er is wel een beperking in hoe groot we de state kunnen maken, aangeziener een punt zou zijn waar de tabel zo groot wordt dat veel states niet meer bezocht worden. \\\\
+De Q-waarden die doorheen het algoritme geupdate worden, worden bijgehouden in een Q-table. In onze eerste implementatie houdt de state 2 velden bij die de laatst gelegde kaart en zijn hoeveelheid voorstellen. De state wordt gegeven als een tuple (rang, aantal), en acties worden op dezelfde manier voorgesteld. Zo indexeren we de Q-table met deze 2 tuples. \\\\
+We kunnen natuurlijk bediscussiëren of het niet beter zou zijn om een grotere state bij te houden, maar hier komen we later bij onze testresultaten op terug. Er is wel een beperking in hoe groot we de state kunnen maken, aangezien er een punt zou zijn waar de tabel zo groot wordt dat veel states niet meer bezocht worden. \\\\
 De initiele Q-waarden in de tabel zijn 0 voor alle acties behalve "skip". Vanaf nu zullen we het over een skip hebben als het over een beurt passen gaat. De waarden voor skip in elke mogelijke state wordt op -1 gezet, wat betekent dat we die al in het begin afstraffen. Op deze manier proberen we ervoor te zorgen dat de agent zo veel mogelijk beslist om wel een kaart te leggen. \\\\
-Aangezien we hier de state beperkt moeten houden, moeten we best ook de taktiek van de agent beperkt houden, door hem op zo een goed mogelijke manier de rondes te laten spelen spelen, en niet te kijken naar winnen van het spel. Dit is ook wat onze heuristieke speler doet.\\\\
-Daarom werkt de reward functie als volgt: \textbf{todo + thor zijn probeersels met andere manieren om de qtable voor te stellen?}.
+Aangezien we hier de state beperkt moeten houden, moeten we best ook de taktiek van de agent beperkt houden, door hem op zo een goed mogelijke manier de rondes te laten spelen spelen, en niet te kijken naar winnen van het spel. Dit is ook wat onze heuristieke speler doet. Welke reward functie we daaroor implementeren zullen we bespreken bij resultaten. \textbf{todo: thor zijn probeersels met andere manieren om de qtable voor te stellen?}.
 
 \subsection{Deep Q-Network}
 \subsubsection{Theorie}
@@ -103,13 +102,39 @@ Ons initieel idee was om niet te beginnen met een te grote state, om te kijken o
 Na de input laag hebben we 2 hidden layers van elk 64 nodes. Daarop volgen de output nodes, namelijk 53 nodes die elk een actie voorstellen. Er is dus een mapping van 0-52 met elk een overeenkomende zet. Deze zet kan een skip zijn, of een aantal kaarten van een bepaalde rang. Om de output te beperken, kan de agent maar maximum 4 kaarten leggen (ookal is het soms mogelijk om met jokers meer dan dit aantal te leggen).
 
 \newpage
-\subsection{Resultaten}
+\section{Resultaten}
 
-\subsubsection{Q-learning}
+\subsection{Heuristiek en random}
+Het is belangrijk om te weten hoe de heuristieke speler het doet tegenover random spelers, en omgekeerd. Zo kunnen we goed vergelijken en hopelijk zelfs streven naar gelijkaardige of betere resultaten.\\\\
+TODO: resultaten van 1h tegen 3r; etc
 
-\subsubsection{Kleine DQN}
+We zien dat de heuristieke speler het al zeer goed doet, wat wel te verwachten was tegen random spelers. Een goed doel is dus om de volgende methodes deze resultaten (op zijn minst) te laten evenaren.
 
-\subsubsection{Grote DQN}
+\subsection{Q-learning}
+\subsubsection{State met 2 velden}
+Zoals beschreven in de implementatiedetails van Q-learning, werken we hier met een state die als (rang, aantal) wordt voorgesteld. Dit is dus een heel beperkte state, waarvoor we een gepaste reward functie moeten vinden.\\\\
+Om een reward functie te vinden, moeten we eerst beslissen wat we verwachten van onze agent. Eigenlijk willen we, net zoals bij de heuristieke speler, dat hij een ronde zo goed mogelijk speelt en niet kijkt naar of hij degelijk president is geworden of niet. Dit vertaalt dan naar: de agent moet zo snel mogelijk van zijn kaarten afgeraken, of zo veel mogelijk kaarten spelen per ronde. Hiervoor zijn we tot volgende reward functie gekomen:\\\\
+\(r = (amount of cards played * 0.5) + 0.2 * amount of cards played in round\)\\\\
+Voor de juiste learning rate en discount factor kunnen we voor verschillende waarden testen en kijken welke de beste is. TODO:plots\\\\
+Voor de \(\epsilon\) kiezen we als startwaarde 1, en vermenigvuldigen we die elke keer als er een actie gekozen wordt met 0.99. Op die manier wordt er in het begin meer geexploreerd dan op het einde. TODO: plots voor maxepsilon vs epsilon->0?\\\\
+Met uiteindelijke waarden (na 100k trainen en 10k simulaties): 0.1 learning rate en 0.75 gamma (TODO:kies beste based on grafieken): WL 51.82 tegen 3 random spelers, 13.12 tegen 3 basic spelers. \\\\
+Er zijn nog een aantal zaken die geprobeerd zijn, die slechtere of gelijkaardige resultaten geven. Toch zijn ze interessant om even snel te bespreken.
+\begin{itemize}
+	\item Tijdens de training worden nu de rankings van de spelers niet gereset, maar dit wel doen ieder aantal games geeft geen verschil.
+	\item Met een epsilon van 0.25 krijgen we ongeveer even goede resultaten als met een decay werken.
+	\item Een iets complexere reward functie, gebaseerd op de kaarten in je hand voor en na je gelegd hebt, geeft minder goede resultaten. Om dit toch te doen werken, moeten we misschien de state uitbreiden. TODO: misschien werkt die wel? probeer reward van kleine dqn- deze code met uitgebreide state staat op dev branch
+\end{itemize}
+
+\subsubsection{Uitgebreide state}
+Idealiter bevat de state ook de kaarten in je hand. Dit gaat alweer iets meer naar de richting van de heuristieke speler, die ook op basis van zijn hand een beslissing maakt. Na wat zorgvuldig rekenwerk zou dit neerkomen op 2872 mogelijke starthanden, zonder zelfs de andere mogelijke handen na het leggen van 1, 2, ... kaarten. Dit zijn veel te veel states voor een functionele Q-table, er moet dus veralgemeend worden. De grootste veralgemening kan dus het bijhouden zijn van het aantal kaarten in je hand, en niet de kaarten exact.\\\\
+We kunnen de state als volgt voorstellen: (rang, aantal, aantal kaarten in hand). Een reward functie kan nu als volgt zijn: scorenieuwehand/scorevorigehand (TODO: mooier en nog uitleggen wat score voorstelt).\\\\
+Met deze reward functie heeft de agent slechts een win ratio van ongeveer 30procent, dit is geen goed resultaat... met een reden. (TODO: doe die ene reward functie van kleine dqn en leg uit waarom de andere reward niet zou werken).\\\\
+Misschien extra TODO: mooie tabelletjes van resultaten agent vs randoms en basic players als we dus de win ration bespreken (niet overal ofc anders wordt het mss beetje veel, mss gewoon bij de beste).
+
+\subsection{Kleine DQN}
+Het doel tot nu toe is het krijgen van gelijkaardige resultaten als bij de heuristieke speler, hierin zijn we nog niet geslaagd. Een mogelijke verklaring is de beperkte state, waarin we niet eens met de volledige hand kunnen rekening houden. Nu we werken met een deep Q-network, is het eindelijk mogelijk om dit wel te doen.
+
+\subsection{Grote DQN}
 
 \newpage
 \begin{thebibliography}{9}
