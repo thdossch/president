@@ -3,6 +3,7 @@
 \usepackage{float}
 \usepackage{graphicx}
 \usepackage{hyperref}
+\usepackage[margin=1in,footskip=0.25in]{geometry}
 \graphicspath{ {./images/} }
 
 \begin{document}
@@ -62,8 +63,8 @@ Ook hebben we een extra speler geimplementeerd: de random speler. Deze speler ki
 
 \subsection{Q-learning}
 \subsubsection{Theorie}
-Q-learning helpt ons zoeken naar een zo goed mogelijke policy \textbf{(todo: leg policy uit?, en mss bellman eq? + zeg q-learning model free is)}. De letter "Q" slaat op de functie die gebruikt wordt om, gegeven een state en een actie, de waarde van deze combinatie te vinden. Deze waarde geeft aan hoe goed - of slecht - een bepaalde actie is in een bepaalde state.\\\\
-Zoals we zien in onderstaande formule, zal een Q-waarde van een bepaald state-actie paar veranderen met de tijd. De Q(s,a) waarden blijven dus niet perse hetzelfde. Daarom moeten we in het begin de Q-waarden initialiseren, om die dan wanneer nodig aan te passen.
+Q-learning helpt ons zoeken naar een zo goed mogelijke policy \textbf{(todo: leg policy uit? zie dqn-pract)}. De letter "Q" slaat op de functie die gebruikt wordt om, gegeven een state en een actie, de waarde van deze combinatie te vinden. Deze waarde geeft aan hoe goed - of slecht - een bepaalde actie is in een bepaalde state.\\\\
+Op basis van de Bellman equations (TODO:source), kunnen we een update regel definieren die er als onderstaande formule uitziet. Een Q-waarde van een bepaald state-actie paar zal dus veranderen met de tijd. Daarom moeten we in het begin de Q-waarden initialiseren, om die dan wanneer nodig aan te passen.
 
 \begin{figure}[h]
 \centering
@@ -90,10 +91,27 @@ Daarom werkt de reward functie als volgt: \textbf{todo + thor zijn probeersels m
 
 \subsection{Deep Q-Network}
 \subsubsection{Theorie}
-
+In plaats van de tabel letterlijk op te slaan en up te daten, benaderen we in het DQN-algoritme de tabel met een functie-approximator. Deze functie-approximator is een neuraal netwerk.\\\\
+Het updaten van dit neuraal netwerk werkt dan als volgt. Stel we zitten in een toestand s, dan wordt er een actie a gekozen op basis van een \(\epsilon\)-greedy policy. Door deze actie uit te voeren, komen we in een nieuwe state s' terecht en krijgen we ook een reward r. Waar we bij Q-learning hiermee de Q-table kunnen updaten, is het hier niet zo simpel. \\\\
+De volgende stap is om deze originele state, de actie, de nieuwe state en de reward op te slaan in een replay memory. In dit replay memory krijgen we dus een verzameling van tuples van de vorm (s,a,r,s'). In elke stap nemen we dan samples uit het replay memory en stellen we targets op. Deze targets worden ongeveer dezelfde manier berekend als de temporal difference targets bij Q-learning (zie Figuur 1). Enkel is hier het verschil dus dat Q nu een functie-approximator is. Daarbij zien we dat deze targets van de vorm 'reward + estimate of optimal future value' zijn. Dit tweede deel is niet meer nodig als we aan het einde van de episode zijn, dan houden we dus enkel de reward over als target. \\\\
+Daarna wordt het netwerk geupdate met de MSE-loss functie, en kunnen we dit allemaal herhalen.
 
 \subsubsection{Implementatie}
+Gelukkig moeten we hier niet het warm water opnieuw uitvinden, en zijn er al een aantal frameworks ter beschikking die ons een handje kunnen helpen. Wij hebben gekozen voor PyTorch, die dus de implementatie details voor zich neemt.\\\\
+Het belangrijkste was hier dus om te beslissen hoe precies we ons netwerk gingen voorstellen: welke inputs, hidden layers en outputs hebben we nodig?\\\\
+Ons initieel idee was om niet te beginnen met een te grote state, om te kijken of we toch resultaten gelijkaardig aan de heuristieke speler konden krijgen met dezelfde informatie. Daarom hebben we gekozen om de de kaarten in de hand bij te houden en de laatst gelegde kaart. De state zou dan 15 velden bevatten. De eerste 13 velden geven aan hoeveel kaarten je van elke waarde in je hand hebt. De laatste 2 tonen dan hoeveel kaarten van welke rang als laatste zijn gelegd (met speciale waarden voor een skip en het begin van een ronde). Om te zorgen dat deze inputs genormaliseerd zijn, hebben we een mapping gemaakt: 0 kaarten komt overeen met x, 1 met y, 2 met z, 3 met u en 4 met x.\\\\
+Na de input laag hebben we 2 hidden layers van elk 64 nodes. Daarop volgen de output nodes, namelijk 53 nodes die elk een actie voorstellen. Er is dus een mapping van 0-52 met elk een overeenkomende zet. Deze zet kan een skip zijn, of een aantal kaarten van een bepaalde rang. Om de output te beperken, kan de agent maar maximum 4 kaarten leggen (ookal is het soms mogelijk om met jokers meer dan dit aantal te leggen).
 
+\newpage
+\subsection{Resultaten}
+
+\subsubsection{Q-learning}
+
+\subsubsection{Kleine DQN}
+
+\subsubsection{Grote DQN}
+
+\newpage
 \begin{thebibliography}{9}
 \bibitem{simple-qlearning} 
 Reinforcement learning tutorial using Python and Keras 
