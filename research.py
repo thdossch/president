@@ -378,5 +378,99 @@ def results_for_big_vs_small(path):
                 print()
                 print()
 
+
+def results_small_q_table():
+    path = "q_table_results"
+    try:
+        os.mkdir(path)
+    except OSError:
+        print ("Creation of the directory %s failed" % path)
+        exit()
+
+    try:
+        file = open(f"{path}/results.py", "x")
+        file.close()
+    except FileExistsError:
+        print ("Creation of the outputfile failed")
+        exit()
+
+
+    results_random = []
+    results_heuristic = []
+    for g in range(0, 11):
+        gamma = g/10
+        print(f"Calculating for gamma = {gamma}")
+        
+        ai = TemporalDifferenceAgent("small Anton", gamma, 0.7, 0.1)
+
+        amount = 10000
+
+        players = [ai, RandomPlayer("Random 1")]
+        players.append(RandomPlayer("Random 2"))
+        players.append(RandomPlayer("Random 3"))
+
+        session = President(players)
+        session.train(100000)
+
+        ranks = session.simulate(amount)
+        results_random.append(round(ranks[ai]['p']/amount*100, 2))
+
+        players = [ai, HeuristicPlayer("Heuristic 1")]
+        players.append(HeuristicPlayer("Heuristic 2"))
+        players.append(HeuristicPlayer("Heuristic 3"))
+
+        session = President(players)
+        
+        ranks = session.simulate(amount)
+        results_heuristic.append(round(ranks[ai]['p']/amount*100, 2))
+            
+
+    with open(f'{path}/results.py', 'a') as f:
+        with redirect_stdout(f):
+     
+            print('plt.plot(', end='')
+            print([g/10 for g in range(0, 11)], end='')
+            print(', ', end='')
+            print(results_random, end='')
+            print(', \'r\', label=\'vs random\')')
+
+            print('plt.plot(', end='')
+            print([g/10 for g in range(0, 11)], end='')
+            print(', ', end='')
+            print(results_heuristic, end='')
+            print(', \'b\', label=\'vs heuristic\')')
+
+            # for plotting with matplotlib
+            print()
+            print('plt.xlabel("Gamma")')
+            print('plt.ylabel("W/L in %")')
+            print('axes = plt.gca()')
+            print('axes.set_ylim([0, 100])')
+            print('plt.legend(loc="upper right")')
+            print('plt.xticks([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])')
+            print('plt.show()')
+            print()
+            print()
+
 if __name__ == '__main__':
-    results_for_gamma_0_100_small_dqn()
+    #results_small_q_table()
+    #exit()
+    #results_for_gamma_0_100_small_dqn()
+    ai = TemporalDifferenceAgent("mini Anton", 0.2, 0.75, 1)
+
+    players = [ai]
+    players.append(RandomPlayer("Random 1"))
+    players.append(RandomPlayer("Random 2"))
+    players.append(RandomPlayer("Random 3"))
+
+#    players = [ai]
+#    players.append(HeuristicPlayer("Random 1"))
+#    players.append(HeuristicPlayer("Random 2"))
+#    players.append(HeuristicPlayer("Random 3"))
+
+    session = President(players)
+    session.train(200000, 10000)
+    ai.epsilon = 0
+
+    session.simulate(10000)
+
