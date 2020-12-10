@@ -159,3 +159,6 @@ class TemporalDifferenceAgent(Player):
             move: Move
         '''
         return list(filter(lambda move: self.move_to_action(move) == action, possible_moves))[0]
+
+    def notify_game_end(self, rank):
+        self.epsilon = max(0.05, self.epsilon * 0.999962)

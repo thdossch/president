@@ -1,13 +1,6 @@
 from game import Game
-from basic_player  import BasicPlayer
-from random_player  import RandomPlayer
-from deep_q_learning_agent import DeepQLearningAgent
-from temporal_difference_learning_agent  import TemporalDifferenceAgent
 from util import vprint
 import random
-from time import time
-import torch
-import threading
 
 class President:
     def __init__(self, players, ranks=None):
@@ -138,7 +131,7 @@ class President:
             #random.shuffle(self.players)
             game = Game(self.players, self.ranks, False)
             self.ranks = game.start()
-
+            
     def t_input(self, container):
         inp = input()
         while inp != 'stop':
@@ -166,32 +159,3 @@ class President:
             game = Game(self.players, None, False)
             self.ranks = game.start()
             i+=1
-
-        
-if __name__ == '__main__':
-    #network_name = 'BIGANTON_2.pt'
-    #ai = BigDeepQLearningAgent("Anton", True)
-    #ai = BigDeepQLearningAgent("Anton", True, network_name)
-    ai = TemporalDifferenceAgent("AI", 0.1, 0.75, 0.25)
-    random_players = True 
-    if random_players: 
-        players = [ai, RandomPlayer("Random 1")]
-        players.append(RandomPlayer("Random 2"))
-        players.append(RandomPlayer("Random 3"))
-    else:
-        players = [ai, BasicPlayer("Basic 1")]
-        players.append(BasicPlayer("Basic 2"))
-        players.append(BasicPlayer("Basic 3"))
-
-    
-    #session = President(players)
-
-    #session.train_with_cancel(1000)
-    #torch.save(ai.network, network_name)
-
-    #ai.training = False
-    session = President(players)
-    session.train(100000, 1000)
-    ai.epsilon = 0
-    res = session.simulate(10000)
-
