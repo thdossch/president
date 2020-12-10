@@ -57,3 +57,10 @@ class Table:
         '''
         if not self.deck.complete:
             raise ValueError(f"The deck is not complete, it contains {len(self.deck.cards)} cards")
+
+    def current_cards(self):
+        cards = []
+        for move in self.moves:
+            for card in move.cards:
+                cards.append(card)
+        return cards

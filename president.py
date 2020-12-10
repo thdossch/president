@@ -131,3 +131,31 @@ class President:
             random.shuffle(self.players)
             game = Game(self.players, self.ranks, False)
             self.ranks = game.start()
+            
+    def t_input(self, container):
+        inp = input()
+        while inp != 'stop':
+            time.sleep(1)
+            inp = input()
+        container.append(1)
+
+    def train_with_cancel(self, show_every=None):
+        '''
+        Method that runs a number of games to train agents
+
+        Parameters:
+            games: int
+            show_every: int
+        '''
+        container = []
+        t = threading.Thread(target=self.t_input, args=(container,))
+        t.start()
+
+        i = 0
+        while not container:
+            if show_every and ( i % show_every == 0):
+                print(f"Trained for {i} games")
+            random.shuffle(self.players)
+            game = Game(self.players, None, False)
+            self.ranks = game.start()
+            i+=1

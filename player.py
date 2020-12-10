@@ -127,6 +127,12 @@ class Player:
         '''
         pass
 
+    def add_game_ref(self, game):
+        '''
+        Function that gives a ref to a game (for the DQN agents)
+        '''
+        pass
+
     def __repr__(self):
         return f"{self.name}: {self.cards}"
 

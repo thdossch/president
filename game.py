@@ -60,6 +60,10 @@ class Game:
         if len(self.players) < 2:
             raise ValueError(f"A game can't be played with {len(self.players)} players.")
     
+        # Give game ref (for DQN)
+        for player in self.players:
+            player.add_game_ref(self)
+
         # Deal the cards
         self.deal()
         # Switch cards between ranks
@@ -137,18 +141,23 @@ class Game:
                 player.notify_round_end()
             # Clear the table so a new round can begin
             self.table.clear()
+
             
         # Get the scum 
         scum = list(filter(lambda player: player not in finished_players, self.players))[0]
-        # Let the scum return his card, by putting them on the table and clearing it
-        self.table.put(Move(scum.return_cards()))
-        self.table.clear()
+
         # Add him/her to the finishing_players for the finishing order
         finished_players.append(scum)
 
+        # before returning cards notify game end
         for i, player in enumerate(finished_players):
             # pass player ranking to the player at end of game
             player.notify_game_end(i)
+
+        # Let the scum return his card, by putting them on the table and clearing it
+        self.table.put(Move(scum.return_cards()))
+        self.table.clear()
+
         # Finish the game
         return finished_players
 
