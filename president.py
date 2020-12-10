@@ -2,7 +2,6 @@ from game import Game
 from basic_player  import BasicPlayer
 from random_player  import RandomPlayer
 from deep_q_learning_agent import DeepQLearningAgent
-from big_deep_q_learning_agent import BigDeepQLearningAgent
 from temporal_difference_learning_agent  import TemporalDifferenceAgent
 from util import vprint
 import random
@@ -136,7 +135,7 @@ class President:
         for i in range(games):
             if show_every and ( i % show_every == 0):
                 print(f"Trained for {i} games")
-            random.shuffle(self.players)
+            #random.shuffle(self.players)
             game = Game(self.players, self.ranks, False)
             self.ranks = game.start()
 
@@ -170,11 +169,11 @@ class President:
 
         
 if __name__ == '__main__':
-    network_name = 'BIGANTON_2.pt'
+    #network_name = 'BIGANTON_2.pt'
     #ai = BigDeepQLearningAgent("Anton", True)
-    ai = BigDeepQLearningAgent("Anton", True, network_name)
-
-    random_players = True
+    #ai = BigDeepQLearningAgent("Anton", True, network_name)
+    ai = TemporalDifferenceAgent("AI", 0.1, 0.75, 0.25)
+    random_players = True 
     if random_players: 
         players = [ai, RandomPlayer("Random 1")]
         players.append(RandomPlayer("Random 2"))
@@ -185,12 +184,14 @@ if __name__ == '__main__':
         players.append(BasicPlayer("Basic 3"))
 
     
+    #session = President(players)
+
+    #session.train_with_cancel(1000)
+    #torch.save(ai.network, network_name)
+
+    #ai.training = False
     session = President(players)
-
-    session.train_with_cancel(1000)
-    torch.save(ai.network, network_name)
-
-    ai.training = False
-    session.simulate(5, True)
-    session.simulate(1000)
+    session.train(100000, 1000)
+    ai.epsilon = 0
+    res = session.simulate(10000)
 
