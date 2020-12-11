@@ -118,23 +118,31 @@ Om een reward functie te vinden, moeten we eerst beslissen wat we verwachten van
 Voor de juiste learning rate en discount factor kunnen we voor verschillende waarden testen en kijken welke de beste is. TODO:plots\\\\
 Voor de \(\epsilon\) kiezen we als startwaarde 1, en vermenigvuldigen we die elke keer als er een actie gekozen wordt met 0.99. Op die manier wordt er in het begin meer geexploreerd dan op het einde. TODO: plots voor maxepsilon vs epsilon->0?\\\\
 Met uiteindelijke waarden (na 100k trainen en 10k simulaties): 0.1 learning rate en 0.75 gamma (TODO:kies beste based on grafieken): WL 51.82 tegen 3 random spelers, 13.12 tegen 3 basic spelers. \\\\
+Dit zijn heel goede resultaten, aangezien de heuristieke speler een 60? haalt in deze situatie. Daarbij legt de heuristieke speler enkel jokers als dit nodig is, hier wordt en kan daar geen rekening mee gehouden worden, wat een verklaring kan zijn voor het toch lagere resultaat.\\\\
 Er zijn nog een aantal zaken die geprobeerd zijn, die slechtere of gelijkaardige resultaten geven. Toch zijn ze interessant om even snel te bespreken.
 \begin{itemize}
 	\item Tijdens de training worden nu de rankings van de spelers niet gereset, maar dit wel doen ieder aantal games geeft geen verschil.
 	\item Met een epsilon van 0.25 krijgen we ongeveer even goede resultaten als met een decay werken.
-	\item Een iets complexere reward functie, gebaseerd op de kaarten in je hand voor en na je gelegd hebt, geeft minder goede resultaten. Om dit toch te doen werken, moeten we misschien de state uitbreiden. TODO: misschien werkt die wel? probeer reward van kleine dqn- deze code met uitgebreide state staat op dev branch
-\end{itemize}
+	\item Een iets complexere reward functie, gebaseerd op de kaarten in je hand voor en na je gelegd hebt, geeft minder goede resultaten: ongeveer 36procent W/L. Om dit toch te doen werken, moeten we misschien de state uitbreiden.
+\end{itemize}\\\\
+ extra TODO in het algemeen: mooie tabelletjes van resultaten agent vs randoms en basic players als we dus de win ration bespreken (niet overal ofc anders wordt het mss beetje veel, mss gewoon bij de beste).
 
 \subsubsection{Uitgebreide state}
 Idealiter bevat de state ook de kaarten in je hand. Dit gaat alweer iets meer naar de richting van de heuristieke speler, die ook op basis van zijn hand een beslissing maakt. Na wat zorgvuldig rekenwerk zou dit neerkomen op 2872 mogelijke starthanden, zonder zelfs de andere mogelijke handen na het leggen van 1, 2, ... kaarten. Dit zijn veel te veel states voor een functionele Q-table, er moet dus veralgemeend worden. De grootste veralgemening kan dus het bijhouden zijn van het aantal kaarten in je hand, en niet de kaarten exact.\\\\
-We kunnen de state als volgt voorstellen: (rang, aantal, aantal kaarten in hand). Een reward functie kan nu als volgt zijn: scorenieuwehand/scorevorigehand (TODO: mooier en nog uitleggen wat score voorstelt).\\\\
-Met deze reward functie heeft de agent slechts een win ratio van ongeveer 30procent, dit is geen goed resultaat... met een reden. (TODO: doe die ene reward functie van kleine dqn en leg uit waarom de andere reward niet zou werken).\\\\
-Misschien extra TODO: mooie tabelletjes van resultaten agent vs randoms en basic players als we dus de win ration bespreken (niet overal ofc anders wordt het mss beetje veel, mss gewoon bij de beste).
+We kunnen de state als volgt voorstellen: (rang, aantal, aantal kaarten in hand). Een reward functie kan nu als volgt zijn: scorenieuwehand/scorevorigehand + amountcardsplayed (TODO: mooier en nog uitleggen wat score voorstelt).\\\\
+Dit geeft nog steeds geen betere resultaten(TODO resultaten). Er zijn duidelijk nog tekortkomingen met deze reward functie (TODO mss bespreken bij kleine dqn - eerder reward voor over korte tijd ofz?), wat ons doet concluderen dat het soms makkelijker is om een simpelere reward functie te implementeren, die met minder rekening houdt en de agent meer "zijn eigen ding laat doen". Daarbij is er een extra probleem, er zijn namelijk  veel zeldzame states, of states die gewoon niet of amper bezocht zijn. \\\\
+Een extra uitbreiding van de state houdt nog rekening met de jokers in je hand, zo zou het misschien kunnen dat de agent leert dat het niet slim is om bij de eerste de beste keer een joker te leggen. Hij zou net zoals de heuristieke speler moeten leren beslissen om pas een joker te leggen in nood. Echter zitten we hier spijtig genoeg met hetzelfde probleem, namelijk de Q-table die te groot wordt.
 
-\subsection{Kleine DQN}
+
+\subsection{DQN}
 Het doel tot nu toe is het krijgen van gelijkaardige resultaten als bij de heuristieke speler, hierin zijn we nog niet geslaagd. Een mogelijke verklaring is de beperkte state, waarin we niet eens met de volledige hand kunnen rekening houden. Nu we werken met een deep Q-network, is het eindelijk mogelijk om dit wel te doen.
 
-\subsection{Grote DQN}
+\subsubsection{Kleine DQN}
+TODO: redenering reward funct, wrm niet die simpele van qtable werkte die niet goed?
+TODO: resultaten gamma iteratie
+
+\subsubsection{Grote DQN}
+TODO: idk resultaten zeker i guess en redenering reward functie
 
 \newpage
 \begin{thebibliography}{9}
