@@ -397,11 +397,11 @@ def results_small_q_table():
 
     results_random = []
     results_heuristic = []
-    for g in range(0, 11):
-        gamma = g/10
+    for g in range(0, 21):
+        gamma = g/20
         print(f"Calculating for gamma = {gamma}")
         
-        ai = TemporalDifferenceAgent("small Anton", gamma, 0.7, 0.1)
+        ai = TemporalDifferenceAgent("small Anton", 0.1, gamma)
 
         amount = 10000
 
@@ -456,7 +456,7 @@ if __name__ == '__main__':
     #results_small_q_table()
     #exit()
     #results_for_gamma_0_100_small_dqn()
-    ai = TemporalDifferenceAgent("mini Anton", 0.2, 0.75, 1)
+    ai = TemporalDifferenceAgent("mini Anton", 0.1, 0.75)
 
     players = [ai]
     players.append(RandomPlayer("Random 1"))
@@ -469,7 +469,7 @@ if __name__ == '__main__':
 #    players.append(HeuristicPlayer("Random 3"))
 
     session = President(players)
-    session.train(200000, 10000)
+    session.train(100000, 10000)
     ai.epsilon = 0
 
     session.simulate(10000)

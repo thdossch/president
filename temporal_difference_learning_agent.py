@@ -11,7 +11,7 @@ class TemporalDifferenceAgent(Player):
     Player class that implements a temporal difference learning agent
     '''
 
-    def __init__(self, name, learning_rate, discount_factor, epsilon):
+    def __init__(self, name, learning_rate, discount_factor):
         super().__init__(name)
         self.table = QTable() 
         self.learning_rate = learning_rate #0.05
@@ -104,6 +104,7 @@ class TemporalDifferenceAgent(Player):
             return list(filter(lambda action: action != best, [self.move_to_action(move) for move in possible_moves]))[val]
 
         self.epsilon *= self.epsilon_decay
+        self.epsilon = max(self.epsilon, 0.05)
 
     def notify_round_end(self):
         '''
@@ -159,6 +160,3 @@ class TemporalDifferenceAgent(Player):
             move: Move
         '''
         return list(filter(lambda move: self.move_to_action(move) == action, possible_moves))[0]
-
-    def notify_game_end(self, rank):
-        self.epsilon = max(0.05, self.epsilon * 0.999962)
