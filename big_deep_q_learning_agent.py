@@ -45,6 +45,7 @@ class BigDeepQLearningAgent(Player):
         self.eps = 0.3
         self.EPS_DECAY = 0.999
         self.N_ACTIONS = N_ACTIONS 
+        self.normalized = True
         if network_path:
             self.network = torch.load(network_path)
             self.network.eval()
@@ -261,13 +262,20 @@ class BigDeepQLearningAgent(Player):
         Returns:
             move: [ amount_3 amount_4 ... value_last amount_last ]
         '''
-        norm_cards = list(map(lambda x: (x-2)/4, self.cards_to_list(self.cards)))
-        norm_state = list(map(lambda x: (x-2)/4, self.cards_to_list(self.game.table.current_cards() + self.game.table.deck.cards)))
-        if move is Skip():
-            return  norm_cards + norm_state +  [ 0, 0 ]
-        if move.is_round_start():
-            return  norm_cards + norm_state + [ 3, 0 ]
-        return norm_cards + norm_state + [move.rank, move.amount]
+        if self.normalized:
+            norm_cards = list(map(lambda x: (x-2)/2, self.cards_to_list(self.cards)))
+            norm_state = list(map(lambda x: (x-2)/2, self.cards_to_list(self.game.table.current_cards() + self.game.table.deck.cards)))
+            if move is Skip():
+                return  norm_cards + norm_state +  [ 0, 0 ]
+            if move.is_round_start():
+                return  norm_cards + norm_state + [ 3, 0 ]
+            return norm_cards + norm_state + [move.rank, move.amount]
+        else:
+            if move is Skip():
+                return  self.cards_to_list(self.cards) + self.cards_to_list(self.game.table.current_cards() + self.game.table.deck.cards) +  [ 0, 0 ]
+            if move.is_round_start():
+                return  self.cards_to_list(self.cards) + self.cards_to_list(self.game.table.current_cards() + self.game.table.deck.cards) + [ 3, 0 ]
+            return self.cards_to_list(self.cards) + self.cards_to_list(self.game.table.current_cards() + self.game.table.deck.cards) + [move.rank, move.amount]
 
     def cards_to_list(self, cards):
         '''

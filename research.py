@@ -7,6 +7,7 @@ from president import President
 from heuristic_player  import HeuristicPlayer
 from random_player  import RandomPlayer
 from deep_q_learning_agent import DeepQLearningAgent
+from big_deep_q_learning_agent import BigDeepQLearningAgent
 from temporal_difference_learning_agent  import TemporalDifferenceAgent
 
 def results_for_gamma_0_100_small_dqn_training(path):
@@ -472,6 +473,8 @@ def results_small_q_table():
             #names
             print("plt.xlabel('gamma')")
             print("plt.ylabel('alpha')")
+            print("plt.xticks([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])")
+            print("plt.yticks([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])")
 
             print("plt.show()")
             print("plt.clf()")
@@ -504,35 +507,87 @@ def results_small_q_table():
             #names
             print("plt.xlabel('gamma')")
             print("plt.ylabel('alpha')")
+            print("plt.xticks([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])")
+            print("plt.yticks([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])")
+
 
             print("plt.show()")
 
-#    with open(f'{path}/results.py', 'a') as f:
-#        with redirect_stdout(f):
-#     
-#            print('plt.plot(', end='')
-#            print([g/10 for g in range(0, 21)], end='')
-#            print(', ', end='')
-#            print(results_random, end='')
-#            print(', \'r\', label=\'vs random\')')
-#
-#            print('plt.plot(', end='')
-#            print([g/10 for g in range(0, 21)], end='')
-#            print(', ', end='')
-#            print(results_heuristic, end='')
-#            print(', \'b\', label=\'vs heuristic\')')
-#
-#            # for plotting with matplotlib
-#            print()
-#            print('plt.xlabel("Gamma")')
-#            print('plt.ylabel("W/L in %")')
-#            print('axes = plt.gca()')
-#            print('axes.set_ylim([0, 100])')
-#            print('plt.legend(loc="upper right")')
-#            print('plt.xticks([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])')
-#            print('plt.show()')
-#            print()
-#            print()
+def normalized_input_results():
+    path = "normalized_results"
+    try:
+        os.mkdir(path)
+    except OSError:
+        print ("Creation of the directory %s failed" % path)
+        exit()
+
+    try:
+        file = open(f"{path}/results.py", "x")
+        file.close()
+    except FileExistsError:
+        print ("Creation of the outputfile failed")
+        exit()
+
+    results_normal = []
+    results_normalized = []
+
+    for x in range(0, 8):
+        print(f"Calculating for normal {x}")
+        amount = 10000
+        ai = BigDeepQLearningAgent("Anton", True)
+        ai.normalized = False
+
+        players = [ai, RandomPlayer("Random 1")]
+        players.append(RandomPlayer("Random 2"))
+        players.append(RandomPlayer("Random 3"))
+
+        session = President(players)
+        session.train(80000, 20000)
+        ai.training = False
+
+        ranks = session.simulate(amount)
+        results_normal.append(round(ranks[ai]['p']/amount*100, 2))
+
+        ai = BigDeepQLearningAgent("Anton", True)
+
+        players = [ai, RandomPlayer("Random 1")]
+        players.append(RandomPlayer("Random 2"))
+        players.append(RandomPlayer("Random 3"))
+
+        session = President(players)
+        session.train(80000, 20000)
+        ai.training = False
+
+        ranks = session.simulate(amount)
+        results_normalized.append(round(ranks[ai]['p']/amount*100, 2))
+            
+    with open(f'{path}/results.py', 'a') as f:
+        with redirect_stdout(f):
+
+            print("from matplotlib import pyplot as plt")
+            print('plt.plot(', end='')
+            print([i for i in range(1, 9)])
+            print(', ', end='')
+            print(results_normal, end='')
+            print(', \'r\', label=\'normal\')')
+
+            print('plt.plot(', end='')
+            print([i for i in range(1, 9)])
+            print(', ', end='')
+            print(results_normalized, end='')
+            print(', \'b\', label=\'normalized\')')
+
+            # for plotting with matplotlib
+            print()
+            print('plt.xlabel("Network")')
+            print('plt.ylabel("W/L in %")')
+            print('axes = plt.gca()')
+            print('axes.set_ylim([0, 100])')
+            print('plt.legend(loc="upper right")')
+            print('plt.xticks([1,2,3,4,5,6,7,8])')
+            print('plt.show()')
+            print()
+            print()
 
 def simulate_heuristic_vs_random():
 
@@ -557,13 +612,12 @@ def simulate_heuristic_vs_random():
 
 
 if __name__ == '__main__':
-    results_small_q_table()
+    normalized_input_results()
     exit()
 
 
     #results_for_gamma_0_100_small_dqn()
     ai = TemporalDifferenceAgent("mini Anton", 0.1, 0.75)
-    #ai = TemporalDifferenceAgent("mini Anton", 0, 0)
 
     players = [ai]
     players.append(RandomPlayer("Random 1"))
@@ -579,5 +633,4 @@ if __name__ == '__main__':
 
     session.train(50000, 10000)
 
-    ai.stop_training()
     session.simulate(10000)
