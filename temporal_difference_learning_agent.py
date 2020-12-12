@@ -22,6 +22,7 @@ class TemporalDifferenceAgent(Player):
         self.A = None
         self.amount_cards_played = 0 
         self.amount_cards_played_round = 0 
+        self.training = True
         
     def play(self, last_move):
         '''
@@ -31,7 +32,8 @@ class TemporalDifferenceAgent(Player):
         possible_moves.append(Skip())
                                            
         S_new = self.move_to_state(last_move)
-        self.update(S_new, possible_moves)
+        if self.training:
+            self.update(S_new, possible_moves)
 
         self.S = S_new
 
@@ -103,8 +105,9 @@ class TemporalDifferenceAgent(Player):
             best = self.get_best_action(state, possible_moves)
             return list(filter(lambda action: action != best, [self.move_to_action(move) for move in possible_moves]))[val]
 
-        self.epsilon *= self.epsilon_decay
-        self.epsilon = max(self.epsilon, 0.05)
+        if self.training:
+            self.epsilon *= self.epsilon_decay
+            self.epsilon = max(self.epsilon, 0.05)
 
     def notify_round_end(self):
         '''
@@ -160,3 +163,11 @@ class TemporalDifferenceAgent(Player):
             move: Move
         '''
         return list(filter(lambda move: self.move_to_action(move) == action, possible_moves))[0]
+
+    def stop_training(self):
+        '''
+        Method that stops the training
+        '''
+        self.training = False
+        self.epsilon = 0
+        

@@ -394,63 +394,145 @@ def results_small_q_table():
         print ("Creation of the outputfile failed")
         exit()
 
+    total_results_random = []
+    total_results_heuristic = []
 
-    results_random = []
-    results_heuristic = []
-    for g in range(0, 21):
-        gamma = g/20
-        print(f"Calculating for gamma = {gamma}")
-        
-        ai = TemporalDifferenceAgent("small Anton", 0.1, gamma)
-
-        amount = 10000
-
-        players = [ai, RandomPlayer("Random 1")]
-        players.append(RandomPlayer("Random 2"))
-        players.append(RandomPlayer("Random 3"))
-
-        session = President(players)
-        session.train(100000)
-
-        ranks = session.simulate(amount)
-        results_random.append(round(ranks[ai]['p']/amount*100, 2))
-
-        players = [ai, HeuristicPlayer("Heuristic 1")]
-        players.append(HeuristicPlayer("Heuristic 2"))
-        players.append(HeuristicPlayer("Heuristic 3"))
-
-        session = President(players)
-        
-        ranks = session.simulate(amount)
-        results_heuristic.append(round(ranks[ai]['p']/amount*100, 2))
+    step = 10
+    for a in range(0, step + 1):
+        results_random = []
+        results_heuristic = []
+        for g in range(0, step + 1):
+            gamma = g/step
+            alpha = a/step
+            print(f"Calculating for alpha = {alpha}, gamma = {gamma}")
             
+            ai = TemporalDifferenceAgent("small Anton", alpha, gamma)
 
+            amount = 10000
+
+            players = [ai, RandomPlayer("Random 1")]
+            players.append(RandomPlayer("Random 2"))
+            players.append(RandomPlayer("Random 3"))
+
+            session = President(players)
+            session.train(50000)
+            ai.stop_training()
+
+            ranks = session.simulate(amount)
+            results_random.append(round(ranks[ai]['p']/amount*100, 2))
+
+            players = [ai, HeuristicPlayer("Heuristic 1")]
+            players.append(HeuristicPlayer("Heuristic 2"))
+            players.append(HeuristicPlayer("Heuristic 3"))
+
+            session = President(players)
+            
+            ranks = session.simulate(amount)
+            results_heuristic.append(round(ranks[ai]['p']/amount*100, 2))
+
+        total_results_random.append(results_random)
+        total_results_heuristic.append(results_heuristic)
+
+            
     with open(f'{path}/results.py', 'a') as f:
         with redirect_stdout(f):
-     
-            print('plt.plot(', end='')
-            print([g/10 for g in range(0, 11)], end='')
-            print(', ', end='')
-            print(results_random, end='')
-            print(', \'r\', label=\'vs random\')')
 
-            print('plt.plot(', end='')
-            print([g/10 for g in range(0, 11)], end='')
-            print(', ', end='')
-            print(results_heuristic, end='')
-            print(', \'b\', label=\'vs heuristic\')')
+            #imports
+            print("from mpl_toolkits.mplot3d import Axes3D")
+            print("import matplotlib.pyplot as plt")
+            print("from matplotlib import cm")
+            print("from matplotlib.ticker import LinearLocator, FormatStrFormatter")
+            print("import numpy as np")
 
-            # for plotting with matplotlib
-            print()
-            print('plt.xlabel("Gamma")')
-            print('plt.ylabel("W/L in %")')
-            print('axes = plt.gca()')
-            print('axes.set_ylim([0, 100])')
-            print('plt.legend(loc="upper right")')
-            print('plt.xticks([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])')
-            print('plt.show()')
-            print()
-            print()
+            #figure
+            print("fig = plt.figure()")
+            print("ax = fig.gca(projection='3d')")
+
+            print("res_random = [")
+           
+            for res in total_results_random:
+                print(res, end="")
+                print(",")
+
+            print("]")
+
+            #data
+            print(f"gamma = np.arange(0, {1+1/step}, {1/step})")
+            print(f"alpha = np.arange(0, {1+1/step}, {1/step})")
+            print("X, Y = np.meshgrid(gamma, alpha)")
+            print("Z = np.array(res_random)")
+
+            # Plot the surface.
+            print("surf = ax.plot_surface(X, Y, Z, cmap=cm.coolwarm, linewidth=0, antialiased=False)")
+            print("ax.set_zlim(0, 100)")
+            print("ax.zaxis.set_major_locator(LinearLocator(10))")
+            print("ax.zaxis.set_major_formatter(FormatStrFormatter('%.0f'))")
+            print("fig.colorbar(surf, shrink=0.5, aspect=5)")
+
+            #names
+            print("plt.xlabel('gamma')")
+            print("plt.ylabel('alpha')")
+
+            print("plt.show()")
+            print("plt.clf()")
+
+            # PLOT 2
+            #figure
+            print("fig = plt.figure()")
+            print("ax = fig.gca(projection='3d')")
+
+            print("res_heuristic = [")
+            
+            for res in total_results_heuristic:
+                print(res, end="")
+                print(",")
+            print("]")
+
+            #data
+            print(f"gamma = np.arange(0, {1+1/step}, {1/step})")
+            print(f"alpha = np.arange(0, {1+1/step}, {1/step})")
+            print("X, Y = np.meshgrid(gamma, alpha)")
+            print("Z = np.array(res_heuristic)")
+
+            # Plot the surface.
+            print("surf = ax.plot_surface(X, Y, Z, cmap=cm.coolwarm, linewidth=0, antialiased=False)")
+            print("ax.set_zlim(0, 100)")
+            print("ax.zaxis.set_major_locator(LinearLocator(10))")
+            print("ax.zaxis.set_major_formatter(FormatStrFormatter('%.0f'))")
+            print("fig.colorbar(surf, shrink=0.5, aspect=5)")
+
+            #names
+            print("plt.xlabel('gamma')")
+            print("plt.ylabel('alpha')")
+
+            print("plt.show()")
+
+#    with open(f'{path}/results.py', 'a') as f:
+#        with redirect_stdout(f):
+#     
+#            print('plt.plot(', end='')
+#            print([g/10 for g in range(0, 21)], end='')
+#            print(', ', end='')
+#            print(results_random, end='')
+#            print(', \'r\', label=\'vs random\')')
+#
+#            print('plt.plot(', end='')
+#            print([g/10 for g in range(0, 21)], end='')
+#            print(', ', end='')
+#            print(results_heuristic, end='')
+#            print(', \'b\', label=\'vs heuristic\')')
+#
+#            # for plotting with matplotlib
+#            print()
+#            print('plt.xlabel("Gamma")')
+#            print('plt.ylabel("W/L in %")')
+#            print('axes = plt.gca()')
+#            print('axes.set_ylim([0, 100])')
+#            print('plt.legend(loc="upper right")')
+#            print('plt.xticks([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])')
+#            print('plt.show()')
+#            print()
+#            print()
 
 def simulate_heuristic_vs_random():
 
@@ -475,12 +557,13 @@ def simulate_heuristic_vs_random():
 
 
 if __name__ == '__main__':
-    simulate_heuristic_vs_random()
+    results_small_q_table()
     exit()
 
 
     #results_for_gamma_0_100_small_dqn()
     ai = TemporalDifferenceAgent("mini Anton", 0.1, 0.75)
+    #ai = TemporalDifferenceAgent("mini Anton", 0, 0)
 
     players = [ai]
     players.append(RandomPlayer("Random 1"))
@@ -493,8 +576,8 @@ if __name__ == '__main__':
 #    players.append(HeuristicPlayer("Random 3"))
 
     session = President(players)
-    session.train(100000, 10000)
-    ai.epsilon = 0
 
+    session.train(50000, 10000)
+
+    ai.stop_training()
     session.simulate(10000)
-

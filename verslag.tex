@@ -133,21 +133,39 @@ We zien dat de heuristieke speler het al zeer goed doet, wat wel te verwachten w
 
 \subsection{Q-learning}
 \subsubsection{State met 2 velden}
-Zoals beschreven in de implementatiedetails van Q-learning, werken we hier met een state die als (rang, aantal) wordt voorgesteld. Dit is dus een heel beperkte state, waarvoor we een gepaste reward functie moeten vinden.\\\\
-Om een reward functie te vinden, moeten we eerst beslissen wat we verwachten van onze agent. Eigenlijk willen we, net zoals bij de heuristieke speler, dat hij een ronde zo goed mogelijk speelt en niet kijkt naar of hij degelijk president is geworden of niet. Dit vertaalt dan naar: de agent moet zo snel mogelijk van zijn kaarten afgeraken, of zo veel mogelijk kaarten spelen per ronde. Hiervoor zijn we tot volgende reward functie gekomen:
+Zoals beschreven in de implementatiedetails van Q-learning, werken we hier met een state die als (rang, aantal) wordt voorgesteld. Dit is dus een heel beperkte state, waarvoor we een gepaste reward functie moeten vinden. Naast de rewardfunctie kunnen de andere parameters ($\epsilon$, $\alpha$, $\gamma$) ook een invloed hebben.\\\\
+Om een reward functie te vinden, moeten we eerst beslissen wat we verwachten van onze agent. Eigenlijk willen we, net zoals bij de heuristieke speler, dat hij een ronde zo goed mogelijk speelt en niet kijkt naar of hij degelijk president is geworden of niet. Dit vertaalt dan naar: de agent moet zo snel mogelijk al zijn kaarten uitspelen, of zo veel mogelijk kaarten spelen per ronde. Hiervoor zijn we tot volgende reward functie gekomen:
 \begin{center}
 $r = amount\_of\_cards\_played * 0.5 + amount\_of\_cards\_played\_in\_round * 0.2$
 \end{center}
-Voor de juiste learning rate en discount factor kunnen we voor verschillende waarden testen en kijken welke de beste is. TODO:plots\\\\
-Voor de $\epsilon$ kiezen we als startwaarde 1, en vermenigvuldigen we die elke keer als er een actie gekozen wordt met 0.99. Op die manier wordt er in het begin meer geexploreerd dan op het einde. TODO: plots voor maxepsilon vs epsilon->0?\\\\
+
+
+Voor de $\epsilon$ kiezen we als startwaarde 1, en werken we met een epsilondecay. Na iedere actie zullen we de huidige $\epsilon$ vermenigvuldigen met een $epsilon\_decay$ parameter. Op deze manier is er in het begin van het trainen meer exploratie maar naarmate de tijd vordert zal $\epsilon$ afnemen en zullen we meer exploitatie hebben. We zullen echter wel zorgen dat eenmaal $\epsilon == 0.05$ de waarde niet meer veranderd. Dit omdat we toch steeds nog een beetje exploratie willen toelaten.\\ 
+TODO: plots voor maxepsilon vs epsilon->0?\\\\
+TODO: of plot van epsilon in de tijd?\\\\
+
+Voor de juiste learning rate en discount factor kunnen we simulaties laten lopen om zo de optimale parameters te vinden. Hieronder zien we de W/L voor alle mogelijke parameters voor $\alpha$ en $\gamma$ met stappen van $0.1$.\\
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.70]{images/qformula.png}
+\caption{Resultaten variëren met parameters $\gamma$ en $\alpha$}
+\end{figure}
+
+We zien nu dat er round ... hogere winstwaardes liggen. Bovenstaande figuur is bekomen met training van 50000 keer. We zullen nu wat meer trainen om te zien of we nog betere parameters kunnen vinden
+
 Met uiteindelijke waarden na 100k trainen en 10k simulaties: 0.1 learning rate en 0.75 gamma TODO: kies beste based on grafieken: WL 51.82 tegen 3 random spelers, 13.12 tegen 3 basic spelers. \\\\
+
 Dit zijn heel goede resultaten, aangezien de heuristieke speler een 60? haalt in deze situatie. Daarbij legt de heuristieke speler enkel jokers als dit nodig is, hier wordt en kan daar geen rekening mee gehouden worden, wat een verklaring kan zijn voor het toch lagere resultaat.\\\\
 Er zijn nog een aantal zaken die geprobeerd zijn, die slechtere of gelijkaardige resultaten geven. Toch zijn ze interessant om even snel te bespreken.\\\\
 
 
+\textbf{dit moet nog beter}\\
+\textbf{dit moet nog beter}\\
+\textbf{dit moet nog beter}\\
 \begin{itemize}
 	\item Tijdens de training worden nu de rankings van de spelers niet gereset, maar dit wel doen ieder aantal games geeft geen verschil.
-	\item Met een epsilon van 0.25 krijgen we ongeveer even goede resultaten als met een decay werken.
+	\item Met een epsilon van 0.25 en geen epsilondecay krijgen we ongeveer even goede resultaten dan als we wel met epsilondecay werken.
 	\item Een iets complexere reward functie, gebaseerd op de kaarten in je hand voor en na je gelegd hebt, geeft minder goede resultaten: ongeveer 36procent W/L. Om dit toch te doen werken, moeten we misschien de state uitbreiden.
 \end{itemize}
 
@@ -161,6 +179,10 @@ Idealiter bevat de state ook de kaarten in je hand. Dit gaat alweer iets meer na
 We kunnen de state als volgt voorstellen: (rang, aantal, aantal kaarten in hand). Een reward functie kan nu als volgt zijn: scorenieuwehand/scorevorigehand + amountcardsplayed (TODO: mooier en nog uitleggen wat score voorstelt).\\\\
 Dit geeft nog steeds geen betere resultaten TODO resultaten. Er zijn duidelijk nog tekortkomingen met deze reward functie (TODO mss bespreken bij kleine dqn \- eerder reward voor over korte tijd ofz?), wat ons doet concluderen dat het soms makkelijker is om een simpelere reward functie te implementeren, die met minder rekening houdt en de agent meer `zijn eigen ding laat doen'. Daarbij is er een extra probleem, er zijn namelijk  veel zeldzame states, of states die gewoon niet of amper bezocht zijn. \\\\
 Een extra uitbreiding van de state houdt nog rekening met de jokers in je hand, zo zou het misschien kunnen dat de agent leert dat het niet slim is om bij de eerste de beste keer een joker te leggen. Hij zou net zoals de heuristieke speler moeten leren beslissen om pas een joker te leggen in nood. Echter zitten we hier spijtig genoeg met hetzelfde probleem, namelijk de Q-table die te groot wordt.\\\\
+
+Algemeen gezien is het probleem met de uitgebreide state dat er veel states zijn die niet vaak worden tegengekomen en enkele states die zeer vaak worden tegengekomen. Ook met de acties is dit het geval, eenmaal in een state zal het bijvoorbeeld niet veel voorkomen dat je 4 koningen legt waardoor deze waarde niet veel \textbf{geupdate} gaat worden bij het trainen. \\
+Met je rewardfunctie kan je twee kanten op, je kan werken met eerder positive Q-waarden of met eerder negatieve Q-waarden. Stel dat we beginnen met alle state-actie waarden op 0 te initialiseren. Dan zal in het geval van de eerder positive Q-waarde de waarde van de vaak voorkomende state-actie paren groter zijn dan de zeldzame. Echter zijn vaak de zeldzame zetten zeer goeie zetten in deze situatie maar deze zullen dus niet genomen worden omdat ze een lagere Q-waarde hebben.\\
+Een voorbeeld hier zou kunnen zijn: de state bestaat uit $(rang, aantal, aantal\_kaarten\_in\_hand)$ en is hier (3,2,4) en onze agent heeft alle 4 de 4'en in zijn hand. :w
 
 
 \subsection{DQN}
