@@ -107,19 +107,37 @@ Na de input laag hebben we 2 hidden layers van elk 64 nodes. Daarop volgen de ou
 
 
 \section{Resultaten}
+Om een gevoel te krijgen hoe goed een agent presteert gebruiken we een win/lose ratio. Dit zal enkel rekening houden met hoeveel een agent president is:
+\begin{center}
+$W/L = games\_president/total\_games\_played * 100$.
+\end{center}
+We vermenigvuldigen met 100 om het resultaat als percentage uit te drukken.
 
 \subsection{Heuristiek en random}
-Het is belangrijk om te weten hoe de heuristieke speler het doet tegenover random spelers, en omgekeerd. Zo kunnen we goed vergelijken en hopelijk zelfs streven naar gelijkaardige of betere resultaten.\\\\
-TODO: resultaten van 1h tegen 3r etc\\\\
+Het is belangrijk om te weten hoe de heuristieke speler het doet tegenover random spelers, en omgekeerd. Zo kunnen we goed vergelijken en hopelijk zelfs streven naar gelijkaardige of betere resultaten. In onderstaande tabel worden de resultaten van simulaties voor deze situatie geïllustreerd.
+\begin{table}[H]
+        \centering
+        \begin{tabular}{|c|c|c|}
+                \hline
+                  vs                & 3 heuristieke spelers & 3 random spelers \\
+                \hline
+                 heuristieke speler & 25         & 65\\
+                 random spelers     & 6         & 25\\
+                \hline
+        \end{tabular}
+        \caption{W/L in \% voor heuristieke agents}
+\end{table}
 
-We zien dat de heuristieke speler het al zeer goed doet, wat wel te verwachten was tegen random spelers. Een goed doel is dus om de volgende methodes deze resultaten (op zijn minst) te laten evenaren.\\\\
+We zien dat de heuristieke speler het al zeer goed doet, wat wel te verwachten was tegen random spelers. Een goed doel voor de niet-heuristieke agents is dus minstens beter zijn dan de random speler en proberen de heuristieke speler te evenaren, al dan niet te overtreffen.\\\\
 
 
 \subsection{Q-learning}
 \subsubsection{State met 2 velden}
 Zoals beschreven in de implementatiedetails van Q-learning, werken we hier met een state die als (rang, aantal) wordt voorgesteld. Dit is dus een heel beperkte state, waarvoor we een gepaste reward functie moeten vinden.\\\\
-Om een reward functie te vinden, moeten we eerst beslissen wat we verwachten van onze agent. Eigenlijk willen we, net zoals bij de heuristieke speler, dat hij een ronde zo goed mogelijk speelt en niet kijkt naar of hij degelijk president is geworden of niet. Dit vertaalt dan naar: de agent moet zo snel mogelijk van zijn kaarten afgeraken, of zo veel mogelijk kaarten spelen per ronde. Hiervoor zijn we tot volgende reward functie gekomen:\\\\
-$r = (amount of cards played * 0.5) + 0.2 * amount of cards played in round$\\\\
+Om een reward functie te vinden, moeten we eerst beslissen wat we verwachten van onze agent. Eigenlijk willen we, net zoals bij de heuristieke speler, dat hij een ronde zo goed mogelijk speelt en niet kijkt naar of hij degelijk president is geworden of niet. Dit vertaalt dan naar: de agent moet zo snel mogelijk van zijn kaarten afgeraken, of zo veel mogelijk kaarten spelen per ronde. Hiervoor zijn we tot volgende reward functie gekomen:
+\begin{center}
+$r = amount\_of\_cards\_played * 0.5 + amount\_of\_cards\_played\_in\_round * 0.2$
+\end{center}
 Voor de juiste learning rate en discount factor kunnen we voor verschillende waarden testen en kijken welke de beste is. TODO:plots\\\\
 Voor de $\epsilon$ kiezen we als startwaarde 1, en vermenigvuldigen we die elke keer als er een actie gekozen wordt met 0.99. Op die manier wordt er in het begin meer geexploreerd dan op het einde. TODO: plots voor maxepsilon vs epsilon->0?\\\\
 Met uiteindelijke waarden na 100k trainen en 10k simulaties: 0.1 learning rate en 0.75 gamma TODO: kies beste based on grafieken: WL 51.82 tegen 3 random spelers, 13.12 tegen 3 basic spelers. \\\\

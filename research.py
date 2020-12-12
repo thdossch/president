@@ -452,9 +452,33 @@ def results_small_q_table():
             print()
             print()
 
+def simulate_heuristic_vs_random():
+
+    players = []
+    players.append(HeuristicPlayer("HeuristicPlayer"))
+    players.append(RandomPlayer("Random 1"))
+    players.append(RandomPlayer("Random 2"))
+    players.append(RandomPlayer("Random 3"))
+
+
+    session = President(players)
+    session.simulate(50000)
+
+    players = []
+    players.append(HeuristicPlayer("HeuristicPlayer 1"))
+    players.append(HeuristicPlayer("HeuristicPlayer 2"))
+    players.append(HeuristicPlayer("HeuristicPlayer 3"))
+    players.append(RandomPlayer("RandomPlayer"))
+
+    session = President(players)
+    session.simulate(50000)
+
+
 if __name__ == '__main__':
-    #results_small_q_table()
-    #exit()
+    simulate_heuristic_vs_random()
+    exit()
+
+
     #results_for_gamma_0_100_small_dqn()
     ai = TemporalDifferenceAgent("mini Anton", 0.1, 0.75)
 
