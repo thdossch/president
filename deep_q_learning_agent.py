@@ -59,6 +59,7 @@ class DeepQLearningAgent(Player):
         self.plays_this_game = 0
         self.cards_played_this_round = 0
         self.plays_this_round = 0
+        self.normalized = True
     
     def play(self, last_move):
         '''
@@ -274,6 +275,9 @@ class DeepQLearningAgent(Player):
                 score += rank*mapping[i]
             return score
 
+        if self.normalized:
+            state = [ int(x*2 + 2) for x in state ]
+            print(state)
         return sum([score(i,state[i-1]) for i in range(1,14)]) / sum(state[:13])
 
 
@@ -286,6 +290,13 @@ class DeepQLearningAgent(Player):
         Returns:
             move: [ amount_3 amount_4 ... value_last amount_last ]
         '''
+        if self.normalized:
+            norm_cards = list(map(lambda x: (x-2)/2, self.cards_to_list(self.cards)))
+            if move is Skip():
+                return  norm_cards +  [ 0, 0 ]+ [self.plays_this_game]
+            if move.is_round_start():
+                return  norm_cards + [ 3, 0 ]+ [self.plays_this_game]
+            return norm_cards + [move.rank, move.amount]+ [self.plays_this_game]
         if move is Skip():
             return self.cards_to_list(self.cards) + [ 0, 0 ] + [self.plays_this_game]
         if move.is_round_start():
