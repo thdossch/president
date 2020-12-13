@@ -692,6 +692,216 @@ def results_small_q_table_zoomed_in():
 
             print("plt.show()")
 
+def results_small_q_table_epsilon():
+    path = "q_table_results"
+    try:
+        os.mkdir(path)
+    except OSError:
+        print ("Creation of the directory %s failed" % path)
+
+    try:
+        file = open(f"{path}/results_epsilon.py", "x")
+        file.close()
+    except FileExistsError:
+        print ("Creation of the outputfile failed")
+        exit()
+
+    results_random = []
+    results_heuristic = []
+    eps_decs = [0.99, 0.999, 0.9999, 0.99999]
+    for eps_dec in eps_decs:
+        print(f"Calculating for esp_dec = {eps_dec}")
+        
+        ai = TemporalDifferenceAgent("small Anton", 0.1, 0.75)
+        ai.epsilon_decay = eps_dec
+
+        amount = 100000
+
+        players = [ai, RandomPlayer("Random 1")]
+        players.append(RandomPlayer("Random 2"))
+        players.append(RandomPlayer("Random 3"))
+
+        session = President(players)
+        session.train(100000)
+        ai.stop_training()
+
+        ranks = session.simulate(amount)
+        results_random.append(round(ranks[ai]['p']/amount*100, 2))
+
+        players = [ai, HeuristicPlayer("Heuristic 1")]
+        players.append(HeuristicPlayer("Heuristic 2"))
+        players.append(HeuristicPlayer("Heuristic 3"))
+
+        session = President(players)
+        
+        ranks = session.simulate(amount)
+        results_heuristic.append(round(ranks[ai]['p']/amount*100, 2))
+
+    with open(f'{path}/results_epsilon.py', 'a') as f:
+        with redirect_stdout(f):
+            print("\\begin{table}[H]")
+            print("\\centering")
+            print("\\begin{tabular}{|c|c|c|c|c|}")
+            print("\hline")
+            print(f"                & {'&'.join(str(x) for x in eps_decs)}\\\\")
+            print("\hline")
+            print(f"3 heuristieke speler  &{'&'.join(str(x) for x in results_random)}\\\\")
+            print(f"3 random spelers      &{'&'.join(str(x) for x in results_heuristic)}\\\\")
+            print("\hline")
+            print("\end{tabular}")
+            print("\caption{W/L voor Q-table agent in \% voor verschillende epsilondecay factoren}")
+            print("\end{table}")
+
+
+
+def q_table_win_in_time_results():
+    path = "q_table_results"
+    try:
+        os.mkdir(path)
+    except OSError:
+        print ("Creation of the directory %s failed" % path)
+
+    try:
+        file = open(f"{path}/results_win_in_time.py", "x")
+        file.close()
+    except FileExistsError:
+        print ("Creation of the outputfile failed")
+        exit()
+
+    results_random = []
+    results_heuristic = []
+
+    ai = TemporalDifferenceAgent("small Anton", 0.1, 0.75)
+    amount = 100000
+    for x in range(0,20):
+        print(f"after {x*10000} trainings")
+
+        players = [ai, RandomPlayer("Random 1")]
+        players.append(RandomPlayer("Random 2"))
+        players.append(RandomPlayer("Random 3"))
+
+        session = President(players)
+        session.train(10000)
+        eps_before = ai.epsilon
+        ai.stop_training()
+
+        ranks = session.simulate(amount)
+        results_random.append(round(ranks[ai]['p']/amount*100, 2))
+
+        players = [ai, HeuristicPlayer("Heuristic 1")]
+        players.append(HeuristicPlayer("Heuristic 2"))
+        players.append(HeuristicPlayer("Heuristic 3"))
+
+        session = President(players)
+        
+        ranks = session.simulate(amount)
+        results_heuristic.append(round(ranks[ai]['p']/amount*100, 2))
+
+        ai.epsilon = eps_before
+        ai.training = True
+
+    with open(f'{path}/results_win_in_time.py', 'a') as f:
+        with redirect_stdout(f):
+     
+            print("import matplotlib.pyplot as plt")
+            print('plt.plot(', end='')
+            print([(x+1)*10000 for x in range(0, 20)], end='')
+            print(', ', end='')
+            print(results_random, end='')
+            print(', \'b\', label=\'vs random\')')
+
+            print('plt.plot(', end='')
+            print([(x+1)*10000 for x in range(0, 20)], end='')
+            print(', ', end='')
+            print(results_heuristic, end='')
+            print(', \'r\', label=\'vs heuristic\')')
+
+            # for plotting with matplotlib
+            print()
+            print('plt.xlabel("episodes")')
+            print('plt.ylabel("W/L in %")')
+            print('axes = plt.gca()')
+            print('axes.set_ylim([0, 100])')
+            print('plt.legend(loc="upper right")')
+            print('plt.show()')
+            print()
+            print()
+
+def normalized_input_results():
+    path = "normalized_results"
+    try:
+        os.mkdir(path)
+    except OSError:
+        print ("Creation of the directory %s failed" % path)
+        exit()
+
+    try:
+        file = open(f"{path}/results.py", "x")
+        file.close()
+    except FileExistsError:
+        print ("Creation of the outputfile failed")
+        exit()
+
+    results_normal = []
+    results_normalized = []
+
+    for x in range(0, 8):
+        print(f"Calculating for normal {x}")
+        amount = 10000
+        ai = BigDeepQLearningAgent("Anton", True)
+        ai.normalized = False
+
+        players = [ai, RandomPlayer("Random 1")]
+        players.append(RandomPlayer("Random 2"))
+        players.append(RandomPlayer("Random 3"))
+
+        session = President(players)
+        session.train(80000, 20000)
+        ai.training = False
+
+        ranks = session.simulate(amount)
+        results_normal.append(round(ranks[ai]['p']/amount*100, 2))
+
+        ai = BigDeepQLearningAgent("Anton", True)
+
+        players = [ai, RandomPlayer("Random 1")]
+        players.append(RandomPlayer("Random 2"))
+        players.append(RandomPlayer("Random 3"))
+
+        session = President(players)
+        session.train(80000, 20000)
+        ai.training = False
+
+        ranks = session.simulate(amount)
+        results_normalized.append(round(ranks[ai]['p']/amount*100, 2))
+            
+    with open(f'{path}/results.py', 'a') as f:
+        with redirect_stdout(f):
+
+            print("from matplotlib import pyplot as plt")
+            print('plt.plot(', end='')
+            print([i for i in range(1, 9)])
+            print(', ', end='')
+            print(results_normal, end='')
+            print(', \'r\', label=\'normal\')')
+
+            print('plt.plot(', end='')
+            print([i for i in range(1, 9)])
+            print(', ', end='')
+            print(results_normalized, end='')
+            print(', \'b\', label=\'normalized\')')
+
+            # for plotting with matplotlib
+            print()
+            print('plt.xlabel("Network")')
+            print('plt.ylabel("W/L in %")')
+            print('axes = plt.gca()')
+            print('axes.set_ylim([0, 100])')
+            print('plt.legend(loc="upper right")')
+            print('plt.xticks([1,2,3,4,5,6,7,8])')
+            print('plt.show()')
+            print()
+            print()
 
 def normalized_input_results():
     path = "normalized_results"
@@ -790,23 +1000,51 @@ def simulate_heuristic_vs_random():
     session = President(players)
     session.simulate(50000)
 
+def epsilon_decay_plot():
+    try:
+        file = open(f"epsilon_decay_plot.py", "x")
+        file.close()
+    except FileExistsError:
+        print ("Creation of the outputfile failed")
+        exit()
+
+    with open(f'epsilon_decay_plot.py', 'a') as f:
+        with redirect_stdout(f):
+            print("from matplotlib import pyplot as plt")
+            print("eps_stop = 0.05")
+            print("for eps_dec, color in zip([0.99, 0.999, 0.9999, 0.99999], ['y', 'g', 'b', 'r']) :")
+            print("\tplt.plot([1000*x for x in range(0, 350)], [max(1*eps_dec**(1000*x), eps_stop) for x in range(0, 350)], color, label=f'$\epsilon-decay = {eps_dec}$')")
+            print("plt.xlabel('iterations')")
+            print("plt.ylabel('$\epsilon$')")
+            print("plt.yticks([0.,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1])")
+            print("plt.legend(loc='upper right') ")
+            print("plt.savefig('images/epsilon_decay.png')")
+            print("plt.show()")
+
+
+
+
 
 if __name__ == '__main__':
+    #results_small_q_table_epsilon()
+    #q_table_win_in_time_results()
+    #exit()
+    if False:
+        ai = BigDeepQLearningAgent("Anton", True, "test.pt")
 
-    test_for_small_dqn(".")
-    exit()
-    ai = BigDeepQLearningAgent("Anton", True)
+        players = [ai, RandomPlayer("Random 1")]
+        players.append(RandomPlayer("Random 2"))
+        players.append(RandomPlayer("Random 3"))
 
-    players = [ai, RandomPlayer("Random 1")]
-    players.append(RandomPlayer("Random 2"))
-    players.append(RandomPlayer("Random 3"))
+        session = President(players)
 
-    session = President(players)
-    session.train(30000, 1000)
-
-    ai.training = False
-    ranks = session.simulate(10000)
-    exit()
+        network_name = "test.pt"
+        session.train(50000, 1000)
+        torch.save(ai.network, network_name)
+        
+        ai.training = False
+        session.simulate(10000)
+        exit()
 
     #results_for_gamma_0_100_small_dqn()
     ai = TemporalDifferenceAgent("mini Anton", 0.1, 0.75)
@@ -817,12 +1055,21 @@ if __name__ == '__main__':
     players.append(RandomPlayer("Random 3"))
 
 #    players = [ai]
-#    players.append(HeuristicPlayer("Random 1"))
-#    players.append(HeuristicPlayer("Random 2"))
-#    players.append(HeuristicPlayer("Random 3"))
+#    players.append(HeuristicPlayer("Heuristic 1"))
+#    players.append(HeuristicPlayer("Heuristic 2"))
+#    players.append(HeuristicPlayer("Heuristic 3"))
 
     session = President(players)
 
-    session.train(50000, 10000)
+    #session.train(1000000, 10000)
+    ai.stop_training()
 
-    session.simulate(10000)
+    session.simulate(100000)
+
+    players = [ai]
+    players.append(HeuristicPlayer("Heuristic 1"))
+    players.append(HeuristicPlayer("Heuristic 2"))
+    players.append(HeuristicPlayer("Heuristic 3"))
+
+    session = President(players)
+    session.simulate(100000)
