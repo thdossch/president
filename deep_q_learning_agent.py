@@ -277,7 +277,6 @@ class DeepQLearningAgent(Player):
 
         if self.normalized:
             state = [ int(x*2 + 2) for x in state ]
-            print(state)
         return sum([score(i,state[i-1]) for i in range(1,14)]) / sum(state[:13])
 
 
