@@ -752,8 +752,6 @@ def results_small_q_table_epsilon():
             print("\caption{W/L voor Q-table agent in \% voor verschillende epsilondecay factoren}")
             print("\end{table}")
 
-
-
 def q_table_win_in_time_results():
     path = "q_table_results"
     try:
@@ -922,9 +920,10 @@ def normalized_input_results():
     results_normal = []
     results_normalized = []
 
-    for x in range(0, 8):
+    tests = 6
+    for x in range(0, tests):
         print(f"Calculating for normal {x}")
-        amount = 1
+        amount = 10000
 
         ai = DeepQLearningAgent("Anton", True)
         ai.normalized = False
@@ -934,20 +933,20 @@ def normalized_input_results():
         players.append(RandomPlayer("Random 3"))
 
         session = President(players)
-        session.train(1, 10000)
+        session.train(70000, 10000)
         ai.stop_training()
 
         ranks = session.simulate(amount)
         results_normal.append(round(ranks[ai]['p']/amount*100, 2))
 
-        ai = DeepQLearningAgent("Anton", True)
+        ai = DeepQLearningAgent("Anton normalized", True)
 
         players = [ai, RandomPlayer("Random 1")]
         players.append(RandomPlayer("Random 2"))
         players.append(RandomPlayer("Random 3"))
 
         session = President(players)
-        session.train(1, 20000)
+        session.train(70000, 10000)
         ai.stop_training()
 
         ranks = session.simulate(amount)
@@ -963,13 +962,13 @@ def normalized_input_results():
 
             print("from matplotlib import pyplot as plt")
             print('plt.plot(', end='')
-            print([i for i in range(1, 9)])
+            print([i+1 for i in range(0, tests)])
             print(', ', end='')
             print(results_normal, end='')
             print(', \'r\', label=\'normal\')')
 
             print('plt.plot(', end='')
-            print([i for i in range(1, 9)])
+            print([i+1 for i in range(0, tests)])
             print(', ', end='')
             print(results_normalized, end='')
             print(', \'b\', label=\'normalized\')')
@@ -981,7 +980,7 @@ def normalized_input_results():
             print('axes = plt.gca()')
             print('axes.set_ylim([0, 100])')
             print('plt.legend(loc="upper right")')
-            print('plt.xticks([1,2,3,4,5,6,7,8])')
+            print(f'plt.xticks({[i+1 for i in range(0, tests)]})')
             print('plt.show()')
             print()
             print()
