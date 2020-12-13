@@ -117,6 +117,55 @@ def results_for_gamma_0_100_small_dqn_simulation(path):
                 print()
                 print()
 
+def test_for_small_dqn(path):
+        ai = DeepQLearningAgent("Anton", True)
+
+        players = [ai, RandomPlayer("Random 1")]
+        players.append(RandomPlayer("Random 2"))
+        players.append(RandomPlayer("Random 3"))
+        
+        session = President(players)
+        
+        torch.save(ai.network, f"{path}/0k.pt")
+        # 5k
+        network_name = f"{path}/5k.pt"
+        session.train(5000, 1000)
+        torch.save(ai.network, network_name)
+        ai.training = False
+        session.simulate(5000)
+
+        # 20k
+        ai.training = True 
+        network_name = f"{path}/20k.pt"
+        session.train(15000, 1000)
+        torch.save(ai.network, network_name)
+        ai.training = False
+        session.simulate(5000)
+
+        # 50k
+        ai.training = True 
+        network_name = f"{path}/50k.pt"
+        session.train(30000, 10000)
+        torch.save(ai.network, network_name)
+        ai.training = False
+        session.simulate(10000)
+
+        # 70k
+        ai.training = True 
+        network_name = f"{path}/20k.pt"
+        session.train(20000, 10000)
+        torch.save(ai.network, network_name)
+        ai.training = False
+        session.simulate(10000)
+
+        # 100k
+        ai.training = True 
+        network_name = f"{path}/100k.pt"
+        session.train(50000, 10000)
+        torch.save(ai.network, network_name)
+        ai.training = False
+        session.simulate(10000)
+
 def results_for_gamma_0_100_small_dqn():
     path = "./small_dqn_results"
 
@@ -743,9 +792,9 @@ def simulate_heuristic_vs_random():
 
 
 if __name__ == '__main__':
-    results_small_q_table_zoomed_in()
-    exit()
 
+    test_for_small_dqn(".")
+    exit()
     ai = BigDeepQLearningAgent("Anton", True)
 
     players = [ai, RandomPlayer("Random 1")]
