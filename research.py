@@ -513,6 +513,137 @@ def results_small_q_table():
 
             print("plt.show()")
 
+
+def results_small_q_table_zoomed_in():
+    path = "q_table_results"
+    try:
+        os.mkdir(path)
+    except OSError:
+        print ("Creation of the directory %s failed" % path)
+
+    try:
+        file = open(f"{path}/results_zoomed.py", "x")
+        file.close()
+    except FileExistsError:
+        print ("Creation of the outputfile failed")
+        exit()
+
+    total_results_random = []
+    total_results_heuristic = []
+
+    for alpha in [0.05,0.1,0.15,0.2,0.25,0.3]:
+        results_random = []
+        results_heuristic = []
+        for gamma in [0.55,0.6,0.65,0.7,0.75,0.8]:
+            print(f"Calculating for alpha = {alpha}, gamma = {gamma}")
+            
+            ai = TemporalDifferenceAgent("small Anton", alpha, gamma)
+
+            amount = 10000
+
+            players = [ai, RandomPlayer("Random 1")]
+            players.append(RandomPlayer("Random 2"))
+            players.append(RandomPlayer("Random 3"))
+
+            session = President(players)
+            session.train(100000)
+            ai.stop_training()
+
+            ranks = session.simulate(amount)
+            results_random.append(round(ranks[ai]['p']/amount*100, 2))
+
+            players = [ai, HeuristicPlayer("Heuristic 1")]
+            players.append(HeuristicPlayer("Heuristic 2"))
+            players.append(HeuristicPlayer("Heuristic 3"))
+
+            session = President(players)
+            
+            ranks = session.simulate(amount)
+            results_heuristic.append(round(ranks[ai]['p']/amount*100, 2))
+
+        total_results_random.append(results_random)
+        total_results_heuristic.append(results_heuristic)
+
+            
+    with open(f'{path}/results_zoomed.py', 'a') as f:
+        with redirect_stdout(f):
+
+            #imports
+            print("from mpl_toolkits.mplot3d import Axes3D")
+            print("import matplotlib.pyplot as plt")
+            print("from matplotlib import cm")
+            print("from matplotlib.ticker import LinearLocator, FormatStrFormatter")
+            print("import numpy as np")
+
+            #figure
+            print("fig = plt.figure()")
+            print("ax = fig.gca(projection='3d')")
+
+            print("res_random = [")
+           
+            for res in total_results_random:
+                print(res, end="")
+                print(",")
+
+            print("]")
+
+            #data
+            print(f"gamma = np.array([0.55,0.6,0.65,0.7,0.75,0.8])")
+            print(f"alpha = np.array([0.05,0.1,0.15,0.2,0.25,0.3])")
+            print("X, Y = np.meshgrid(gamma, alpha)")
+            print("Z = np.array(res_random)")
+
+            # Plot the surface.
+            print("surf = ax.plot_surface(X, Y, Z, cmap=cm.coolwarm, linewidth=0, antialiased=False)")
+            print("ax.set_zlim(0, 100)")
+            print("ax.zaxis.set_major_locator(LinearLocator(10))")
+            print("ax.zaxis.set_major_formatter(FormatStrFormatter('%.0f'))")
+            print("fig.colorbar(surf, shrink=0.5, aspect=5)")
+
+            #names
+            print("plt.xlabel('gamma')")
+            print("plt.ylabel('alpha')")
+            print("plt.xticks([0.55,0.6,0.65,0.7,0.75,0.8])")
+            print("plt.yticks([0.05,0.1,0.15,0.2,0.25,0.3])")
+
+            print("plt.show()")
+            print("plt.clf()")
+
+            # PLOT 2
+            #figure
+            print("fig = plt.figure()")
+            print("ax = fig.gca(projection='3d')")
+
+            print("res_heuristic = [")
+            
+            for res in total_results_heuristic:
+                print(res, end="")
+                print(",")
+            print("]")
+
+            #data
+            print(f"gamma = np.array([0.55,0.6,0.65,0.7,0.75,0.8])")
+            print(f"alpha = np.array([0.05,0.1,0.15,0.2,0.25,0.3])")
+            print("X, Y = np.meshgrid(gamma, alpha)")
+            print("Z = np.array(res_heuristic)")
+
+            # Plot the surface.
+            print("surf = ax.plot_surface(X, Y, Z, cmap=cm.coolwarm, linewidth=0, antialiased=False)")
+            print("ax.set_zlim(0, 100)")
+            print("ax.zaxis.set_major_locator(LinearLocator(10))")
+            print("ax.zaxis.set_major_formatter(FormatStrFormatter('%.0f'))")
+            print("fig.colorbar(surf, shrink=0.5, aspect=5)")
+
+            #names
+            print("plt.xlabel('gamma')")
+            print("plt.ylabel('alpha')")
+            print("plt.xticks([0.55,0.6,0.65,0.7,0.75,0.8])")
+            print("plt.yticks([0.05,0.1,0.15,0.2,0.25,0.3])")
+
+
+            print("plt.show()")
+
+
 def normalized_input_results():
     path = "normalized_results"
     try:
@@ -612,9 +743,21 @@ def simulate_heuristic_vs_random():
 
 
 if __name__ == '__main__':
-    normalized_input_results()
+    results_small_q_table_zoomed_in()
     exit()
 
+    ai = BigDeepQLearningAgent("Anton", True)
+
+    players = [ai, RandomPlayer("Random 1")]
+    players.append(RandomPlayer("Random 2"))
+    players.append(RandomPlayer("Random 3"))
+
+    session = President(players)
+    session.train(30000, 1000)
+
+    ai.training = False
+    ranks = session.simulate(10000)
+    exit()
 
     #results_for_gamma_0_100_small_dqn()
     ai = TemporalDifferenceAgent("mini Anton", 0.1, 0.75)

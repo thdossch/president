@@ -42,7 +42,7 @@ class BigDeepQLearningAgent(Player):
         self.MEM_SIZE = 1000
         self.GAMMA = 0.7
         self.EPS_END = 0.05
-        self.eps = 0.3
+        self.eps = 1
         self.EPS_DECAY = 0.999
         self.N_ACTIONS = N_ACTIONS 
         self.normalized = True
