@@ -111,7 +111,7 @@ Om een gevoel te krijgen hoe goed een agent presteert gebruiken we een win/lose 
 \begin{center}
 $W/L = games\_president/total\_games\_played * 100$.
 \end{center}
-We vermenigvuldigen met 100 om het resultaat als percentage uit te drukken.
+We vermenigvuldigen met 100 om het resultaat als percentage uit te drukken. Dit is een goede maat aangezien we hieruit vaak ook kunnen afleiden dat als hij veel president is, hij waarschijnlijk ook vaak vice-president is, en minder scum of high-scum.
 
 \subsection{Heuristiek en random}
 Het is belangrijk om te weten hoe de heuristieke speler het doet tegenover random spelers, en omgekeerd. Zo kunnen we goed vergelijken en hopelijk zelfs streven naar gelijkaardige of betere resultaten. In onderstaande tabel worden de resultaten van simulaties voor deze situatie geïllustreerd.
@@ -158,32 +158,18 @@ Met uiteindelijke waarden na 100k trainen en 10k simulaties: 0.1 learning rate e
 
 Dit zijn heel goede resultaten, aangezien de heuristieke speler een 60? haalt in deze situatie. Daarbij legt de heuristieke speler enkel jokers als dit nodig is, hier wordt en kan daar geen rekening mee gehouden worden, wat een verklaring kan zijn voor het toch lagere resultaat.\\\\
 Er zijn nog een aantal zaken die geprobeerd zijn, die slechtere of gelijkaardige resultaten geven. Toch zijn ze interessant om even snel te bespreken.\\\\
-
-
-\textbf{dit moet nog beter}\\
-\textbf{dit moet nog beter}\\
-\textbf{dit moet nog beter}\\
+\textbf{dit moet nog beter}
 \begin{itemize}
 	\item Tijdens de training worden nu de rankings van de spelers niet gereset, maar dit wel doen ieder aantal games geeft geen verschil.
 	\item Met een epsilon van 0.25 en geen epsilondecay krijgen we ongeveer even goede resultaten dan als we wel met epsilondecay werken.
-	\item Een iets complexere reward functie, gebaseerd op de kaarten in je hand voor en na je gelegd hebt, geeft minder goede resultaten: ongeveer 36procent W/L. Om dit toch te doen werken, moeten we misschien de state uitbreiden.
+	\item Een iets complexere reward functie, gebaseerd op de kaarten in je hand voor en na je gelegd hebt, geeft veel slechtere resultaten: ongeveer 30\% W/L. Om dit toch te doen werken, moeten we misschien de state uitbreiden. TODO: leg complexere reward uit?
 \end{itemize}
-
- extra TODO in het algemeen: mooie tabelletjes van resultaten agent vs randoms en basic players als we dus de win ration bespreken (niet overal ofc anders wordt het mss beetje veel, mss gewoon bij de beste).
-
-
 
 \subsubsection{Uitgebreide state}
 Idealiter bevat de state ook de kaarten in je hand. Dit gaat alweer iets meer naar de richting van de heuristieke speler, die ook op basis van zijn hand een beslissing maakt. Na wat zorgvuldig rekenwerk zou dit neerkomen op 2872 mogelijke starthanden, zonder zelfs de andere mogelijke handen na het leggen van 1, 2, ... kaarten. Dit zijn veel te veel states voor een functionele Q-table, er moet dus veralgemeend worden. De grootste veralgemening kan dus het bijhouden zijn van het aantal kaarten in je hand, en niet de kaarten exact.\\\\
-
-We kunnen de state als volgt voorstellen: (rang, aantal, aantal kaarten in hand). Een reward functie kan nu als volgt zijn: scorenieuwehand/scorevorigehand + amountcardsplayed (TODO: mooier en nog uitleggen wat score voorstelt).\\\\
-Dit geeft nog steeds geen betere resultaten TODO resultaten. Er zijn duidelijk nog tekortkomingen met deze reward functie (TODO mss bespreken bij kleine dqn \- eerder reward voor over korte tijd ofz?), wat ons doet concluderen dat het soms makkelijker is om een simpelere reward functie te implementeren, die met minder rekening houdt en de agent meer `zijn eigen ding laat doen'. Daarbij is er een extra probleem, er zijn namelijk  veel zeldzame states, of states die gewoon niet of amper bezocht zijn. \\\\
-Een extra uitbreiding van de state houdt nog rekening met de jokers in je hand, zo zou het misschien kunnen dat de agent leert dat het niet slim is om bij de eerste de beste keer een joker te leggen. Hij zou net zoals de heuristieke speler moeten leren beslissen om pas een joker te leggen in nood. Echter zitten we hier spijtig genoeg met hetzelfde probleem, namelijk de Q-table die te groot wordt.\\\\
-
-Algemeen gezien is het probleem met de uitgebreide state dat er veel states zijn die niet (vaak) worden tegengekomen en enkele states die zeer vaak worden tegengekomen. Ook met de acties is dit het geval, eenmaal in een state zal het bijvoorbeeld niet veel voorkomen dat je 4 koningen legt waardoor de Q-waarde van deze actie niet veel \textbf{geupdate} gaat worden bij het trainen. \\
-Met je rewardfunctie kan je twee kanten op, je kan werken met eerder positive Q-waarden of met eerder negatieve Q-waarden. Stel dat we beginnen met alle state-actie waarden op 0 te initialiseren. Dan zal in het geval van de eerder positive Q-waarde de waarde van de vaak voorkomende state-actie paren groter zijn dan de zeldzame. Echter zijn vaak de zeldzame zetten zeer goeie zetten in deze situatie maar deze zullen dus niet genomen worden omdat ze een lagere Q-waarde hebben.\\
-Een voorbeeld hier zou kunnen zijn: de state bestaat uit $(rang, aantal, aantal\_kaarten\_in\_hand)$ en is hier (3,2,4) en onze agent heeft 3 Q'en en een A in zijn hand. De beste zet zou de 3Q leggen, waarmee de ronde waarschijnlijk gewonnen zou worden, en dan de A leggen waarmee hij het spel wint. Echter zal de actie 3Q voor de state (3,2,4) waarschijnlijk nog niet of nog maar heel weinig zijn voorgekomen waardoor dit een lagere Q-waarde zal hebben dan bijvoorbeeld 1Q leggen. En dus zal de agent niet goed spelen.\\
-Een voorbeeld voor de eerder negatieve rewards is een die we bij het zoeken naar een goeie rewardfunctie vaak hebben zien gebeuren. Stel de state bestaat ook hier uit $(rang, aantal, aantal\_kaarten\_in\_hand)$ en is (4,2,9) en de agent heeft alle 4 de jokers (2). Dit komt zelde voor waardoor dat de Q-waarde nog niet veel \textbf{geupdate} zal zijn en dus nog een redelijk hoge waarde dicht bij 0 heeft. Dit betekent dat de agent het leggen van de 4 jokers in 1 zet als een goeie actie zal beschouwen. Dit is echter niet het geval want dan is hij zijn 4 jokers kwijt.
+We kunnen de state als volgt voorstellen: (rang, aantal, aantal kaarten in hand). Met de reward functie die hierboven zo goede resultaten gaf, krijgen we nu nog maar rond de 30\% W/L ratio tegen 3 random spelers. Dit is dus niet veel beter meer dan een random agent. Ook de complexere functie op basis van de hand behaalt maar met moeite 30\%. \\\\
+We zitten hier dus duidelijk met een probleem, namelijk de Q-table die te groot wordt. Hierdoor zijn er veel delen van de Q-table die amper of zelfs nooit worden bezocht, waardoor veel Q-waarden op hun initiele waarde blijven staan, en de agent dus geen goede beslissingen kan maken.\\\\
+We zouden dus de state nog meer moeten veralgemenen...TODO thor :x
 
 \subsection{DQN}
 Het doel tot nu toe is het krijgen van gelijkaardige resultaten als bij de heuristieke speler, hierin zijn we nog niet geslaagd. Een mogelijke verklaring is de beperkte state, waarin we niet eens met de volledige hand kunnen rekening houden. Nu we werken met een deep Q-network, is het eindelijk mogelijk om dit wel te doen.\\\\
@@ -195,6 +181,13 @@ TODO: resultaten gamma iteratie\\\\
 \subsubsection{Grote DQN}
 TODO: idk resultaten zeker i guess en redenering reward functie\\
 
+\section{conclusie}
+- simpelere rewards die de agent meer zijn ding laten doen lijken het beter te doen
+- zelfs simpelere algoritmen lijken het beter te doen\\\\
+Het probleem met presidenten en qlearning, is dat er states zijn die amper of nooit worden tegengekomen en enkele states die zeer vaak worden tegengekomen. Ook met de acties is dit het geval, het zal bijvoorbeeld niet veel voorkomen dat je 4 koningen kan leggen waardoor de Q-waarde van deze actie niet veel aangepast gaat worden bij het trainen. \\\\
+Met je rewardfunctie kan je twee kanten op, je kan werken met eerder positieve Q-waarden of met eerder negatieve Q-waarden. Stel dat we beginnen met alle state-actie waarden op 0 te initialiseren. Dan zal in het geval van de eerder positive Q-waarde de waarde van de vaak voorkomende state-actie paren groter zijn dan de zeldzame. Echter zijn vaak de zeldzame zetten zeer goeie zetten in deze situatie maar deze zullen dus niet genomen worden omdat ze een lagere Q-waarde hebben.\\\\
+Een voorbeeld hier zou kunnen zijn: de state bestaat uit $(rang, aantal, aantal\_kaarten\_in\_hand)$ en is hier (3,2,4) en onze agent heeft 3 Q'en en een A in zijn hand. De beste zet zou de 3Q leggen, waarmee de ronde waarschijnlijk gewonnen zou worden, en dan de A leggen waarmee hij het spel wint. Echter zal de actie 3Q voor de state (3,2,4) waarschijnlijk nog niet of nog maar heel weinig zijn voorgekomen waardoor dit een lagere Q-waarde zal hebben dan bijvoorbeeld 1Q leggen. En dus zal de agent niet goed spelen.\\\\
+Een voorbeeld voor de eerder negatieve rewards is een die we bij het zoeken naar een goede rewardfunctie vaak hebben zien gebeuren. Stel de state bestaat ook hier uit $(rang, aantal, aantal\_kaarten\_in\_hand)$ en is (4,2,9) en de agent heeft alle 4 de jokers. Dit komt zelden voor, waardoor dat de Q-waarde nog een redelijk "hoge" waarde dicht bij 0 zal hebben. Dit betekent dat de agent het leggen van de 4 jokers in 1 zet als een goeie actie zal beschouwen. Dit is echter niet het geval want dan is hij zijn 4 jokers kwijt.
 
 \begin{thebibliography}{9}
 \bibitem{simple-qlearning} 
