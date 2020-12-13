@@ -909,10 +909,11 @@ def normalized_input_results():
         os.mkdir(path)
     except OSError:
         print ("Creation of the directory %s failed" % path)
-        exit()
 
     try:
-        file = open(f"{path}/results.py", "x")
+        file = open(f"{path}/results_normalization.py", "x")
+        file.close()
+        file = open(f"{path}/results_normalization_backup.py", "x")
         file.close()
     except FileExistsError:
         print ("Creation of the outputfile failed")
@@ -923,8 +924,9 @@ def normalized_input_results():
 
     for x in range(0, 8):
         print(f"Calculating for normal {x}")
-        amount = 10000
-        ai = BigDeepQLearningAgent("Anton", True)
+        amount = 1
+
+        ai = DeepQLearningAgent("Anton", True)
         ai.normalized = False
 
         players = [ai, RandomPlayer("Random 1")]
@@ -932,26 +934,31 @@ def normalized_input_results():
         players.append(RandomPlayer("Random 3"))
 
         session = President(players)
-        session.train(80000, 20000)
-        ai.training = False
+        session.train(1, 10000)
+        ai.stop_training()
 
         ranks = session.simulate(amount)
         results_normal.append(round(ranks[ai]['p']/amount*100, 2))
 
-        ai = BigDeepQLearningAgent("Anton", True)
+        ai = DeepQLearningAgent("Anton", True)
 
         players = [ai, RandomPlayer("Random 1")]
         players.append(RandomPlayer("Random 2"))
         players.append(RandomPlayer("Random 3"))
 
         session = President(players)
-        session.train(80000, 20000)
-        ai.training = False
+        session.train(1, 20000)
+        ai.stop_training()
 
         ranks = session.simulate(amount)
         results_normalized.append(round(ranks[ai]['p']/amount*100, 2))
             
-    with open(f'{path}/results.py', 'a') as f:
+        with open(f'{path}/results_normalization_backup.py', 'a') as f:
+            with redirect_stdout(f):
+               print(f"{x} niet -> {results_normal}")
+               print(f"{x} -> {results_normalized}")
+
+    with open(f'{path}/results_normalization.py', 'a') as f:
         with redirect_stdout(f):
 
             print("from matplotlib import pyplot as plt")
@@ -975,6 +982,101 @@ def normalized_input_results():
             print('axes.set_ylim([0, 100])')
             print('plt.legend(loc="upper right")')
             print('plt.xticks([1,2,3,4,5,6,7,8])')
+            print('plt.show()')
+            print()
+            print()
+
+def small_dqn_win_in_time_results():
+    path = "small_dqn_results"
+    try:
+        os.mkdir(path)
+    except OSError:
+        print ("Creation of the directory %s failed" % path)
+
+    try:
+        file = open(f"{path}/results_win_in_time.py", "x")
+        file.close()
+    except FileExistsError:
+        print ("Creation of the outputfile failed")
+        exit()
+
+    results_random = []
+    results_heuristic = []
+
+    ai = DeepQLearningAgent("Anton", True)
+    amount = 10000
+
+    #simulate results without training
+    players = [ai, RandomPlayer("Random 1")]
+    players.append(RandomPlayer("Random 2"))
+    players.append(RandomPlayer("Random 3"))
+
+    session = President(players)
+    ai.stop_training()
+
+    ranks = session.simulate(amount)
+    results_random.append(round(ranks[ai]['p']/amount*100, 2))
+
+    players = [ai, HeuristicPlayer("Heuristic 1")]
+    players.append(HeuristicPlayer("Heuristic 2"))
+    players.append(HeuristicPlayer("Heuristic 3"))
+
+    session = President(players)
+    
+    ranks = session.simulate(amount)
+    results_heuristic.append(round(ranks[ai]['p']/amount*100, 2))
+
+    ai.training = True
+
+    #simulate with training
+    for x in range(0,20):
+        print(f"after {x*10000} trainings")
+
+        players = [ai, RandomPlayer("Random 1")]
+        players.append(RandomPlayer("Random 2"))
+        players.append(RandomPlayer("Random 3"))
+
+        session = President(players)
+        session.train(10000)
+        ai.stop_training()
+
+        ranks = session.simulate(amount)
+        results_random.append(round(ranks[ai]['p']/amount*100, 2))
+
+        players = [ai, HeuristicPlayer("Heuristic 1")]
+        players.append(HeuristicPlayer("Heuristic 2"))
+        players.append(HeuristicPlayer("Heuristic 3"))
+
+        session = President(players)
+        
+        ranks = session.simulate(amount)
+        results_heuristic.append(round(ranks[ai]['p']/amount*100, 2))
+
+        ai.training = True
+
+    with open(f'{path}/results_win_in_time.py', 'a') as f:
+        with redirect_stdout(f):
+     
+            print("import matplotlib.pyplot as plt")
+            print('plt.plot(', end='')
+            print([(x)*10000 for x in range(0, 21)], end='')
+            print(', ', end='')
+            print(results_random, end='')
+            print(', \'b\', label=\'vs random\')')
+
+            print('plt.plot(', end='')
+            print([(x)*10000 for x in range(0, 21)], end='')
+            print(', ', end='')
+            print(results_heuristic, end='')
+            print(', \'r\', label=\'vs heuristic\')')
+
+            # for plotting with matplotlib
+            print()
+            print('plt.xlabel("episodes")')
+            print('plt.ylabel("W/L in %")')
+            print('axes = plt.gca()')
+            print('axes.set_ylim([0, 100])')
+            print('plt.legend(loc="upper right")')
             print('plt.show()')
             print()
             print()
@@ -1021,14 +1123,10 @@ def epsilon_decay_plot():
             print("plt.savefig('images/epsilon_decay.png')")
             print("plt.show()")
 
-
-
-
-
 if __name__ == '__main__':
-    #results_small_q_table_epsilon()
-    #q_table_win_in_time_results()
-    #exit()
+    #small_dqn_win_in_time_results()
+    normalized_input_results()
+    exit()
     if False:
         ai = BigDeepQLearningAgent("Anton", True, "test.pt")
 

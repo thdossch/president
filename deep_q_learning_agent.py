@@ -40,10 +40,10 @@ class DeepQLearningAgent(Player):
         self.name = name
         self.BATCH_SIZE = 64 
         self.MEM_SIZE = 1000
-        self.GAMMA = 0.99
+        self.GAMMA = 0.5
         self.EPS_END = 0.05
         self.eps = 1.0
-        self.EPS_DECAY = 0.99
+        self.EPS_DECAY = 0.9999
         self.N_ACTIONS = N_ACTIONS 
         if network_path:
             self.network = torch.load(network_path)
@@ -375,3 +375,9 @@ class DeepQLearningAgent(Player):
         Overwriting parent method
         '''
         self.done = False
+
+    def stop_training(self):
+        '''
+        Method that stops the training
+        '''
+        self.training = False
