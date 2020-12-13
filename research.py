@@ -827,7 +827,7 @@ def q_table_win_in_time_results():
             print()
             print()
 
-def normalized_input_results():
+def normalized_input_results_bigdqn():
     path = "normalized_results"
     try:
         os.mkdir(path)
