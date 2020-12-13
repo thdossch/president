@@ -256,7 +256,7 @@ class DeepQLearningAgent(Player):
         ## others skipped, you won round
         #if state[13:15] == [0,0] and not self.done:
         #    return 3  
-        return rel_hand_score - longer_game_penalty + self.output_to_action(self.last_action)[1]*0.05
+        return rel_hand_score - longer_game_penalty
 
     def get_hand_score(self, state):
         '''
