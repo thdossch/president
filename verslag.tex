@@ -111,7 +111,7 @@ Om een gevoel te krijgen hoe goed een agent presteert gebruiken we een win/lose 
 \begin{center}
 $W/L = games\_president/total\_games\_played * 100$.
 \end{center}
-We vermenigvuldigen met 100 om het resultaat als percentage uit te drukken.
+We vermenigvuldigen met 100 om het resultaat als percentage uit te drukken. Dit is een goede maat aangezien we hieruit vaak ook kunnen afleiden dat als hij veel president is, hij waarschijnlijk ook vaak vice-president is, en minder scum of high-scum.
 
 \subsection{Heuristiek en random}
 Het is belangrijk om te weten hoe de heuristieke speler het doet tegenover random spelers, en omgekeerd. Zo kunnen we goed vergelijken en hopelijk zelfs streven naar gelijkaardige of betere resultaten. In onderstaande tabel worden de resultaten van simulaties voor deze situatie geïllustreerd.
@@ -193,7 +193,6 @@ Uit bovenstaande afbeeldingen kunnen we besluiten dat de optimale parameters, vo
         \caption{W/L in \% voor Q-table agent}
 \end{table}
 
-
 Dit zijn redelijk goede resultaten, aangezien de random speler een 6\% en 25\% haalt in deze situatie. We hebben dus zeker de random agent overtroffen. Ook tegen de heuristieke speler zien we dat we een redelijke prestatie neerzetten. Het voordeel dat de heuristieke speler heeft is dat hij enkel jokers gebruikt als dat nodig is. De Q-table agent houdt hier geen rekening mee, wat een verklaring kan zijn voor het lagere resultaat.\\\\
 \newpage
 Echter als we de prestatie van de agent plotten voor meerdere episodes zien we een opmerkelijk resultaat.\\
@@ -211,31 +210,51 @@ $aantal\_kaarten\_in\_hand = aantal$ $if$ $ aantal <= 4$ $else$ $5$
 \end{center}
 En we initialiseren de state-actie paren op 10 voor de acties op een state die de zorgen dat de speler uitspeelt, gebruikmakend van de rewardfunctie die hierboven beschreven is, behalen we ook een mooie W/L van 45\% tegen random spelers.
 
-
-
-
 \subsubsection{Uitgebreide state}
 Idealiter bevat de state ook de kaarten in je hand. Dit gaat alweer iets meer naar de richting van de heuristieke speler, die ook op basis van zijn hand een beslissing maakt. Na wat zorgvuldig rekenwerk zou dit neerkomen op 2872 mogelijke starthanden, zonder zelfs de andere mogelijke handen na het leggen van 1, 2, ... kaarten. Dit zijn veel te veel states voor een functionele Q-table, er moet dus veralgemeend worden. De grootste veralgemening kan dus het bijhouden zijn van het aantal kaarten in je hand, en niet de kaarten exact.\\\\
-
-We kunnen de state als volgt voorstellen: (rang, aantal, aantal kaarten in hand). Een reward functie kan nu als volgt zijn: scorenieuwehand/scorevorigehand + amountcardsplayed (TODO: mooier en nog uitleggen wat score voorstelt).\\\\
-Dit geeft nog steeds geen betere resultaten TODO resultaten. Er zijn duidelijk nog tekortkomingen met deze reward functie (TODO mss bespreken bij kleine dqn \- eerder reward voor over korte tijd ofz?), wat ons doet concluderen dat het soms makkelijker is om een simpelere reward functie te implementeren, die met minder rekening houdt en de agent meer `zijn eigen ding laat doen'. Daarbij is er een extra probleem, er zijn namelijk  veel zeldzame states, of states die gewoon niet of amper bezocht zijn. \\\\
-Een extra uitbreiding van de state houdt nog rekening met de jokers in je hand, zo zou het misschien kunnen dat de agent leert dat het niet slim is om bij de eerste de beste keer een joker te leggen. Hij zou net zoals de heuristieke speler moeten leren beslissen om pas een joker te leggen in nood. Echter zitten we hier spijtig genoeg met hetzelfde probleem, namelijk de Q-table die te groot wordt.\\\\
-
-Algemeen gezien is het probleem met de uitgebreide state dat er veel states zijn die niet (vaak) worden tegengekomen en enkele states die zeer vaak worden tegengekomen. Ook met de acties is dit het geval, eenmaal in een state zal het bijvoorbeeld niet veel voorkomen dat je 4 koningen legt waardoor de Q-waarde van deze actie niet veel \textbf{geupdate} gaat worden bij het trainen. \\
-Met je rewardfunctie kan je twee kanten op, je kan werken met eerder positive Q-waarden of met eerder negatieve Q-waarden. Stel dat we beginnen met alle state-actie waarden op 0 te initialiseren. Dan zal in het geval van de eerder positive Q-waarde de waarde van de vaak voorkomende state-actie paren groter zijn dan de zeldzame. Echter zijn vaak de zeldzame zetten zeer goeie zetten in deze situatie maar deze zullen dus niet genomen worden omdat ze een lagere Q-waarde hebben.\\
-Een voorbeeld hier zou kunnen zijn: de state bestaat uit $(rang, aantal, aantal\_kaarten\_in\_hand)$ en is hier (3,2,4) en onze agent heeft 3 Q'en en een A in zijn hand. De beste zet zou de 3Q leggen, waarmee de ronde waarschijnlijk gewonnen zou worden, en dan de A leggen waarmee hij het spel wint. Echter zal de actie 3Q voor de state (3,2,4) waarschijnlijk nog niet of nog maar heel weinig zijn voorgekomen waardoor dit een lagere Q-waarde zal hebben dan bijvoorbeeld 1Q leggen. En dus zal de agent niet goed spelen.\\
-Een voorbeeld voor de eerder negatieve rewards is een die we bij het zoeken naar een goeie rewardfunctie vaak hebben zien gebeuren. Stel de state bestaat ook hier uit $(rang, aantal, aantal\_kaarten\_in\_hand)$ en is (4,2,9) en de agent heeft alle 4 de jokers (2). Dit komt zelde voor waardoor dat de Q-waarde nog niet veel \textbf{geupdate} zal zijn en dus nog een redelijk hoge waarde dicht bij 0 heeft. Dit betekent dat de agent het leggen van de 4 jokers in 1 zet als een goeie actie zal beschouwen. Dit is echter niet het geval want dan is hij zijn 4 jokers kwijt.
+We kunnen de state als volgt voorstellen: (rang, aantal, aantal kaarten in hand). Met de reward functie die hierboven zo goede resultaten gaf, krijgen we nu nog maar rond de 30\% W/L ratio tegen 3 random spelers. Dit is dus niet veel beter meer dan een random agent. Ook de complexere functie op basis van de hand behaalt maar met moeite 30\%. \\\\
+We zitten hier dus duidelijk met een probleem, namelijk de Q-table die te groot wordt. Hierdoor zijn er veel delen van de Q-table die amper of zelfs nooit worden bezocht, waardoor veel Q-waarden op hun initiele waarde blijven staan, en de agent dus geen goede beslissingen kan maken.\\\\
+We zouden dus de state nog meer moeten veralgemenen...TODO thor :x
 
 \subsection{DQN}
-Het doel tot nu toe is het krijgen van gelijkaardige resultaten als bij de heuristieke speler, hierin zijn we nog niet geslaagd. Een mogelijke verklaring is de beperkte state, waarin we niet eens met de volledige hand kunnen rekening houden. Nu we werken met een deep Q-network, is het eindelijk mogelijk om dit wel te doen.\\\\
+Het doel tot nu toe is het krijgen van gelijkaardige resultaten als bij de heuristieke speler, hierin zijn we nog niet geslaagd. Een mogelijke verklaring is de beperkte state, waarin we niet eens met de volledige hand kunnen rekening houden. Nu we werken met een deep Q-network, is het eindelijk mogelijk om dit wel te doen.
 
 \subsubsection{Kleine DQN}
-TODO: redenering reward funct, wrm niet die simpele van qtable werkte die niet goed?\\\\
-TODO: resultaten gamma iteratie\\\\
+We werken hier met een state van 15 velden, de eerste 13 stellen onze hand voor, de laatste 2 representeren de laatst gelegde kaart(en). Dit is even veel informatie als de heuristieke speler ook heeft, wat we tot nu toe nog niet hebben kunnen bereiken op een functionele manier.\\\\
+Als eerste testen we de reward functie die ons al veel succes heeft gegeven bij Q-learning. In deze context lijkt die niet zo succesvol te zijn, aangezien die ons nu ongeveer 24\% W/L geeft tegen 3 random spelers. \\\\
+Omdat we nu de volledige hand in de state bijhouden, kunnen we misschien een betere reward functie construeren op basis van de hand. We gebruiken het idee van een relatieve hand score, besproken in Q-learning (TODO?), en voegen nog een aantal metrieken toe. De reward functie ziet er als volgt uit in pseudocode:\\\\
+\indent als uitgespeeld: return 10\\
+\indent als gepast: return -1.5 + skip\_penalty\\
+\indent anders: return relative\_hand\_score + aantal\_kaarten\_gelegd*0.05\\
+
+TODO: leg uit score van hand en skip penalty\\\\
+We hebben deze functie niet in 1 keer gevonden, maar hebben veel verschillende uitgetest. Het valt duidelijk te merken dat dit een heel gefabriceerde en gedetailleerde functie is. De relatieve hand score is een reward die meer gebaseerd is op het korte termijn gedrag van de agent, het is dus interessant om te kijken hoe de discount factor $\gamma$ hier een rol in speelt.
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.45]{images/gamma-iteratie-dqn.png}
+\caption{Resultaten variëren met parameter $\gamma$}
+\end{figure}\\
+We zien inderdaad dat bij een hele hoge gamma, de agent het zelfs slechter gaat doen dan de random spelers waar hij tegen speelt. (TODO: waarom? hij skipt dan wss enkel) In deze context houden we de discount factor dus beter lager dan 0.9. Op 0.6 vinden we ook nog een uitschieter die een iets lagere gamma geeft, maar voor de meeste gevallen lijken de waarden onder 0.9 het wel goed te doen.\\\\
+Merk op dat we met het construeren van een heel specifieke reward functie, maar met moeite een W/L percentage van 45\% behalen tegenover de random spelers. Dit is nog steeds redelijk goed tegen de random spelers, maar zeker nog niet even goed als een heuristieke speler. Daarbij is het gedetailleerd fabriceren van een reward functie misschien niet de beste manier van aanpak. Op een punt loopt dit dus op een dood einde, en moeten we misschien de agent meer zijn eigen beslissingen laten maken, in plaats van te blijven "gokken" welke kleine aanpassing aan de reward functie een beter resultaat zou geven. De agent volgt namelijk exact wat we aangeven in de reward functie, maar we hebben al vaak gemerkt dat een kleine redeneringsfout de agent kan leiden tot heel vreemde acties.
 
 \subsubsection{Grote DQN}
 TODO: idk resultaten zeker i guess en redenering reward functie\\
 
+\section{conclusie}
+- simpelere rewards die de agent meer zijn ding laten doen lijken het beter te doen
+- zelfs simpelere algoritmen lijken het beter te doen\\\\
+Het probleem met presidenten en qlearning, is dat er states zijn die amper of nooit worden tegengekomen en enkele states die zeer vaak worden tegengekomen. Ook met de acties is dit het geval, het zal bijvoorbeeld niet veel voorkomen dat je 4 koningen kan leggen waardoor de Q-waarde van deze actie niet veel aangepast gaat worden bij het trainen. \\\\
+Met je rewardfunctie kan je twee kanten op, je kan werken met eerder positieve Q-waarden of met eerder negatieve Q-waarden. Stel dat we beginnen met alle state-actie waarden op 0 te initialiseren. Dan zal in het geval van de eerder positive Q-waarde de waarde van de vaak voorkomende state-actie paren groter zijn dan de zeldzame. Echter zijn vaak de zeldzame zetten zeer goeie zetten in deze situatie maar deze zullen dus niet genomen worden omdat ze een lagere Q-waarde hebben.\\\\
+Een voorbeeld hier zou kunnen zijn: de state bestaat uit $(rang, aantal, aantal\_kaarten\_in\_hand)$ en is hier (3,2,4) en onze agent heeft 3 Q'en en een A in zijn hand. De beste zet zou de 3Q leggen, waarmee de ronde waarschijnlijk gewonnen zou worden, en dan de A leggen waarmee hij het spel wint. Echter zal de actie 3Q voor de state (3,2,4) waarschijnlijk nog niet of nog maar heel weinig zijn voorgekomen waardoor dit een lagere Q-waarde zal hebben dan bijvoorbeeld 1Q leggen. En dus zal de agent niet goed spelen.\\\\
+Een voorbeeld voor de eerder negatieve rewards is een die we bij het zoeken naar een goede rewardfunctie vaak hebben zien gebeuren. Stel de state bestaat ook hier uit $(rang, aantal, aantal\_kaarten\_in\_hand)$ en is (4,2,9) en de agent heeft alle 4 de jokers. Dit komt zelden voor, waardoor dat de Q-waarde nog een redelijk "hoge" waarde dicht bij 0 zal hebben. Dit betekent dat de agent het leggen van de 4 jokers in 1 zet als een goeie actie zal beschouwen. Dit is echter niet het geval want dan is hij zijn 4 jokers kwijt.\\\\
+
+Ook interessant om zeker over te praten:\\
+https://www.alexirpan.com/2018/02/14/rl-hard.html\\
+Veel van de observaties in de blogpost komen overeen wat we hier hebben gemerkt zoals\\
+- vinden van een reward functie is niet moeilijk, maar het vinden van de beste reward functie wel\\
+- Een reward functie kan duidelijk een slechte invloed hebben op de agent aangezien die exact doet wat wij specifieren in de reward functie, zo kunnen we dus raar gedrag krijgen waar de agents opeens blijven skippen etc.
+- overfitten kan ook een probleem zijn bij DQN, zeker in de case van presidenten (zie bovenstaande uitleg van thor)
+- nog zo veel mogelijke problemen: states die niet goed zijn voorgesteld, foute parameters, slechte netwerk structuur, ...
 
 \begin{thebibliography}{9}
 \bibitem{simple-qlearning} 
