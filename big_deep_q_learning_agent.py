@@ -43,7 +43,7 @@ class BigDeepQLearningAgent(Player):
         self.GAMMA = 0.7
         self.EPS_END = 0.05
         self.eps = 1
-        self.EPS_DECAY = 0.999
+        self.EPS_DECAY = 0.9999
         self.N_ACTIONS = N_ACTIONS 
         self.normalized = True
         if network_path:
@@ -81,8 +81,6 @@ class BigDeepQLearningAgent(Player):
                 self.cards = list(filter(lambda card: card not in next_move.cards, self.cards))
                 return next_move 
 
-
-        
         output = self.train_play(state)
         #safe this action and state so we can use them when we get the new state, also reset last_action_illegal
         self.last_action = output
@@ -240,6 +238,9 @@ class BigDeepQLearningAgent(Player):
         Parameters:
             state: [int]
         '''
+        if self.normalized:
+            state = [ int(x*2 + 2) for x in state ]
+
         if not sum(state[:13]):
             return 0
 
