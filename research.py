@@ -1239,25 +1239,27 @@ def epsilon_decay_plot():
 if __name__ == '__main__':
     #small_dqn_win_in_time_results()
     #normalized_input_results()
-    test_for_small_dqn(".")
+    #test_for_small_dqn(".")
     #extended_q_table_win_in_time_results()
+    #exit()
+    #ai = BigDeepQLearningAgent("Anton", True, "test.pt")
+    ai = TemporalDifferenceAgent("mini anton", 0.1,0.75)
+    players = [ai, RandomPlayer("Random 1")]
+    players.append(RandomPlayer("Random 2"))
+    players.append(RandomPlayer("Random 3"))
+
+    session = President(players)
+    ai.training = False
+    session.simulate(10000)
+
+    ai.training = True 
+    #network_name = "test.pt"
+    session.train(100000, 1000)
+    #torch.save(ai.network, network_name)
+    
+    ai.training = False
+    session.simulate(10000)
     exit()
-    if False:
-        ai = BigDeepQLearningAgent("Anton", True, "test.pt")
-
-        players = [ai, RandomPlayer("Random 1")]
-        players.append(RandomPlayer("Random 2"))
-        players.append(RandomPlayer("Random 3"))
-
-        session = President(players)
-
-        network_name = "test.pt"
-        session.train(50000, 1000)
-        torch.save(ai.network, network_name)
-        
-        ai.training = False
-        session.simulate(10000)
-        exit()
 
     #results_for_gamma_0_100_small_dqn()
     ai = ExtendedTemporalDifferenceAgent("mini Anton", 0.1, 0.75)
