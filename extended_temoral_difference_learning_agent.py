@@ -2,18 +2,18 @@ from player import Player
 from move import Move
 from card import Card
 from move_generator import MoveGenerator
-from qtable import QTable
+from extended_qtable import ExtendedQTable
 from random import randint
 from skip import Skip
 
-class TemporalDifferenceAgent(Player):
+class ExtendedTemporalDifferenceAgent(Player):
     '''
     Player class that implements a temporal difference learning agent
     '''
 
     def __init__(self, name, learning_rate, discount_factor):
         super().__init__(name)
-        self.table = QTable() 
+        self.table = ExtendedQTable() 
         self.learning_rate = learning_rate #0.05
         self.discount_factor = discount_factor #0.6
         self.epsilon = 1

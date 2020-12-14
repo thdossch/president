@@ -2,7 +2,7 @@ from pprint import pprint
 from skip import Skip
 from pprint import pprint
 
-class QTable:
+class ExtendedQTable:
     def __init__(self):
         self.table = { state: { action: 0 for action in self.possible_actions(state) } for state in self.possible_states() }
         self.table[(0,)] = { action: 0 for action in self.possible_actions((2, 1)) }

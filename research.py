@@ -9,6 +9,7 @@ from random_player  import RandomPlayer
 from deep_q_learning_agent import DeepQLearningAgent
 from big_deep_q_learning_agent import BigDeepQLearningAgent
 from temporal_difference_learning_agent  import TemporalDifferenceAgent
+from extended_temporal_difference_learning_agent  import ExtendedTemporalDifferenceAgent
 
 def results_for_gamma_0_100_small_dqn_training(path):
     for g in range(0, 11):
@@ -810,6 +811,104 @@ def q_table_win_in_time_results():
 
             print('plt.plot(', end='')
             print([(x+1)*10000 for x in range(0, 20)], end='')
+            print(', ', end='')
+            print(results_heuristic, end='')
+            print(', \'r\', label=\'vs heuristic\')')
+
+            # for plotting with matplotlib
+            print()
+            print('plt.xlabel("episodes")')
+            print('plt.ylabel("W/L in %")')
+            print('axes = plt.gca()')
+            print('axes.set_ylim([0, 100])')
+            print('plt.legend(loc="upper right")')
+            print('plt.show()')
+            print()
+            print()
+
+def extended_q_table_win_in_time_results():
+    path = "extended_q_table_results"
+    try:
+        os.mkdir(path)
+    except OSError:
+        print ("Creation of the directory %s failed" % path)
+
+    try:
+        file = open(f"{path}/results_win_in_time.py", "x")
+        file.close()
+    except FileExistsError:
+        print ("Creation of the outputfile failed")
+        exit()
+
+    results_random = []
+    results_heuristic = []
+
+    ai = ExtendedTemporalDifferenceAgent("small Anton", 0.1, 0.75)
+    amount = 50000
+
+    #simulate without training
+    players = [ai, RandomPlayer("Random 1")]
+    players.append(RandomPlayer("Random 2"))
+    players.append(RandomPlayer("Random 3"))
+
+    session = President(players)
+    eps_before = ai.epsilon
+    ai.stop_training()
+
+    ranks = session.simulate(amount)
+    results_random.append(round(ranks[ai]['p']/amount*100, 2))
+
+    players = [ai, HeuristicPlayer("Heuristic 1")]
+    players.append(HeuristicPlayer("Heuristic 2"))
+    players.append(HeuristicPlayer("Heuristic 3"))
+
+    session = President(players)
+    
+    ranks = session.simulate(amount)
+    results_heuristic.append(round(ranks[ai]['p']/amount*100, 2))
+
+    ai.epsilon = eps_before
+    ai.training = True
+
+    for x in range(0,30):
+        print(f"after {x*10000} trainings")
+
+        players = [ai, RandomPlayer("Random 1")]
+        players.append(RandomPlayer("Random 2"))
+        players.append(RandomPlayer("Random 3"))
+
+        session = President(players)
+        session.train(10000)
+        eps_before = ai.epsilon
+        ai.stop_training()
+
+        ranks = session.simulate(amount)
+        results_random.append(round(ranks[ai]['p']/amount*100, 2))
+
+        players = [ai, HeuristicPlayer("Heuristic 1")]
+        players.append(HeuristicPlayer("Heuristic 2"))
+        players.append(HeuristicPlayer("Heuristic 3"))
+
+        session = President(players)
+        
+        ranks = session.simulate(amount)
+        results_heuristic.append(round(ranks[ai]['p']/amount*100, 2))
+
+        ai.epsilon = eps_before
+        ai.training = True
+
+    with open(f'{path}/results_win_in_time.py', 'a') as f:
+        with redirect_stdout(f):
+     
+            print("import matplotlib.pyplot as plt")
+            print('plt.plot(', end='')
+            print([(x+1)*10000 for x in range(0, 31)], end='')
+            print(', ', end='')
+            print(results_random, end='')
+            print(', \'b\', label=\'vs random\')')
+
+            print('plt.plot(', end='')
+            print([(x+1)*10000 for x in range(0, 31)], end='')
             print(', ', end='')
             print(results_heuristic, end='')
             print(', \'r\', label=\'vs heuristic\')')
