@@ -118,7 +118,7 @@ def results_for_gamma_0_100_small_dqn_simulation(path):
                 print()
 
 def test_for_small_dqn(path):
-        ai = DeepQLearningAgent("Anton", True)
+        ai = BigDeepQLearningAgent("Anton", True)
 
         players = [ai, RandomPlayer("Random 1")]
         players.append(RandomPlayer("Random 2"))
@@ -134,13 +134,28 @@ def test_for_small_dqn(path):
         ai.training = False
         session.simulate(5000)
 
+        # 10k
+        network_name = f"{path}/10k.pt"
+        session.train(5000, 1000)
+        torch.save(ai.network, network_name)
+        ai.training = False
+        session.simulate(10000)
+
         # 20k
         ai.training = True 
         network_name = f"{path}/20k.pt"
-        session.train(15000, 1000)
+        session.train(10000, 10000)
         torch.save(ai.network, network_name)
         ai.training = False
-        session.simulate(5000)
+        session.simulate(10000)
+
+        # 35k
+        ai.training = True 
+        network_name = f"{path}/35k.pt"
+        session.train(15000, 10000)
+        torch.save(ai.network, network_name)
+        ai.training = False
+        session.simulate(10000)
 
         # 50k
         ai.training = True 
@@ -152,7 +167,7 @@ def test_for_small_dqn(path):
 
         # 70k
         ai.training = True 
-        network_name = f"{path}/20k.pt"
+        network_name = f"{path}/70k.pt"
         session.train(20000, 10000)
         torch.save(ai.network, network_name)
         ai.training = False
@@ -920,13 +935,13 @@ def normalized_input_results():
     results_normal = []
     results_normalized = []
 
-    tests = 6
+    tests = 4 
     for x in range(0, tests):
         print(f"Calculating for normal {x}")
         amount = 10000
 
         ai = DeepQLearningAgent("Anton", True)
-        ai.normalized = False
+        ai.normalized = False 
 
         players = [ai, RandomPlayer("Random 1")]
         players.append(RandomPlayer("Random 2"))
@@ -1124,7 +1139,8 @@ def epsilon_decay_plot():
 
 if __name__ == '__main__':
     #small_dqn_win_in_time_results()
-    normalized_input_results()
+    #normalized_input_results()
+    test_for_small_dqn(".")
     exit()
     if False:
         ai = BigDeepQLearningAgent("Anton", True, "test.pt")
