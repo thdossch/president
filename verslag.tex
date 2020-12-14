@@ -19,8 +19,7 @@
 
 \section{Inleiding}
 In dit project zullen we bestuderen hoe reinforcement learning kan toegepast worden op een kaartspel. Het kaartspel dat we gaan bekijken is presidenten. Dit is een perfect voorbeeld van een spel waarbij we incomplete informatie hebben: er kan namelijk niet in de kaarten van de tegenstanders gekeken worden. Daarbij is elke toestand discreet, waardoor het probleem kan gemodelleerd worden als een Partially Observable Markov Decision Process (POMDP).\\\\
-Voor dit soort problemen zijn er al heel wat oplossingsmethodes, waarvan we er een paar zullen uitproberen en vergelijken. Daarbij kunnen we ons ook de vraag stellen of het wel degelijk rendeert om Reinforcement Learning te gebruiken, misschien zijn we beter af met een heuristiek? 
-
+Voor dit soort problemen zijn er al heel wat oplossingsmethodes, waarvan we er een paar zullen uitproberen en vergelijken. Daarbij kunnen we ons ook de vraag stellen of het wel degelijk rendeert om Reinforcement Learning te gebruiken, misschien zijn we beter af met een heuristiek? \\
 \subsection{Het probleem}
 Presidenten kent veel varianten, de regels liggen namelijk niet hard vast en kunnen daarom vaak besproken worden onder de spelers. Afhankelijk van welke regels je gebruikt, kan het spel moeilijker worden. \\\\
 Bij het spelen van presidenten speel je meerdere spelletjes. Na ieder spel zullen de `rangen' voor het volgend spel gekend zijn. Ieder spel bestaat uit meerdere rondes. In deze rondes proberen de spelers zoveel mogelijk kaarten te leggen om zo al hun kaarten uit te spelen. Tijdens een ronde moeten spelers elk om beurt een kaart leggen hoger of gelijk aan de vorige kaart. Het aantal van die kaarten moet hoger of gelijk zijn aan de kaart(en) van de vorige beurt.\\
@@ -28,52 +27,48 @@ Als een speler geen kaart(en) meer kan of wil liggen past hij, eenmaal gepast za
 De persoon die het eerste uitspeelt is de president, de tweede de vice-president.
 De persoon die als laatste overblijft is de scum, degene die als voorlaatste uitspeelt is de vice-scum.\\
 Als alle rangen gekend zijn start het volgende spel. Na het delen van de kaarten krijgt de president de beste 2 kaarten van de scum, de scum krijgt de 2 slechtste van de president. Hetzelfde geldt voor vice-president en vice-scum, maar die wisselen slechts 1 kaart uit.\\\\
-Nog enkele basisregels:\\\\
+Nog enkele basisregels:\\
 - De speler die de ‘klaver 3’ heeft, start de eerste ronde van een spel met deze kaart (of meerdere kaarten van waarde 3 waaronder de `klaver 3'). \\
 - Als een speler uit is, dan wordt een nieuwe ronde gestart en mag de speler links van de net uitgespeelde speler beginnen.\\\\
-Om het spel interessanter te maken hebben wij nog een paar extra regels toegevoegd:\\\\
+Om het spel interessanter te maken hebben wij nog een paar extra regels toegevoegd:\\
 - Als een 7 is gespeeld, dan moet de volgende kaart lager of gelijk zijn aan die 7 ook het aantal kaarten moet gelijk zijn aan het aantal gelegde kaarten.\\
 - De kaart 2 is een joker die kan gebruikt worden als hoogste kaart in het spel, of als een extra kaart. Als de joker gelegd wordt samen met een kaart van een andere waarde zal de joker deze waarde aannemen.\\
 - De ranking van de kaarten is dus als volgt: 3,4,5,6,7,8,9,10,V,Q,K,A,2\\
 
 \subsection{De environment}
-Bij Reinforcement Learning gaan we niet aan de slag met een dataset, maar met een “environment”, die het spel zelf voorstelt. We willen dan een agent bekomen die een zo hoog mogelijke score behaalt in de environment. \\
-In dit geval, willen we een agent die zo vaak mogelijk of zo lang mogelijk president kan zijn. Maar, de situatie is niet zo zwart-wit. Het is namelijk ook goed zijn om veel vice-president te zijn want dan ben je nog steeds in een voordeelpositie. Goed spelen kan ook zijn dat je met zeer slechte kaarten toch niet scum wordt maar door tactisch te spelen de high-scum rang behaalt. Soms krijg je gewoon kaarten waarmee je gewoon niet kan winnen hoe goed je ook bent, heb je dan slecht gespeeld als je scum wordt? Het is duidelijk niet zo dat dat altijd winnen een goeie maat is om te meten of je goed bent. Er zal dus gezocht moeten worden naar een goed evenwicht van deze verschillende factoren om te bepalen of de agent goed is. \\
-Bovendien kan de environment ook op veel verschillende manieren bekeken worden. Hoe wordt een state voorgesteld, welke rewards delen we uit, welke acties maken we mogelijk? Dit zijn allemaal deelproblemen op zich, waarvoor we verschillende oplossingen zullen proberen vinden.\\\\
+Bij Reinforcement Learning gaan we niet aan de slag met een dataset, maar met een “environment”, die het spel zelf voorstelt. We willen dan een agent bekomen die een zo hoog mogelijke score behaalt in de environment. \\\\
+In dit geval, willen we een agent die zo vaak mogelijk of zo lang mogelijk president kan zijn. Maar, de situatie is niet zo zwart-wit. Het is namelijk ook goed zijn om veel vice-president te zijn want dan ben je nog steeds in een voordeelpositie. Goed spelen kan ook zijn dat je met zeer slechte kaarten toch niet scum wordt maar door tactisch te spelen de high-scum rang behaalt. Soms krijg je gewoon kaarten waarmee je gewoon niet kan winnen hoe goed je ook bent, heb je dan slecht gespeeld als je scum wordt? Het is duidelijk niet zo dat dat altijd winnen een goeie maat is om te meten of je goed bent. Er zal dus gezocht moeten worden naar een goed evenwicht van deze verschillende factoren om te bepalen of de agent goed is. \\\\
+Bovendien kan de environment ook op veel verschillende manieren bekeken worden. Hoe wordt een state voorgesteld, welke rewards delen we uit, welke acties maken we mogelijk? Dit zijn allemaal deelproblemen op zich, waarvoor we verschillende oplossingen zullen proberen vinden.\\
 
 \subsection{Mogelijke oplossingsmethoden}
 Zoals in de inleiding besproken, is ons probleem gemodelleerd als  een Partially Observable Markov Decision Process (POMDP). Hier zijn verschillende oplossingsmethoden voor mogelijk, waaronder Q-learning, DQN en Monte Carlo Tree Search. Het doel van deze oplossingsmethoden en van Reinforcement Learning zelf, is om een agent, gegeven een toestand en een aantal acties, de meest optimale actie te laten kiezen. Hierbij wordt met optimaal bedoeld dat de agent zijn score maximaliseert. Een actie uitvoeren in een bepaalde state, geeft de agent dus een reward (die goed of slecht kan zijn).\\\\ 
 Een eerste interessante weg is Q-learning. Alhoewel dit een algoritme is dat we vaak bij simpele spelsituaties gebruikt zien (zoals \cite{simple-qlearning}), zouden we kunnen kijken of dit goede resultaten geeft. Aangezien Q-learning werkt met een Q-table die per state en per actie een score bijhoudt, kan het toch zijn dat dit te beperkt is voor de grote aantal mogelijke spelsituaties in presidenten. \\\\
 Het is daarom misschien interessanter om met een DQN of Deep Q-Network te werken, waarmee we kunnen werken met grotere states om zo meer informatie over het spel bij te houden. Een succesvol voorbeeld met neurale netwerken is \cite{nn-paper}, waar ze werken met spel dat een gelijkaardige complexiteit heeft als presidenten. Waarom ze niet met DQN werken, wordt ook besproken, en is interessant om later in dit onderzoek nog eens aan te halen. \\\\
-Ten laatste zou Monte Carlo Tree Search een zelfde beperkingen geven als Q-learning, namelijk de grootte van de state. Hoe groot kunnen we de state maken tot we in een situatie komen waar we te veel paden hebben om te simuleren? Hiervoor zijn er wel al oplossingen, waaronder Partially Observable Monte-Carlo Planning (POMCP), wat een aangepaste Monte Carlo tree search is om POMDPs op te lossen \cite{mct-1}. Er bestaan ook andere manieren door Monte Carlo te combineren met andere oplossingen, zoals in \cite{mct-2} of \cite{mct-3}.\\\\
+Ten laatste zou Monte Carlo Tree Search een zelfde beperkingen geven als Q-learning, namelijk de grootte van de state. Hoe groot kunnen we de state maken tot we in een situatie komen waar we te veel paden hebben om te simuleren? Hiervoor zijn er wel al oplossingen, waaronder Partially Observable Monte-Carlo Planning (POMCP), wat een aangepaste Monte Carlo tree search is om POMDPs op te lossen \cite{mct-1}. Er bestaan ook andere manieren door Monte Carlo te combineren met andere oplossingen, zoals in \cite{mct-2} of \cite{mct-3}.\\
 
 \section{Methodiek}
 Uit de bovenstaande besproken oplossingsmethodes, bespreken we de eerste twee, namelijk Q-learning en DQN. Interessant hieraan is dat de tweede methode, die met een Deep Q-Network werkt, gebaseerd is op het Q-learning van de eerste methode. Ook bekijken we een alternatieve, eenvoudigere oplossingsmethode die aan de hand van heuristieken of vuistregels van presidenten werkt.\\
-
 \subsection{Heuristiek}
 
-Om te toetsen hoe goed de andere oplossingsmethoden zijn, hebben we een goede speler nodig. Hiervoor hebben we een heuristiek geimplementeerd die ongeveer volgt wat echte spelers in het spel zouden doen, namelijk:\\
+Om te toetsen hoe goed de andere oplossingsmethoden zijn, hebben we een goede speler nodig. Hiervoor hebben we een heuristiek geimplementeerd die ongeveer volgt wat echte spelers in het spel zouden doen, namelijk:
 \begin{itemize}
 	\item Leg altijd de laagste kaart mogelijk. Als je meerdere van die kaart hebt, leg ze allemaal.
 	\item Leg enkel een joker als je niet anders kan.
 	\item Pas enkel wanneer je niets kan leggen.
 \end{itemize}
 Een echte speler zal natuurlijk ook rekening houden met details zoals welke kaarten al gelegd zijn doorheen het spel, hoeveel spelers al uitgespeeld zijn, ... Maar we zullen toch zien dat deze heuristiek opvallend goede resultaten behaald. \\\\
-Ook hebben we een extra speler geimplementeerd: de random speler. Deze speler kiest een willekeurige zet uit de mogelijke zetten die hij op dat moment kan doen gegeven de laatst gelegde kaart(en) en de kaarten in zijn hand. Zo hebben we nu een goede en slechtere speler, waarop getest kan worden.\\\\
+Ook hebben we een extra speler geimplementeerd: de random speler. Deze speler kiest een willekeurige zet uit de mogelijke zetten die hij op dat moment kan doen gegeven de laatst gelegde kaart(en) en de kaarten in zijn hand. Zo hebben we nu een goede en slechtere speler, waarop getest kan worden.\\
 
 \subsection{Q-learning}
 \subsubsection{Theorie}
 Q-learning helpt ons zoeken naar een zo goed mogelijke policy \textbf{(todo: leg policy uit? zie dqn-pract)}. De letter $Q$ slaat op de functie die gebruikt wordt om, gegeven een state en een actie, de waarde van deze combinatie te vinden. Deze waarde geeft aan hoe goed - of slecht - een bepaalde actie is in een bepaalde state.\\\\
-Op basis van de Bellman equations \cite{bellman-equations}, kunnen we een update regel definieren die er als onderstaande formule uitziet. Een Q-waarde van een bepaald state-actie paar zal dus veranderen met de tijd. Daarom moeten we in het begin de Q-waarden initialiseren, om die dan wanneer nodig aan te passen.\\\\
-
-
+Op basis van de Bellman equations \cite{bellman-equations}, kunnen we een update regel definieren die er als de formule in figuur 1 uitziet. Een Q-waarde van een bepaald state-actie paar zal dus veranderen met de tijd. Daarom moeten we in het begin de Q-waarden initialiseren, om die dan wanneer nodig aan te passen.\\
 \begin{figure}[h]
 \centering
 \includegraphics[scale=0.70]{images/qformula.png}
 \caption{Q function - Source: wikipedia.org/wiki/Q-learning}
 \label{fig:qfunction}
-\end{figure}
-
+\end{figure} \\
 Er zijn nog een aantal belangrijke parameters aanwezig in de formule. 
 \begin{itemize}
 	\item Learning rate: Geeft aan in welke mate we de Q-waarde updaten, een grote learning rate zal dus meer impact hebben op de uiteindelijke Q-waarde dan een kleinere.
@@ -89,22 +84,21 @@ De Q-waarden die doorheen het algoritme geupdate worden, worden bijgehouden in e
 We kunnen natuurlijk bediscussiëren of het niet beter zou zijn om een grotere state bij te houden, maar hier komen we later bij onze testresultaten op terug. Er is wel een beperking in hoe groot we de state kunnen maken, aangezien er een punt zou zijn waar de tabel zo groot wordt dat veel states niet meer bezocht worden. \\\\
 De initiele Q-waarden in de tabel zijn 0 voor alle acties behalve `skip'. Vanaf nu zullen we het over een skip hebben als het over een beurt passen gaat. De waarden voor skip in elke mogelijke state wordt op -1 gezet, wat betekent dat we die al in het begin afstraffen. Op deze manier proberen we ervoor te zorgen dat de agent zo veel mogelijk beslist om wel een kaart te leggen. \\\\
 Aangezien we hier de state beperkt moeten houden, moeten we best ook de taktiek van de agent beperkt houden, door hem op zo een goed mogelijke manier de rondes te laten spelen spelen, en niet te kijken naar winnen van het spel. Natuurlijk zal je het spel vaak winnen als je goed speelt in rondes. Dit is ook wat onze heuristieke speler doet. Welke reward functie we daaroor implementeren zullen we bespreken bij resultaten.\\\\
+Voor de $\epsilon$ kiezen we als startwaarde 1, en werken we met epsilon decay. Na iedere actie zullen we de huidige $\epsilon$ vermenigvuldigen met een $epsilon\_decay$ parameter. Op deze manier is er in het begin van het trainen meer exploratie maar naarmate de tijd vordert zal $\epsilon$ afnemen en zullen we meer exploitatie hebben. We zullen echter wel zorgen dat eenmaal $\epsilon == 0.05$ de waarde van $\epsilon$ niet meer veranderd. Dit omdat we toch steeds wat exploratie willen hebben.\\\\
 Ook hebben we een poging gedaan om de state-acties in een bitvector vorm te beschrijven. Dit omdat als we met grotere states en acties werken we zo meer geheugen zouden besparen dan gebruik te maken van tuples. Echter bleek dat dit negatief was, ook voor meer uitgebreide state-actie representaties, voor de performantie van het trainen en geen significante verbeteringen bijbracht in de prestatie van de agent. Daarom zijn we van dit idee afgestapt.\\
-
 
 \subsection{Deep Q-Network}
 \subsubsection{Theorie}
 In plaats van de tabel letterlijk op te slaan en up te daten, benaderen we in het DQN-algoritme de tabel met een functie-approximator. Deze functie-approximator is een neuraal netwerk.\\\\
 Het updaten van dit neuraal netwerk werkt dan als volgt. Stel we bevinden ons in een toestand $s$, dan wordt er een actie $a$ gekozen op basis van een $\epsilon$-greedy policy. Door deze actie uit te voeren, komen we in een nieuwe state $s'$ terecht en krijgen we ook een reward $r$. Waar we bij Q-learning hiermee de Q-table kunnen updaten, is het hier niet zo simpel. \\\\
 De volgende stap is om deze originele state, de actie, de nieuwe state en de reward op te slaan in een replay memory. In dit replay memory krijgen we dus een verzameling van tuples van de vorm $(s,a,r,s')$. In elke stap nemen we dan samples uit het replay memory en stellen we targets op. Deze targets worden ongeveer dezelfde manier berekend als de temporal difference targets bij Q-learning (zie Figure ~\ref{fig:qfunction}). Enkel is hier het verschil dus dat $Q$ nu een functie-approximator is. Daarbij zien we dat deze targets van de vorm `reward + estimate of optimal future value' zijn. Dit tweede deel is niet meer nodig als we aan het einde van de episode zijn, dan houden we dus enkel de reward over als target. \\\\
-Daarna wordt het netwerk geupdate met de MSE-loss functie, en kunnen we dit allemaal herhalen.\\\\
+Daarna wordt het netwerk geupdate met de MSE-loss functie, en kunnen we dit allemaal herhalen.\\
 
 \subsubsection{Implementatie}
 Gelukkig moeten we hier niet het warm water opnieuw uitvinden, en zijn er al een aantal frameworks ter beschikking die ons een handje kunnen helpen. Wij hebben gekozen voor PyTorch, die dus de implementatie details voor zich neemt.\\\\
 Het belangrijkste was hier om te beslissen hoe we precies ons netwerk gingen voorstellen: welke inputs, hidden layers en outputs hebben we nodig?\\\\
 Ons initieel idee was om niet te beginnen met een te grote state, om te kijken of we toch resultaten gelijkaardig aan de heuristieke speler konden krijgen met dezelfde informatie. Daarom hebben we gekozen om de de kaarten in de hand bij te houden en de laatst gelegde kaart. De state zou dan 15 velden bevatten. De eerste 13 velden geven aan hoeveel kaarten je van elke waarde in je hand hebt. De laatste 2 tonen dan hoeveel kaarten van welke rang als laatste zijn gelegd (met speciale waarden voor een skip en het begin van een ronde). Om te zorgen dat deze inputs genormaliseerd zijn, gebruiken we volgende formule $norm\_aantal = (aantal - 2)/2$.\\\\
-Na de input laag hebben we 2 hidden layers van elk 64 nodes. Daarop volgen de output nodes, namelijk 53 nodes die elk een actie voorstellen. Er is dus een mapping van 0-52 met elk een overeenkomende zet. Deze zet kan een skip zijn, of een aantal kaarten van een bepaalde rang. Om de output te beperken, kan de agent maar maximum 4 kaarten leggen (ookal is het soms mogelijk om met jokers meer dan dit aantal te leggen).\\\\
-
+Na de input laag hebben we 2 hidden layers van elk 64 nodes. Daarop volgen de output nodes, namelijk 53 nodes die elk een actie voorstellen. Er is dus een mapping van 0-52 met elk een overeenkomende zet. Deze zet kan een skip zijn, of een aantal kaarten van een bepaalde rang. Om de output te beperken, kan de agent maar maximum 4 kaarten leggen (ookal is het soms mogelijk om met jokers meer dan dit aantal te leggen).\\
 
 \section{Resultaten}
 Om een gevoel te krijgen hoe goed een agent presteert gebruiken we een win/lose ratio. Dit zal enkel rekening houden met hoeveel een agent president is:
@@ -128,29 +122,24 @@ Het is belangrijk om te weten hoe de heuristieke speler het doet tegenover rando
         \caption{W/L in \% voor heuristieke agents}
 \end{table}
 
-We zien dat de heuristieke speler het al zeer goed doet, wat wel te verwachten was tegen random spelers. Een goed doel voor de niet-heuristieke agents is dus minstens beter zijn dan de random speler en proberen de heuristieke speler te evenaren, al dan niet te overtreffen.\\\\
-
+We zien dat de heuristieke speler het al zeer goed doet, wat wel te verwachten was tegen random spelers. Een goed doel voor de niet-heuristieke agents is dus minstens beter zijn dan de random speler en proberen de heuristieke speler te evenaren, al dan niet te overtreffen.\\
 
 \subsection{Q-learning}
 \subsubsection{State met 2 velden}
-Zoals beschreven in de implementatiedetails van Q-learning, werken we hier met een state die als (rang, aantal) wordt voorgesteld. Dit is dus een heel beperkte state, waarvoor we een gepaste reward functie moeten vinden. Naast de rewardfunctie kunnen de andere parameters ($\epsilon$, $\alpha$, $\gamma$) ook een invloed hebben.\\
-
+Zoals beschreven in de implementatiedetails van Q-learning, werken we hier met een state die als (rang, aantal) wordt voorgesteld. Dit is dus een heel beperkte state, waarvoor we een gepaste reward functie moeten vinden. Naast de rewardfunctie kunnen de andere parameters ($\epsilon$, $\alpha$, $\gamma$) ook een invloed hebben.\\\\
 Om een reward functie te vinden, moeten we eerst beslissen wat we verwachten van onze agent. Eigenlijk willen we, net zoals bij de heuristieke speler, dat hij een ronde zo goed mogelijk speelt en niet kijkt naar of hij degelijk president is geworden of niet. Dit vertaalt dan naar: de agent moet zo snel mogelijk al zijn kaarten uitspelen, of zo veel mogelijk kaarten spelen per ronde. Hiervoor zijn we tot volgende reward functie gekomen:
 \begin{center}
 $r = amount\_of\_cards\_played * 0.5 + amount\_of\_cards\_played\_in\_round * 0.2$
 \end{center}
 In de rewardfunctie zien we ook de term $amount\_of\_cards\_played\_in\_round$ bevat. Ookal zit dit niet in de state gebruiken we dit om acties die vaak leiden tot meer kaarten gespeeld in een ronde extra te belonen.\\\\
-
-Voor de $\epsilon$ kiezen we als startwaarde 1, en werken we met een epsilondecay policy. Na iedere actie zullen we de huidige $\epsilon$ vermenigvuldigen met een $epsilon\_decay$ parameter. Op deze manier is er in het begin van het trainen meer exploratie maar naarmate de tijd vordert zal $\epsilon$ afnemen en zullen we meer exploitatie hebben. We zullen echter wel zorgen dat eenmaal $\epsilon == 0.05$ de waarde van $\epsilon$ niet meer veranderd. Dit omdat we toch steeds wat exploratie willen hebben.\\
-Hieronder illustreren we dat het belangrijk is om je $epsilon\_decay$ factor dicht genoeg bij 1 te nemen anders zal $\epsilon$ al snel zijn minimum hebben bereikt en zal er misschien niet genoeg exploratie geweest zijn.\\ 
+Aangezien we met $\epsilon$ decay werken, illustreren we hieronder dat het belangrijk is om je $epsilon\_decay$ factor dicht genoeg bij 1 te nemen. Anders zal $\epsilon$ al snel zijn minimum hebben bereikt en zal er misschien niet genoeg exploratie geweest zijn.\\
 \begin{figure}[h]
 \centering
-\includegraphics[scale=0.50]{images/epsilon_decay.png}
+\includegraphics[scale=0.5]{images/epsilon_decay.png}
 \caption{Illustratie van epsilondecay met een minimum $\epsilon$ van 0.05}
-\end{figure}
-\\
-Voor ons model kozen wij voor een $epsilon\_decay$ factor van 0.9999 omdat we merken dat na 100000 episodes het model zo goed als stabiel is. Met 0.9999 bereiken we de minimale epsilon na ongeveer 30000 episodes wat betekent dat we na 30\% van de episodes voornamelijk exploitatie hebben.\\\\
-In onderstaande tabel hebben we een simulatie gedaan voor de $epsilon\_decay$ factoren die in bovenstaande grafiek zijn geïllustreerd. De gebruikte parameter voor $\alpha$ en $\gamma$ zijn de parameters die we uit het onderzoek in de volgende paragrafen zijn bekomen.
+\end{figure}\\
+Voor ons model kozen wij voor een $epsilon\_decay$ factor van 0.9999 omdat we merken dat na 100000 (TODO:eig niet..) episodes het model zo goed als stabiel is. Met 0.9999 bereiken we de minimale epsilon na ongeveer 30000 episodes wat betekent dat we na 30\% van de episodes voornamelijk exploitatie hebben.\\\\
+In onderstaande tabel hebben we een simulatie gedaan voor de $epsilon\_decay$ factoren die in bovenstaande grafiek zijn geïllustreerd, met $\alpha = 0.1$ en $\gamma = 0.75$. Dit zijn de waarden voor de parameters die in het onderzoek in appendix A (TODO: reference) de beste resultaten gaven.
 \begin{table}[H]
         \centering
         \begin{tabular}{|c|c|c|c|c|}
@@ -164,23 +153,7 @@ In onderstaande tabel hebben we een simulatie gedaan voor de $epsilon\_decay$ fa
         \caption{W/L voor Q-table agent in \% voor verschillende epsilondecay factoren na 100000 episodes}
 \end{table}
 We zien dat zelfs voor een $epsilon\_decay$ factor van 0.99 de agent goed presteert. Ook voor $epsilon\_decay = 0.99999$, waarbij er nog veel exploratie is na 100000 episodes, is dit het geval. We kunnen dus besluiten dat de $\epsilon$ parameter een beperkte invloed heeft op de prestatie van de agent.\\\\
-Voor de juiste learning rate en discount factor kunnen we simulaties laten lopen om zo de optimale parameters te vinden. Hieronder zien we de W/L voor alle mogelijke parameters voor $\alpha$ en $\gamma$ met stappen van $0.1$.
-
-\begin{figure}[h]
-\centering
-\includegraphics[scale=0.50]{images/qtable_parameter_random.png}
-\includegraphics[scale=0.50]{images/qtable_parameter_heuristic.png}
-\caption{Resultaten variëren met parameters $\gamma$ en $\alpha$ na 50000 episodes, links tegen random, rechts tegen heuristieke spelers}
-\end{figure}
-We zien nu dat er voor $\gamma \in [0.5, 0.8] $ en $\alpha \in [0.1, 0.3] $ meer winst wordt behaald. Bovenstaande figuren zijn bekomen met training van 50000 keer. We zullen nu dubbel zo veel trainen voor deze intervallen om zo de optimale $\gamma$ en $\alpha$ te vinden\\\\
-\newpage
-\begin{figure}[h]
-\centering
-\includegraphics[scale=0.50]{images/qtable_parameter_random_zoomed.png}
-\includegraphics[scale=0.50]{images/qtable_parameter_heuristic_zoomed.png}
-\caption{Resultaten variëren met parameters $\gamma$ en $\alpha$ na 100000 episodes, links tegen random, rechts tegen heuristieke spelers}
-\end{figure}
-Uit bovenstaande afbeeldingen kunnen we besluiten dat de optimale parameters, voor de gebruikte rewardfunctie, $\alpha = 0.1$ en $\gamma = 0.75$ zijn. Met deze parameters behaalt onze agent volgende resultaten:
+ Met deze parameters behaalt onze agent volgende resultaten: TODO (ook laten trainen tegen heuristiek en dan resultaten tegen random en heuristiek snelle fix).
 \begin{table}[H]
         \centering
         \begin{tabular}{|c|c|c|}
@@ -192,29 +165,34 @@ Uit bovenstaande afbeeldingen kunnen we besluiten dat de optimale parameters, vo
         \end{tabular}
         \caption{W/L in \% voor Q-table agent}
 \end{table}
-
-Dit zijn redelijk goede resultaten, aangezien de random speler een 6\% en 25\% haalt in deze situatie. We hebben dus zeker de random agent overtroffen. Ook tegen de heuristieke speler zien we dat we een redelijke prestatie neerzetten. Het voordeel dat de heuristieke speler heeft is dat hij enkel jokers gebruikt als dat nodig is. De Q-table agent houdt hier geen rekening mee, wat een verklaring kan zijn voor het lagere resultaat.\\\\
-\newpage
-Echter als we de prestatie van de agent plotten voor meerdere episodes zien we een opmerkelijk resultaat.\\
+Dit zijn redelijk goede resultaten, aangezien de random speler een 6\% en 25\% haalt in deze situatie. We hebben dus zeker de random agent overtroffen. Ook tegen de heuristieke speler zien we dat we een redelijke prestatie neerzetten. Het voordeel dat de heuristieke speler heeft is dat hij enkel jokers gebruikt als dat nodig is. De Q-table agent houdt hier geen rekening mee, wat een verklaring kan zijn voor het lagere resultaat.
 \begin{figure}[h]
 \centering
 \includegraphics[scale=0.55]{images/wins_in_time.png}
 \caption{Resultaten met $\gamma = 0.75$ en $\alpha = 0.1$ doorheen de tijd}
 \end{figure}\\
-We zien dat de Q-table agent de random speler sterk overtreft zelfs zonder training! Na even zoeken vonden we dat de oorzaak hiervan bij de implementatie van de Q-table agent ligt. In de tabel van de agent staan de acties die voor een state kunnen genomen worden in volgorde van laag naar hoog, als de agent een zet moet doen neemt hij de zet die hij legaal kan doen met de hoogste Q-waarde. Dit wil zeggen dat als de tabel nog maar net geïntialiseerd is en alles op 0 staat hij de laagste legale zet zal doen die hij kan. Dit op zich is al een kleine heuristiek die beter presteert dan de random keuze van de random agent.\\\\
-
-\textbf{dit is nog voor de uitgebreide state}\\
-Als we werken met een state $(rang, aantal, aantal\_kaarten\_in\_hand)$ waarbij
-\begin{center}
-$aantal\_kaarten\_in\_hand = aantal$ $if$ $ aantal <= 4$ $else$ $5$
-\end{center}
-En we initialiseren de state-actie paren op 10 voor de acties op een state die de zorgen dat de speler uitspeelt, gebruikmakend van de rewardfunctie die hierboven beschreven is, behalen we ook een mooie W/L van 45\% tegen random spelers.
-
+Echter als we de prestatie van de agent plotten voor meerdere episodes (zie Figuur 5) zien we een opmerkelijk resultaat.\\\\
+We zien dat de Q-table agent de random speler sterk overtreft zelfs zonder training! Na even zoeken vonden we dat de oorzaak hiervan bij de implementatie van de Q-table agent ligt. In de tabel van de agent staan de acties die voor een state kunnen genomen worden in volgorde van laag naar hoog, als de agent een zet moet doen neemt hij de zet die hij legaal kan doen met de hoogste Q-waarde. Dit wil zeggen dat als de tabel nog maar net geïntialiseerd is en alles op 0 staat hij de laagste legale zet zal doen die hij kan. Dit op zich is al een kleine heuristiek die beter presteert dan de random keuze van de random agent.\\
 \subsubsection{Uitgebreide state}
 Idealiter bevat de state ook de kaarten in je hand. Dit gaat alweer iets meer naar de richting van de heuristieke speler, die ook op basis van zijn hand een beslissing maakt. Na wat zorgvuldig rekenwerk zou dit neerkomen op 2872 mogelijke starthanden, zonder zelfs de andere mogelijke handen na het leggen van 1, 2, ... kaarten. Dit zijn veel te veel states voor een functionele Q-table, er moet dus veralgemeend worden. De grootste veralgemening kan dus het bijhouden zijn van het aantal kaarten in je hand, en niet de kaarten exact.\\\\
 We kunnen de state als volgt voorstellen: (rang, aantal, aantal kaarten in hand). Met de reward functie die hierboven zo goede resultaten gaf, krijgen we nu nog maar rond de 30\% W/L ratio tegen 3 random spelers. Dit is dus niet veel beter meer dan een random agent. Ook de complexere functie op basis van de hand behaalt maar met moeite 30\%. \\\\
 We zitten hier dus duidelijk met een probleem, namelijk de Q-table die te groot wordt. Hierdoor zijn er veel delen van de Q-table die amper of zelfs nooit worden bezocht, waardoor veel Q-waarden op hun initiele waarde blijven staan, en de agent dus geen goede beslissingen kan maken.\\\\
-We zouden dus de state nog meer moeten veralgemenen...TODO thor :x
+We zouden de state nog meer moeten veralgemenen. Als we werken met een state\\\\
+\indent $(rang, aantal, aantal\_kaarten\_in\_hand)$ met
+\begin{center}
+$aantal\_kaarten\_in\_hand = aantal$ $if$ $ aantal <= 4$ $else$ $5$
+\end{center}
+En we initialiseren de state-actie paren op 10 voor de acties op een state die de zorgen dat de speler uitspeelt, gebruikmakend van de rewardfunctie die hierboven beschreven is, behalen we ook een mooie W/L van 45\% tegen random spelers. We kunnen dit uitzetten op een grafiek naarmate hoeveel hij traint (figuur 6), waarop we zien dat er eigenlijk al vanaf 20 000 episodes niet veel meer verbeterd wordt.\\
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.45]{images/extended_q_table_results.png}
+\caption{Resultaten met $\gamma = 0.75$ en $\alpha = 0.1$ doorheen de tijd}
+\end{figure}\\
+Dit is nog steeds minder dan wat we krijgen met de kleinere Q-table. Hier merken we al snel een beperking van Q-learning op: we moeten de state klein genoeg houden. Als we dit niet doen, krijgen we states in de Q-table die amper of nooit worden tegengekomen en enkele states die zeer vaak worden tegengekomen. Ook met de acties is dit het geval, het zal bijvoorbeeld niet veel voorkomen dat je 4 koningen kan leggen waardoor de Q-waarde van deze actie niet veel aangepast gaat worden bij het trainen, en nog minder als deze actie over veel states kan gedaan worden. \\\\
+Als we in dit geval positieve rewards geven, en we beginnen met alle state-actie waarden op 0,  dan worden de waarden van de vaak voorkomende state-actie paren groter dan de waarden van zeldzame paren. Echter zijn vaak de zeldzame zetten zeer goed, maar zullen ze niet genomen worden omdat ze een lagere Q-waarde hebben. \\\\
+Neem als voorbeeld dat de state bestaat uit $(rang, aantal, aantal\_kaarten\_in\_hand)$ en (3,2,4) is. Onze agent heeft 3 Q'en en een A in zijn hand. De beste zet is de 3 Q'en leggen, waarmee de ronde waarschijnlijk gewonnen zou worden, en dan de A leggen waarmee hij het spel wint. Maar, de actie 3Q zal voor een hand van 4 kaarten hoogstwaarschijnlijk nog niet of nog maar heel weinig zijn voorgekomen waardoor dit een lagere Q-waarde zal hebben dan bijvoorbeeld 1Q leggen.\\\\
+We kunnen ook negatieve rewards geven, en alles initialiseren op 0. Stel dat de state hier (4,2,9) is en de agent heeft alle 4 de jokers. Dit komt zelden voor, waardoor de Q-waarde nog een redelijk "hoge" waarde dicht bij 0 zal hebben. Dit betekent dat de agent het leggen van de 4 jokers in 1 zet als een goede actie ziet. Dit is echter niet het geval want dan is hij zijn 4 jokers kwijt.\\\\
+TODO deze uitleg beter: Dit is dus een extra groot probleem bij presidenten, aangezien het spel veel states heeft die enkel voorkomen met een beetje geluk. Om zoals in bovenstaand voorbeeld 4 jokers te hebben, zou je deze dus moeten gekregen hebben bij het uitdelen van de kaarten, of een deel bij het uitwisselen tussen president en scum.
 
 \subsection{DQN}
 Het doel tot nu toe is het krijgen van gelijkaardige resultaten als bij de heuristieke speler, hierin zijn we nog niet geslaagd. Een mogelijke verklaring is de beperkte state, waarin we niet eens met de volledige hand kunnen rekening houden. Nu we werken met een deep Q-network, is het eindelijk mogelijk om dit wel te doen.
@@ -223,30 +201,34 @@ Het doel tot nu toe is het krijgen van gelijkaardige resultaten als bij de heuri
 We werken hier met een state van 15 velden, de eerste 13 stellen onze hand voor, de laatste 2 representeren de laatst gelegde kaart(en). Dit is even veel informatie als de heuristieke speler ook heeft, wat we tot nu toe nog niet hebben kunnen bereiken op een functionele manier.\\\\
 Als eerste testen we de reward functie die ons al veel succes heeft gegeven bij Q-learning. In deze context lijkt die niet zo succesvol te zijn, aangezien die ons nu ongeveer 24\% W/L geeft tegen 3 random spelers. \\\\
 Omdat we nu de volledige hand in de state bijhouden, kunnen we misschien een betere reward functie construeren op basis van de hand. We gebruiken het idee van een relatieve hand score, besproken in Q-learning (TODO?), en voegen nog een aantal metrieken toe. De reward functie ziet er als volgt uit in pseudocode:\\\\
-\indent als uitgespeeld: return 10\\
-\indent als gepast: return -1.5 + skip\_penalty\\
-\indent anders: return relative\_hand\_score + aantal\_kaarten\_gelegd*0.05\\
+\indent als uitgespeeld: return $10$\\
+\indent als gepast: return $skip\_penalty$\\
+\indent anders: return $relative\_hand\_score$\\\\
+De $skip\_penalty$ geeft een hogere straf als er in het begin van de ronde gepast wordt, dan als er op het einde gepast wordt. De $relative\_hand\_score$ geeft een mate van verbetering van de hand aan. Het idee hier achter is dat je zoveel mogelijk je hoge kaarten probeert te behouden (hier is een joker de hoogste rang), en dat alle kaarten leggen van een rang beter is dan minder te leggen. \\\\
+We hebben deze functie niet in 1 keer gevonden, maar hebben veel verschillende uitgetest. Het valt van deze korte uitleg misschien niet te merken, maar dit is een heel gefabriceerde en gedetailleerde functie. De relatieve hand score is een reward die meer gebaseerd is op het korte termijn gedrag van de agent, het is dus interessant om te kijken hoe de discount factor $\gamma$ hier een rol in speelt.\\
 
-TODO: leg uit score van hand en skip penalty\\\\
-We hebben deze functie niet in 1 keer gevonden, maar hebben veel verschillende uitgetest. Het valt duidelijk te merken dat dit een heel gefabriceerde en gedetailleerde functie is. De relatieve hand score is een reward die meer gebaseerd is op het korte termijn gedrag van de agent, het is dus interessant om te kijken hoe de discount factor $\gamma$ hier een rol in speelt.
 \begin{figure}[h]
 \centering
 \includegraphics[scale=0.45]{images/gamma-iteratie-dqn.png}
 \caption{Resultaten variëren met parameter $\gamma$}
+\end{figure}
+We zien inderdaad in Figuur 6, dat bij een hele hoge gamma de agent het zelfs slechter gaat doen dan de random spelers waar hij tegen speelt. (TODO: waarom? hij skipt dan wss enkel) In deze context houden we de discount factor dus beter lager dan 0.9. Op 0.6 vinden we ook nog een uitschieter die een iets lagere gamma heeft, wat figuur 7 kan verklaren.\\\\
+Merk op dat we met het construeren van een heel specifieke reward functie, maar met moeite een W/L percentage van 45\% behalen tegenover de random spelers. Dit is nog steeds redelijk goed tegen de random spelers, maar zeker nog niet even goed als een heuristieke speler. Daarbij is het gedetailleerd fabriceren van een reward functie misschien niet de beste manier van aanpak. De agent volgt namelijk exact wat we aangeven in de reward functie, maar we hebben al vaak gemerkt dat een kleine redeneringsfout de agent kan leiden tot heel vreemde acties.\\\\
+Wat we ook merken is de grote schommelingen tijdens de training. Naarmate de training vordert stijgt en daalt het W/L in redelijk grote sprongen, wat aantoont dat het netwerk vrij onstabiel is.\\
+TODO: deze grafiek (figuur 7) is veel te hoog, niet tot 100 tonen
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.15]{images/schommelingen-dqn.png}
+\caption{Resultaten over de tijd met $\gamma=0.5$}
 \end{figure}\\
-We zien inderdaad dat bij een hele hoge gamma, de agent het zelfs slechter gaat doen dan de random spelers waar hij tegen speelt. (TODO: waarom? hij skipt dan wss enkel) In deze context houden we de discount factor dus beter lager dan 0.9. Op 0.6 vinden we ook nog een uitschieter die een iets lagere gamma geeft, maar voor de meeste gevallen lijken de waarden onder 0.9 het wel goed te doen.\\\\
-Merk op dat we met het construeren van een heel specifieke reward functie, maar met moeite een W/L percentage van 45\% behalen tegenover de random spelers. Dit is nog steeds redelijk goed tegen de random spelers, maar zeker nog niet even goed als een heuristieke speler. Daarbij is het gedetailleerd fabriceren van een reward functie misschien niet de beste manier van aanpak. Op een punt loopt dit dus op een dood einde, en moeten we misschien de agent meer zijn eigen beslissingen laten maken, in plaats van te blijven "gokken" welke kleine aanpassing aan de reward functie een beter resultaat zou geven. De agent volgt namelijk exact wat we aangeven in de reward functie, maar we hebben al vaak gemerkt dat een kleine redeneringsfout de agent kan leiden tot heel vreemde acties.
 
 \subsubsection{Grote DQN}
-TODO: idk resultaten zeker i guess en redenering reward functie\\
+In het vorige deel hebben we een vrij gedetailleerde reward functie gemaakt, die elke stap een reward geeft. We willen echter de agent minder zelf sturen, en zelf de taktiek van het spel laten ontdekken. Daarvoor gebruiken we volgende, simpele reward functie: TODO.\\\\
+De agent krijgt dus enkel een reward op het einde, en krijgt voor alle andere stappen een 0. Omdat dit een reward functie is die meer over het hele spel loopt, breiden we de inputs van ons netwerk uit. De state houdt vanaf nu ook alle gelegde kaarten bij in het spel. Er zijn dus 13 velden voor de eigen hand, 13 velden (op dezelfde manier als eigen hand) voor de gelegde kaarten in het spel, en 2 voor de laatste gelegde kaart(en). 
 
 \section{conclusie}
 - simpelere rewards die de agent meer zijn ding laten doen lijken het beter te doen
 - zelfs simpelere algoritmen lijken het beter te doen\\\\
-Het probleem met presidenten en qlearning, is dat er states zijn die amper of nooit worden tegengekomen en enkele states die zeer vaak worden tegengekomen. Ook met de acties is dit het geval, het zal bijvoorbeeld niet veel voorkomen dat je 4 koningen kan leggen waardoor de Q-waarde van deze actie niet veel aangepast gaat worden bij het trainen. \\\\
-Met je rewardfunctie kan je twee kanten op, je kan werken met eerder positieve Q-waarden of met eerder negatieve Q-waarden. Stel dat we beginnen met alle state-actie waarden op 0 te initialiseren. Dan zal in het geval van de eerder positive Q-waarde de waarde van de vaak voorkomende state-actie paren groter zijn dan de zeldzame. Echter zijn vaak de zeldzame zetten zeer goeie zetten in deze situatie maar deze zullen dus niet genomen worden omdat ze een lagere Q-waarde hebben.\\\\
-Een voorbeeld hier zou kunnen zijn: de state bestaat uit $(rang, aantal, aantal\_kaarten\_in\_hand)$ en is hier (3,2,4) en onze agent heeft 3 Q'en en een A in zijn hand. De beste zet zou de 3Q leggen, waarmee de ronde waarschijnlijk gewonnen zou worden, en dan de A leggen waarmee hij het spel wint. Echter zal de actie 3Q voor de state (3,2,4) waarschijnlijk nog niet of nog maar heel weinig zijn voorgekomen waardoor dit een lagere Q-waarde zal hebben dan bijvoorbeeld 1Q leggen. En dus zal de agent niet goed spelen.\\\\
-Een voorbeeld voor de eerder negatieve rewards is een die we bij het zoeken naar een goede rewardfunctie vaak hebben zien gebeuren. Stel de state bestaat ook hier uit $(rang, aantal, aantal\_kaarten\_in\_hand)$ en is (4,2,9) en de agent heeft alle 4 de jokers. Dit komt zelden voor, waardoor dat de Q-waarde nog een redelijk "hoge" waarde dicht bij 0 zal hebben. Dit betekent dat de agent het leggen van de 4 jokers in 1 zet als een goeie actie zal beschouwen. Dit is echter niet het geval want dan is hij zijn 4 jokers kwijt.\\\\
 
 Ook interessant om zeker over te praten:\\
 https://www.alexirpan.com/2018/02/14/rl-hard.html\\
@@ -256,6 +238,7 @@ Veel van de observaties in de blogpost komen overeen wat we hier hebben gemerkt 
 - overfitten kan ook een probleem zijn bij DQN, zeker in de case van presidenten (zie bovenstaande uitleg van thor)
 - nog zo veel mogelijke problemen: states die niet goed zijn voorgesteld, foute parameters, slechte netwerk structuur, ...
 
+\newpage
 \begin{thebibliography}{9}
 \bibitem{simple-qlearning} 
 Reinforcement learning tutorial using Python and Keras 
@@ -281,4 +264,27 @@ todo
 Bellman Equations
 \\\texttt{https://en.wikipedia.org/wiki/Bellman\_equation}
 \end{thebibliography}
+\newpage
+
+
+\appendix
+\section{\\De beste learning rate en discount factor vinden}
+% the \\ insures the section title is centered below the phrase: AppendixA
+Voor de juiste learning rate en discount factor kunnen we simulaties laten lopen om zo de optimale parameters te vinden. Hieronder zien we de W/L voor alle mogelijke parameters voor $\alpha$ en $\gamma$ met stappen van $0.1$.
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.50]{images/qtable_parameter_random.png}
+\includegraphics[scale=0.50]{images/qtable_parameter_heuristic.png}
+\caption{Resultaten variëren met parameters $\gamma$ en $\alpha$ na 50000 episodes, links tegen random, rechts tegen heuristieke spelers}
+\end{figure}
+We zien nu dat er voor $\gamma \in [0.5, 0.8] $ en $\alpha \in [0.1, 0.3] $ meer winst wordt behaald. Bovenstaande figuren zijn bekomen met training van 50000 keer. We zullen nu dubbel zo veel trainen voor deze intervallen om zo de optimale $\gamma$ en $\alpha$ te vinden\\\\
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.50]{images/qtable_parameter_random_zoomed.png}
+\includegraphics[scale=0.50]{images/qtable_parameter_heuristic_zoomed.png}
+\caption{Resultaten variëren met parameters $\gamma$ en $\alpha$ na 100000 episodes, links tegen random, rechts tegen heuristieke spelers}
+\end{figure}\\
+Uit bovenstaande afbeeldingen kunnen we besluiten dat de optimale parameters, voor de gebruikte rewardfunctie, $\alpha = 0.1$ en $\gamma = 0.75$ zijn.
+
 \end{document}
