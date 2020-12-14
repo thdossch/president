@@ -133,8 +133,8 @@ class ExtendedTemporalDifferenceAgent(Player):
         if move is Skip():
             return Skip()
         if move.is_round_start():
-            return (0,)
-        return (move.rank, move.amount)
+            return (0,0, 5 if len(self.cards) >= 5 else len(self.cards))
+        return (move.rank, move.amount, 5 if len(self.cards) >= 5 else len(self.cards))
 
     def move_to_action(self, move):
         '''
@@ -160,3 +160,11 @@ class ExtendedTemporalDifferenceAgent(Player):
             move: Move
         '''
         return list(filter(lambda move: self.move_to_action(move) == action, possible_moves))[0]
+
+    def stop_training(self):
+        '''
+        Method that stops the training
+        '''
+        self.training = False
+        self.epsilon = 0
+        

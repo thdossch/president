@@ -9,7 +9,7 @@ from random_player  import RandomPlayer
 from deep_q_learning_agent import DeepQLearningAgent
 from big_deep_q_learning_agent import BigDeepQLearningAgent
 from temporal_difference_learning_agent  import TemporalDifferenceAgent
-from extended_temporal_difference_learning_agent  import ExtendedTemporalDifferenceAgent
+from extended_temoral_difference_learning_agent import ExtendedTemporalDifferenceAgent
 
 def results_for_gamma_0_100_small_dqn_training(path):
     for g in range(0, 11):
@@ -1222,8 +1222,7 @@ def epsilon_decay_plot():
             print("plt.show()")
 
 if __name__ == '__main__':
-    small_dqn_win_in_time_results()
-    normalized_input_results()
+    extended_q_table_win_in_time_results()
     exit()
     if False:
         ai = BigDeepQLearningAgent("Anton", True, "test.pt")
@@ -1243,7 +1242,7 @@ if __name__ == '__main__':
         exit()
 
     #results_for_gamma_0_100_small_dqn()
-    ai = TemporalDifferenceAgent("mini Anton", 0.1, 0.75)
+    ai = ExtendedTemporalDifferenceAgent("mini Anton", 0.1, 0.75)
 
     players = [ai]
     players.append(RandomPlayer("Random 1"))
@@ -1257,7 +1256,7 @@ if __name__ == '__main__':
 
     session = President(players)
 
-    #session.train(1000000, 10000)
+    session.train(100000, 10000)
     ai.stop_training()
 
     session.simulate(100000)
