@@ -1123,7 +1123,7 @@ def epsilon_decay_plot():
             print("plt.show()")
 
 if __name__ == '__main__':
-    #small_dqn_win_in_time_results()
+    small_dqn_win_in_time_results()
     normalized_input_results()
     exit()
     if False:

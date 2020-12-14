@@ -265,6 +265,9 @@ class DeepQLearningAgent(Player):
         Parameters:
             state: [int]
         '''
+        if self.normalized:
+            state = [ int(x*2 + 2) for x in state ]
+
         if not sum(state[:13]):
             return 0
 
@@ -275,8 +278,6 @@ class DeepQLearningAgent(Player):
                 score += rank*mapping[i]
             return score
 
-        if self.normalized:
-            state = [ int(x*2 + 2) for x in state ]
         return sum([score(i,state[i-1]) for i in range(1,14)]) / sum(state[:13])
 
 
@@ -296,11 +297,12 @@ class DeepQLearningAgent(Player):
             if move.is_round_start():
                 return  norm_cards + [ 3, 0 ]+ [self.plays_this_game]
             return norm_cards + [move.rank, move.amount]+ [self.plays_this_game]
-        if move is Skip():
-            return self.cards_to_list(self.cards) + [ 0, 0 ] + [self.plays_this_game]
-        if move.is_round_start():
-            return self.cards_to_list(self.cards) + [ 3, 0 ] + [self.plays_this_game]
-        return self.cards_to_list(self.cards) + [move.rank, move.amount] + [self.plays_this_game]
+        else:
+            if move is Skip():
+                return self.cards_to_list(self.cards) + [ 0, 0 ] + [self.plays_this_game]
+            if move.is_round_start():
+                return self.cards_to_list(self.cards) + [ 3, 0 ] + [self.plays_this_game]
+            return self.cards_to_list(self.cards) + [move.rank, move.amount] + [self.plays_this_game]
 
     def cards_to_list(self, cards):
         '''
