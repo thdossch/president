@@ -50,7 +50,7 @@ class DeepQLearningAgent(Player):
             self.network.eval()
         else:
             self.network = PresidentNetwork(64)
-        self.optimizer = torch.optim.Adam(self.network.parameters(), lr=1e-3)
+        self.optimizer = torch.optim.Adam(self.network.parameters(), lr=1e-4)
         self.memory = deque(maxlen=self.MEM_SIZE)
         self.last_action = None
         self.last_action_illegal = False

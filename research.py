@@ -119,69 +119,36 @@ def results_for_gamma_0_100_small_dqn_simulation(path):
                 print()
 
 def test_for_small_dqn(path):
-        ai = BigDeepQLearningAgent("Anton", True)
-
-        players = [ai, RandomPlayer("Random 1")]
-        players.append(RandomPlayer("Random 2"))
-        players.append(RandomPlayer("Random 3"))
-        
-        session = President(players)
+        ai = DeepQLearningAgent("Anton", True)
+        results_h = []
+        results_r = []
+        players = [ai]
+        random_players = [RandomPlayer("Random 1"), RandomPlayer("Random2"), RandomPlayer("Random3")]
+        heuristic_players = [HeuristicPlayer("Heuristic1")]
+        heuristic_players.append(HeuristicPlayer("Heuristic 2"))
+        heuristic_players.append(HeuristicPlayer("Heuristic 3"))
         
         torch.save(ai.network, f"{path}/0k.pt")
-        # 5k
-        network_name = f"{path}/5k.pt"
-        session.train(5000, 1000)
-        torch.save(ai.network, network_name)
-        ai.training = False
-        session.simulate(5000)
+        session = President(players + heuristic_players)
+        for i in range(100):
+            # 5k
+            ai.training = True
+            network_name = f"{path}/{i*10}k.pt"
+            session.train(10000, 10000)
+            torch.save(ai.network, network_name)
+            ai.training = False
+            print("------Simulating with heuristic players------")
+            ranks = session.simulate(10000)
+            results_h.append(round(ranks[ai]['p']/10000*100, 2))
+            print("-------Simulating with random players-------")
+            session_random = President(players + random_players)
+            ranks = session_random.simulate(10000)
+            results_r.append(round(ranks[ai]['p']/10000*100, 2))
 
-        # 10k
-        network_name = f"{path}/10k.pt"
-        session.train(5000, 1000)
-        torch.save(ai.network, network_name)
-        ai.training = False
-        session.simulate(10000)
+            print(results_h)
+            print(results_r)
 
-        # 20k
-        ai.training = True 
-        network_name = f"{path}/20k.pt"
-        session.train(10000, 10000)
-        torch.save(ai.network, network_name)
-        ai.training = False
-        session.simulate(10000)
-
-        # 35k
-        ai.training = True 
-        network_name = f"{path}/35k.pt"
-        session.train(15000, 10000)
-        torch.save(ai.network, network_name)
-        ai.training = False
-        session.simulate(10000)
-
-        # 50k
-        ai.training = True 
-        network_name = f"{path}/50k.pt"
-        session.train(30000, 10000)
-        torch.save(ai.network, network_name)
-        ai.training = False
-        session.simulate(10000)
-
-        # 70k
-        ai.training = True 
-        network_name = f"{path}/70k.pt"
-        session.train(20000, 10000)
-        torch.save(ai.network, network_name)
-        ai.training = False
-        session.simulate(10000)
-
-        # 100k
-        ai.training = True 
-        network_name = f"{path}/100k.pt"
-        session.train(50000, 10000)
-        torch.save(ai.network, network_name)
-        ai.training = False
-        session.simulate(10000)
-
+        
 def results_for_gamma_0_100_small_dqn():
     path = "./small_dqn_results"
 
@@ -1239,9 +1206,9 @@ def epsilon_decay_plot():
 if __name__ == '__main__':
     #small_dqn_win_in_time_results()
     #normalized_input_results()
-    #test_for_small_dqn(".")
+    test_for_small_dqn(".")
     #extended_q_table_win_in_time_results()
-    #exit()
+    exit()
     #ai = BigDeepQLearningAgent("Anton", True, "test.pt")
     ai = TemporalDifferenceAgent("mini anton", 0.1,0.75)
     players = [ai, RandomPlayer("Random 1")]
