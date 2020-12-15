@@ -7,7 +7,7 @@ from president import President
 from heuristic_player  import HeuristicPlayer
 from random_player  import RandomPlayer
 from deep_q_learning_agent import DeepQLearningAgent
-from big_deep_q_learning_agent import BigDeepQLearningAgent
+from bigger_deep_q_learning_agent import BigDeepQLearningAgent
 from temporal_difference_learning_agent  import TemporalDifferenceAgent
 from extended_temoral_difference_learning_agent import ExtendedTemporalDifferenceAgent
 
@@ -93,6 +93,7 @@ def results_for_gamma_0_100_small_dqn_simulation(path):
         with open(f'{path}/results.py', 'a') as f:
             with redirect_stdout(f):
          
+                print("import matplotlib.pyplot as plt")
                 print('plt.plot(', end='')
                 print([g/10 for g in range(0, 11)], end='')
                 print(', ', end='')
@@ -268,6 +269,7 @@ def results_for_gamma_0_100_big_dqn_simulation(path):
         with open(f'{path}/results.py', 'a') as f:
             with redirect_stdout(f):
          
+                print("import matplotlib.pyplot as plt")
                 print('plt.plot(', end='')
                 print([g/10 for g in range(0, 11)], end='')
                 print(', ', end='')
@@ -325,15 +327,20 @@ def results_for_gamma_0_100_big_dqn():
         print ("Creation of the outputfile failed")
         exit()
 
-    results_for_gamma_0_100_small_dqn_training(path)
-    results_for_gamma_0_100_small_dqn_simulation(path)
+    results_for_gamma_0_100_big_dqn_training(path)
+    results_for_gamma_0_100_big_dqn_simulation(path)
 
 
 
-def results_for_big_vs_small(path):
+def results_for_big_vs_small():
     path = "./big_vs_small"
     path_small = "./small_dqn_results"
     path_big = "./big_dqn_results"
+
+    try:
+        os.mkdir(path)
+    except OSError:
+        print ("Creation of the directory %s failed" % path)
 
     try:
         file = open(f"{path}/results.py", "x")
@@ -386,6 +393,7 @@ def results_for_big_vs_small(path):
         with open(f'{path}/results.py', 'a') as f:
             with redirect_stdout(f):
          
+                print("import matplotlib.pyplot as plt")
                 print('plt.plot(', end='')
                 print([g/10 for g in range(0, 11)], end='')
                 print(', ', end='')
@@ -1098,7 +1106,7 @@ def small_dqn_win_in_time_results():
         print ("Creation of the directory %s failed" % path)
 
     try:
-        file = open(f"{path}/results_win_in_time_001lr.py", "x")
+        file = open(f"{path}/results_win_in_time_00001lr.py", "x")
         file.close()
     except FileExistsError:
         print ("Creation of the outputfile failed")
@@ -1159,7 +1167,103 @@ def small_dqn_win_in_time_results():
         ai.training = True
 
     torch.save(ai.network, "winintime001.pt")
-    with open(f'{path}/results_win_in_time_001lr.py', 'a') as f:
+    with open(f'{path}/results_win_in_time_00001lr.py', 'a') as f:
+        with redirect_stdout(f):
+     
+            print("import matplotlib.pyplot as plt")
+            print('plt.plot(', end='')
+            print([(x)*10000 for x in range(0, 21)], end='')
+            print(', ', end='')
+            print(results_random, end='')
+            print(', \'b\', label=\'vs random\')')
+
+            print('plt.plot(', end='')
+            print([(x)*10000 for x in range(0, 21)], end='')
+            print(', ', end='')
+            print(results_heuristic, end='')
+            print(', \'r\', label=\'vs heuristic\')')
+
+            # for plotting with matplotlib
+            print()
+            print('plt.xlabel("episodes")')
+            print('plt.ylabel("W/L in %")')
+            print('axes = plt.gca()')
+            print('axes.set_ylim([0, 100])')
+            print('plt.legend(loc="upper right")')
+            print('plt.show()')
+            print()
+            print()
+
+def big_dqn_win_in_time_results():
+    path = "big_dqn_results"
+    try:
+        os.mkdir(path)
+    except OSError:
+        print ("Creation of the directory %s failed" % path)
+
+    try:
+        file = open(f"{path}/results_win_in_time.py", "x")
+        file.close()
+    except FileExistsError:
+        print ("Creation of the outputfile failed")
+        exit()
+
+    results_random = []
+    results_heuristic = []
+
+    ai = DeepQLearningAgent("Anton", True)
+    amount = 10000
+
+    #simulate results without training
+    players = [ai, RandomPlayer("Random 1")]
+    players.append(RandomPlayer("Random 2"))
+    players.append(RandomPlayer("Random 3"))
+
+    session = President(players)
+    ai.stop_training()
+
+    ranks = session.simulate(amount)
+    results_random.append(round(ranks[ai]['p']/amount*100, 2))
+
+    players = [ai, HeuristicPlayer("Heuristic 1")]
+    players.append(HeuristicPlayer("Heuristic 2"))
+    players.append(HeuristicPlayer("Heuristic 3"))
+
+    session = President(players)
+    
+    ranks = session.simulate(amount)
+    results_heuristic.append(round(ranks[ai]['p']/amount*100, 2))
+
+    ai.training = True
+
+    #simulate with training
+    for x in range(0,20):
+        print(f"after {x*10000} trainings")
+
+        players = [ai, RandomPlayer("Random 1")]
+        players.append(RandomPlayer("Random 2"))
+        players.append(RandomPlayer("Random 3"))
+
+        session = President(players)
+        session.train(10000)
+        ai.stop_training()
+
+        ranks = session.simulate(amount)
+        results_random.append(round(ranks[ai]['p']/amount*100, 2))
+
+        players = [ai, HeuristicPlayer("Heuristic 1")]
+        players.append(HeuristicPlayer("Heuristic 2"))
+        players.append(HeuristicPlayer("Heuristic 3"))
+
+        session = President(players)
+        
+        ranks = session.simulate(amount)
+        results_heuristic.append(round(ranks[ai]['p']/amount*100, 2))
+
+        ai.training = True
+
+    torch.save(ai.network, "big_winintime.pt")
+    with open(f'{path}/results_win_in_time_00001lr.py', 'a') as f:
         with redirect_stdout(f):
      
             print("import matplotlib.pyplot as plt")
@@ -1229,6 +1333,11 @@ def epsilon_decay_plot():
             print("plt.show()")
 
 if __name__ == '__main__':
+    #results_for_gamma_0_100_big_dqn()
+    #results_for_big_vs_small()
+    #exit()
+    if True:
+        ai = BigDeepQLearningAgent("Anton", False, "big_dqn_results/trained_for_100k/gamma_1.pt")
     #small_dqn_win_in_time_results()
     #normalized_input_results()
     test_for_small_dqn(".")
@@ -1248,18 +1357,15 @@ if __name__ == '__main__':
         players.append(RandomPlayer("Random 2"))
         players.append(RandomPlayer("Random 3"))
 
-    session = President(players)
-    ai.training = False
-    session.simulate(10000)
-
-    ai.training = True 
-    #network_name = "test.pt"
-    session.train(100000, 1000)
-    #torch.save(ai.network, network_name)
-    
-    ai.training = False
-    session.simulate(10000)
-    exit()
+        session = President(players)
+        #ai.training = True 
+        #network_name = "test.pt"
+        #session.train(100000, 1000)
+        #torch.save(ai.network, network_name)
+        
+        #ai.training = False
+        session.simulate(10000)
+        exit()
 
     #results_for_gamma_0_100_small_dqn()
     ai = TemporalDifferenceAgent("Anton", 0.1, 0.75)
