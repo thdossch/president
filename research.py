@@ -743,7 +743,7 @@ def q_table_win_in_time_results():
         print ("Creation of the directory %s failed" % path)
 
     try:
-        file = open(f"{path}/results_win_in_time.py", "x")
+        file = open(f"{path}/results_win_in_time_shuffle.py", "x")
         file.close()
     except FileExistsError:
         print ("Creation of the outputfile failed")
@@ -754,6 +754,30 @@ def q_table_win_in_time_results():
 
     ai = TemporalDifferenceAgent("small Anton", 0.1, 0.75)
     amount = 100000
+
+    players = [ai, RandomPlayer("Random 1")]
+    players.append(RandomPlayer("Random 2"))
+    players.append(RandomPlayer("Random 3"))
+
+    session = President(players)
+    eps_before = ai.epsilon
+    ai.stop_training()
+
+    ranks = session.simulate(amount)
+    results_random.append(round(ranks[ai]['p']/amount*100, 2))
+
+    players = [ai, HeuristicPlayer("Heuristic 1")]
+    players.append(HeuristicPlayer("Heuristic 2"))
+    players.append(HeuristicPlayer("Heuristic 3"))
+
+    session = President(players)
+    
+    ranks = session.simulate(amount)
+    results_heuristic.append(round(ranks[ai]['p']/amount*100, 2))
+
+    ai.epsilon = eps_before
+    ai.training = True
+
     for x in range(0,20):
         print(f"after {x*10000} trainings")
 
@@ -781,18 +805,18 @@ def q_table_win_in_time_results():
         ai.epsilon = eps_before
         ai.training = True
 
-    with open(f'{path}/results_win_in_time.py', 'a') as f:
+    with open(f'{path}/results_win_in_time_shuffle.py', 'a') as f:
         with redirect_stdout(f):
      
             print("import matplotlib.pyplot as plt")
             print('plt.plot(', end='')
-            print([(x+1)*10000 for x in range(0, 20)], end='')
+            print([(x+1)*10000 for x in range(0, 21)], end='')
             print(', ', end='')
             print(results_random, end='')
             print(', \'b\', label=\'vs random\')')
 
             print('plt.plot(', end='')
-            print([(x+1)*10000 for x in range(0, 20)], end='')
+            print([(x+1)*10000 for x in range(0, 21)], end='')
             print(', ', end='')
             print(results_heuristic, end='')
             print(', \'r\', label=\'vs heuristic\')')
@@ -1074,7 +1098,7 @@ def small_dqn_win_in_time_results():
         print ("Creation of the directory %s failed" % path)
 
     try:
-        file = open(f"{path}/results_win_in_time.py", "x")
+        file = open(f"{path}/results_win_in_time_001lr.py", "x")
         file.close()
     except FileExistsError:
         print ("Creation of the outputfile failed")
@@ -1134,7 +1158,8 @@ def small_dqn_win_in_time_results():
 
         ai.training = True
 
-    with open(f'{path}/results_win_in_time.py', 'a') as f:
+    torch.save(ai.network, "winintime001.pt")
+    with open(f'{path}/results_win_in_time_001lr.py', 'a') as f:
         with redirect_stdout(f):
      
             print("import matplotlib.pyplot as plt")
@@ -1214,6 +1239,14 @@ if __name__ == '__main__':
     players = [ai, RandomPlayer("Random 1")]
     players.append(RandomPlayer("Random 2"))
     players.append(RandomPlayer("Random 3"))
+    q_table_win_in_time_results()
+    exit()
+    if False:
+        ai = BigDeepQLearningAgent("Anton", True, "test.pt")
+
+        players = [ai, RandomPlayer("Random 1")]
+        players.append(RandomPlayer("Random 2"))
+        players.append(RandomPlayer("Random 3"))
 
     session = President(players)
     ai.training = False
@@ -1229,7 +1262,7 @@ if __name__ == '__main__':
     exit()
 
     #results_for_gamma_0_100_small_dqn()
-    ai = ExtendedTemporalDifferenceAgent("mini Anton", 0.1, 0.75)
+    ai = TemporalDifferenceAgent("Anton", 0.1, 0.75)
 
     players = [ai]
     players.append(RandomPlayer("Random 1"))
@@ -1243,15 +1276,16 @@ if __name__ == '__main__':
 
     session = President(players)
 
-    session.train(100000, 10000)
+    #session.train(100000, 10000)
     ai.stop_training()
 
-    session.simulate(100000)
-
+    session.simulate(10000)
+    
+    exit()
     players = [ai]
     players.append(HeuristicPlayer("Heuristic 1"))
     players.append(HeuristicPlayer("Heuristic 2"))
     players.append(HeuristicPlayer("Heuristic 3"))
 
     session = President(players)
-    session.simulate(100000)
+    session.simulate(10000)
