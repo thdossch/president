@@ -64,7 +64,7 @@ class President:
             history[player] = {'p': 0, 'vp': 0, 'hs': 0, 's': 0 }
 
         for i in range(games):
-            if True and i % 100 == 0: self.ranks = None
+            if False and i % 100 == 0: self.ranks = None
             game = Game(self.players, self.ranks, verbose)
             self.ranks = game.start()
 
