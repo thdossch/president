@@ -42,15 +42,15 @@ class BigDeepQLearningAgent(Player):
         self.MEM_SIZE = 1000
         self.GAMMA = 0.7
         self.EPS_END = 0.05
-        self.eps = 0.3
-        self.EPS_DECAY = 0.999
+        self.eps = 1
+        self.EPS_DECAY = 0.9999
         self.N_ACTIONS = N_ACTIONS 
         if network_path:
             self.network = torch.load(network_path)
             self.network.eval()
         else:
             self.network = PresidentNetwork(64)
-        self.optimizer = torch.optim.Adam(self.network.parameters(), lr=1e-4)
+        self.optimizer = torch.optim.Adam(self.network.parameters(), lr=1e-2)
         self.memory = deque(maxlen=self.MEM_SIZE)
         self.last_action = None
         self.last_action_illegal = False

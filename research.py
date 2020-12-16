@@ -350,9 +350,6 @@ def results_for_big_vs_small():
         exit()
 
     network_dirs = [
-        "trained_for_5k", 
-        "trained_for_20k", 
-        "trained_for_50k", 
         "trained_for_100k"
     ]
     for network_dir in network_dirs:
@@ -367,6 +364,7 @@ def results_for_big_vs_small():
                 if small: 
                     network_name = f"{path_small}/{network_dir}/gamma_{g}.pt"
                     ai = DeepQLearningAgent("Anton", False, network_name)
+                    ai.normalized = False
                     players = [ai, RandomPlayer("Random 1")]
                     players.append(RandomPlayer("Random 2"))
                     players.append(RandomPlayer("Random 3"))
@@ -1196,13 +1194,14 @@ def small_dqn_win_in_time_results():
 
 def big_dqn_win_in_time_results():
     path = "big_dqn_results"
+    name = "results_win_in_time_e2"
     try:
         os.mkdir(path)
     except OSError:
         print ("Creation of the directory %s failed" % path)
 
     try:
-        file = open(f"{path}/results_win_in_time.py", "x")
+        file = open(f"{path}/{name}.py", "x")
         file.close()
     except FileExistsError:
         print ("Creation of the outputfile failed")
@@ -1263,7 +1262,7 @@ def big_dqn_win_in_time_results():
         ai.training = True
 
     torch.save(ai.network, "big_winintime.pt")
-    with open(f'{path}/results_win_in_time_00001lr.py', 'a') as f:
+    with open(f'{path}/{name}.py', 'a') as f:
         with redirect_stdout(f):
      
             print("import matplotlib.pyplot as plt")
@@ -1333,65 +1332,26 @@ def epsilon_decay_plot():
             print("plt.show()")
 
 if __name__ == '__main__':
-    #results_for_gamma_0_100_big_dqn()
-    #results_for_big_vs_small()
-    #exit()
-    if True:
-        ai = BigDeepQLearningAgent("Anton", False, "big_dqn_results/trained_for_100k/gamma_1.pt")
-    #small_dqn_win_in_time_results()
-    #normalized_input_results()
-    test_for_small_dqn(".")
-    #extended_q_table_win_in_time_results()
+    big_dqn_win_in_time_results()
     exit()
-    #ai = BigDeepQLearningAgent("Anton", True, "test.pt")
-    ai = TemporalDifferenceAgent("mini anton", 0.1,0.75)
-    players = [ai, RandomPlayer("Random 1")]
-    players.append(RandomPlayer("Random 2"))
-    players.append(RandomPlayer("Random 3"))
-    q_table_win_in_time_results()
-    exit()
-    if False:
-        ai = BigDeepQLearningAgent("Anton", True, "test.pt")
+    q_table = TemporalDifferenceAgent("QTable", 0.1, 0.75)
 
-        players = [ai, RandomPlayer("Random 1")]
-        players.append(RandomPlayer("Random 2"))
-        players.append(RandomPlayer("Random 3"))
-
-        session = President(players)
-        #ai.training = True 
-        #network_name = "test.pt"
-        #session.train(100000, 1000)
-        #torch.save(ai.network, network_name)
-        
-        #ai.training = False
-        session.simulate(10000)
-        exit()
-
-    #results_for_gamma_0_100_small_dqn()
-    ai = TemporalDifferenceAgent("Anton", 0.1, 0.75)
-
-    players = [ai]
+    players = [q_table]
     players.append(RandomPlayer("Random 1"))
     players.append(RandomPlayer("Random 2"))
     players.append(RandomPlayer("Random 3"))
 
-#    players = [ai]
-#    players.append(HeuristicPlayer("Heuristic 1"))
-#    players.append(HeuristicPlayer("Heuristic 2"))
-#    players.append(HeuristicPlayer("Heuristic 3"))
-
     session = President(players)
 
-    #session.train(100000, 10000)
-    ai.stop_training()
-
-    session.simulate(10000)
+    session.train(50000)
+    q_table.stop_training()
     
-    exit()
-    players = [ai]
-    players.append(HeuristicPlayer("Heuristic 1"))
-    players.append(HeuristicPlayer("Heuristic 2"))
-    players.append(HeuristicPlayer("Heuristic 3"))
+    input("start")
+    dqn = DeepQLearningAgent("DQN", False, "120k.pt")
+    players = [dqn, q_table]
+    players.append(HeuristicPlayer("Heuristic"))
+    players.append(RandomPlayer("Random"))
 
     session = President(players)
-    session.simulate(10000)
+    session.simulate(2, True)
+    session.simulate(1000)

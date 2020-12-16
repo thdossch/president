@@ -30,7 +30,7 @@ Voor dit soort problemen zijn er al heel wat oplossingsmethodes, waarvan we er e
 \subsection{Het probleem}
 Presidenten kent veel varianten, de regels liggen namelijk niet hard vast en kunnen daarom vaak besproken worden onder de spelers. Afhankelijk van welke regels je gebruikt, kan het spel moeilijker worden. \\\\
 Bij het spelen van presidenten speel je meerdere spelletjes. Na ieder spel zullen de `rangen' voor het volgend spel gekend zijn. Ieder spel bestaat uit meerdere rondes. In deze rondes proberen de spelers zoveel mogelijk kaarten te leggen om zo al hun kaarten uit te spelen. Tijdens een ronde moeten spelers elk om beurt een kaart leggen hoger of gelijk aan de vorige kaart. Het aantal van die kaarten moet hoger of gelijk zijn aan de kaart(en) van de vorige beurt.\\
-Als een speler geen kaart(en) meer kan of wil liggen past hij, eenmaal gepast zal hij niet meer aan de beurt komen in de ronde. Als alle spelers op een na gepast hebben is de winnaar van de ronde gekend. Deze speler mag een nieuwe ronde starten met een kaart of kaarten naar keuze. Als een speler al zijn kaarten heeft uitgespeeld krijgt hij een rang toegewezen voor het volgende spel.\\
+Als een speler geen kaart(en) meer kan of wil liggen past hij, eenmaal gepast zal hij niet meer aan de beurt komen in de ronde. Als alle spelers op één na gepast hebben is de winnaar van de ronde gekend. Deze speler mag een nieuwe ronde starten met een kaart of kaarten naar keuze. Als een speler al zijn kaarten heeft uitgespeeld krijgt hij een rang toegewezen voor het volgende spel.\\
 De persoon die het eerste uitspeelt is de president, de tweede de vice-president.
 De persoon die als laatste overblijft is de scum, degene die als voorlaatste uitspeelt is de vice-scum.\\
 Als alle rangen gekend zijn start het volgende spel. Na het delen van de kaarten krijgt de president de beste 2 kaarten van de scum, de scum krijgt de 2 slechtste van de president. Hetzelfde geldt voor vice-president en vice-scum, maar die wisselen slechts 1 kaart uit.\\\\
@@ -69,7 +69,7 @@ Ook hebben we een extra speler geimplementeerd: de random speler. Deze speler ki
 \subsection{Q-learning}
 \subsubsection{Theorie}
 Q-learning helpt ons zoeken naar een zo goed mogelijke policy \textbf{(todo: leg policy uit? zie dqn-pract)}. De letter $Q$ slaat op de functie die gebruikt wordt om, gegeven een state en een actie, de waarde van deze combinatie te vinden. Deze waarde geeft aan hoe goed - of slecht - een bepaalde actie is in een bepaalde state.\\\\
-Op basis van de Bellman equations \cite{bellman-equations}, kunnen we een update regel definieren die er als de formule in figuur 1 uitziet. Een Q-waarde van een bepaald state-actie paar zal dus veranderen met de tijd. Daarom moeten we in het begin de Q-waarden initialiseren, om die dan wanneer nodig aan te passen.\\
+Op basis van de Bellman equations \cite{bellman-equations}, kunnen we een update regel definieren die er als de formule in Figure \ref{fig:qfunction} uitziet. Een Q-waarde van een bepaald state-actie paar zal dus veranderen met de tijd. Daarom moeten we in het begin de Q-waarden initialiseren, om die dan wanneer nodig aan te passen.\\
 \begin{figure}[h]
 \centering
 \includegraphics[scale=0.70]{images/qformula.png}
@@ -82,15 +82,15 @@ Er zijn nog een aantal belangrijke parameters aanwezig in de formule.
 	\item Reward: Score die berekend wordt op basis van de state waar we in waren en de gekozen actie. Door deze actie uit te voeren, komen we in een nieuwe state en kunnen we kijken hoe waardevol deze actie was. 
 	\item Discount factor: Geeft aan hoe belangrijk toekomstige rewards zijn. Een hoge discount factor zal meer belang hechten aan rewards over een lange tijd, een lage discount factor laat het algoritme enkel rewards in een korte tijdsperiode beschouwen.
 	\item Estimate of optimal future value: In deze stap gaan we de Q-waarden overlopen over alle mogelijke acties in de volgende state, en halen we de hoogste Q-waarde eruit. Merk op dat als de discount factor 0 is, dit niet uitmaakt, en dus niet naar toekomstige states of rewards kijken.
-\end{itemize}\\
-Daarbij is het in Q-learning belangrijk om te beschouwen hoe we de volgende actie a kiezen, om dan overeenkomende $Q(s,a)$ aan te passen. We zouden elke keer de beste actie kunnen kiezen op basis van de Q-waardem, maar dit zal in begin niet werken, aangezien er dan nog helemaal niets geleerd is. We willen dus genoeg exploratie hebben, zeker in het begin! Een oplossing hiervoor is om een $\epsilon$-greedy policy te volgen. Waarbij we met kans $\epsilon$ een willekeurige actie kiezen, en met kans $1-\epsilon$ een actie kiezen gebaseerd op de huidige policy. We kunnen deze $\epsilon$ eventueel laten variëren met de tijd.\\
+\end{itemize}
+Daarbij is het in Q-learning belangrijk om te beschouwen hoe we de volgende actie a kiezen, om dan overeenkomende $Q(s,a)$ aan te passen. We zouden elke keer de beste actie kunnen kiezen op basis van de Q-waardem, maar dit zal in begin niet werken, aangezien er dan nog helemaal niets geleerd is. We willen dus genoeg exploratie hebben, zeker in het begin! Een oplossing hiervoor is om een $\epsilon$-greedy policy te volgen. Waarbij we met kans $\epsilon$ een willekeurige actie kiezen, en met kans $1-\epsilon$ een actie kiezen gebaseerd op de huidige policy. We kunnen deze $\epsilon$ eventueel laten variëren met de tijd.\\\\
 
 \subsubsection{Implementatie}
-De Q-waarden die doorheen het algoritme geupdate worden, worden bijgehouden in een Q-table. In onze eerste implementatie houdt de state 2 velden bij die de laatst gelegde kaart en zijn hoeveelheid voorstellen. De state wordt gegeven als een tuple (rang, aantal), en acties worden op dezelfde manier voorgesteld. Zo indexeren we de Q-table met deze 2 tuples. \\\\
+De Q-waarden die doorheen het algoritme geüpdate worden, worden bijgehouden in een Q-table. In onze eerste implementatie houdt de state 2 velden bij die de laatst gelegde kaart en zijn hoeveelheid voorstellen. De state wordt gegeven als een tuple (rang, aantal), en acties worden op dezelfde manier voorgesteld. Zo indexeren we de Q-table met deze 2 tuples. \\\\
 We kunnen natuurlijk bediscussiëren of het niet beter zou zijn om een grotere state bij te houden, maar hier komen we later bij onze testresultaten op terug. Er is wel een beperking in hoe groot we de state kunnen maken, aangezien er een punt zou zijn waar de tabel zo groot wordt dat veel states niet meer bezocht worden. \\\\
 De initiele Q-waarden in de tabel zijn 0 voor alle acties behalve `skip'. Vanaf nu zullen we het over een skip hebben als het over een beurt passen gaat. De waarden voor skip in elke mogelijke state wordt op -1 gezet, wat betekent dat we die al in het begin afstraffen. Op deze manier proberen we ervoor te zorgen dat de agent zo veel mogelijk beslist om wel een kaart te leggen. \\\\
 Aangezien we hier de state beperkt moeten houden, moeten we best ook de taktiek van de agent beperkt houden, door hem op zo een goed mogelijke manier de rondes te laten spelen spelen, en niet te kijken naar winnen van het spel. Natuurlijk zal je het spel vaak winnen als je goed speelt in rondes. Dit is ook wat onze heuristieke speler doet. Welke reward functie we daaroor implementeren zullen we bespreken bij resultaten.\\\\
-Voor de $\epsilon$ kiezen we als startwaarde 1, en werken we met epsilon decay. Na iedere actie zullen we de huidige $\epsilon$ vermenigvuldigen met een $epsilon\_decay$ parameter. Op deze manier is er in het begin van het trainen meer exploratie maar naarmate de tijd vordert zal $\epsilon$ afnemen en zullen we meer exploitatie hebben. We zullen echter wel zorgen dat eenmaal $\epsilon == 0.05$ de waarde van $\epsilon$ niet meer veranderd. Dit omdat we toch steeds wat exploratie willen hebben. In appendix B bespreken we hoe best deze $\epsilon$ te kiezen.\\\\
+Voor de $\epsilon$ kiezen we als startwaarde 1, en werken we met epsilon decay. Na iedere actie zullen we de huidige $\epsilon$ vermenigvuldigen met een $epsilon\_decay$ parameter. Op deze manier is er in het begin van het trainen meer exploratie maar naarmate de tijd vordert zal $\epsilon$ afnemen en zullen we meer exploitatie hebben. We zullen echter wel zorgen dat eenmaal $\epsilon == 0.05$ de waarde van $\epsilon$ niet meer veranderd. Dit omdat we toch steeds wat exploratie willen hebben. In appendix \ref{appendix:epsilon} bespreken we hoe best deze $\epsilon$ te kiezen.\\\\
 Ook hebben we een poging gedaan om de state-acties in een bitvector vorm te beschrijven. Dit omdat als we met grotere states en acties werken we zo meer geheugen zouden besparen dan gebruik te maken van tuples. Echter bleek dat dit negatief was, ook voor meer uitgebreide state-actie representaties, voor de performantie van het trainen en geen significante verbeteringen bijbracht in de prestatie van de agent. Daarom zijn we van dit idee afgestapt.\\
 
 \subsection{Deep Q-Network}
@@ -98,20 +98,20 @@ Ook hebben we een poging gedaan om de state-acties in een bitvector vorm te besc
 In plaats van de tabel letterlijk op te slaan en up te daten, benaderen we in het DQN-algoritme de tabel met een functie-approximator. Deze functie-approximator is een neuraal netwerk.\\\\
 Het updaten van dit neuraal netwerk werkt dan als volgt. Stel we bevinden ons in een toestand $s$, dan wordt er een actie $a$ gekozen op basis van een $\epsilon$-greedy policy. Door deze actie uit te voeren, komen we in een nieuwe state $s'$ terecht en krijgen we ook een reward $r$. Waar we bij Q-learning hiermee de Q-table kunnen updaten, is het hier niet zo simpel. \\\\
 De volgende stap is om deze originele state, de actie, de nieuwe state en de reward op te slaan in een replay memory. In dit replay memory krijgen we dus een verzameling van tuples van de vorm $(s,a,r,s')$. In elke stap nemen we dan samples uit het replay memory en stellen we targets op. Deze targets worden ongeveer dezelfde manier berekend als de temporal difference targets bij Q-learning (zie Figure ~\ref{fig:qfunction}). Enkel is hier het verschil dus dat $Q$ nu een functie-approximator is. Daarbij zien we dat deze targets van de vorm `reward + estimate of optimal future value' zijn. Dit tweede deel is niet meer nodig als we aan het einde van de episode zijn, dan houden we dus enkel de reward over als target. \\\\
-Daarna wordt het netwerk geupdate met de MSE-loss functie, en kunnen we dit allemaal herhalen.\\
+Daarna wordt het netwerk geüpdate met de MSE-loss functie, en kunnen we dit allemaal herhalen.\\
 
 \subsubsection{Implementatie}
 Gelukkig moeten we hier niet het warm water opnieuw uitvinden, en zijn er al een aantal frameworks ter beschikking die ons een handje kunnen helpen. Wij hebben gekozen voor PyTorch, die dus de implementatie details voor zich neemt.\\\\
 Het belangrijkste was hier om te beslissen hoe we precies ons netwerk gingen voorstellen: welke inputs, hidden layers en outputs hebben we nodig?\\\\
-Ons initieel idee was om niet te beginnen met een te grote state, om te kijken of we toch resultaten gelijkaardig aan de heuristieke speler konden krijgen met dezelfde informatie. Daarom hebben we gekozen om de de kaarten in de hand bij te houden en de laatst gelegde kaart. De state zou dan 15 velden bevatten. De eerste 13 velden geven aan hoeveel kaarten je van elke waarde in je hand hebt. De laatste 2 tonen dan hoeveel kaarten van welke rang als laatste zijn gelegd (met speciale waarden voor een skip en het begin van een ronde). Om te zorgen dat deze inputs genormaliseerd zijn, gebruiken we volgende formule $norm\_aantal = (aantal - 2)/2$.\\\\
-Na de input laag hebben we 2 hidden layers van elk 64 nodes. Daarop volgen de output nodes, namelijk 53 nodes die elk een actie voorstellen. Er is dus een mapping van 0-52 met elk een overeenkomende zet. Deze zet kan een skip zijn, of een aantal kaarten van een bepaalde rang. Om de output te beperken, kan de agent maar maximum 4 kaarten leggen (ookal is het soms mogelijk om met jokers meer dan dit aantal te leggen).\\
+Ons initieel idee was om niet te beginnen met een te grote state, om te kijken of we toch resultaten gelijkaardig aan de heuristieke speler konden krijgen met dezelfde informatie. Daarom hebben we gekozen om de de kaarten in de hand bij te houden en de laatst gelegde kaart. De state bevat dan 15 velden. De eerste 13 velden geven aan hoeveel kaarten je van elke waarde in je hand hebt. De laatste 2 tonen dan hoeveel kaarten van welke rang als laatste zijn gelegd (met speciale waarden voor een skip en het begin van een ronde). Om te zorgen dat deze inputs genormaliseerd zijn, gebruiken we volgende formule $norm\_aantal = (aantal - 2)/2$ om het aantal kaarten van een waarde voor te stellen.\\\\
+Na de input laag hebben we 2 hidden layers van elk 64 nodes. Daarop volgen de output nodes, namelijk 53 nodes die elk een actie voorstellen. Er is dus een mapping van 0 tot 52 naar een zet die bestaat uit een aantal kaarten van een bepaalde waarde. Deze zet kan ook een skip zijn. Om de output te beperken, kan de agent maar maximum 4 kaarten leggen (ookal is het soms mogelijk om met jokers meer dan dit aantal te leggen).\\
 
 \section{Resultaten}
 Om een gevoel te krijgen hoe goed een agent presteert gebruiken we een win/lose ratio. Dit zal enkel rekening houden met hoeveel een agent president is:
 \begin{center}
 $W/L = games\_president/total\_games\_played * 100$.
 \end{center}
-We vermenigvuldigen met 100 om het resultaat als percentage uit te drukken. Dit is een goede maat aangezien we hieruit vaak ook kunnen afleiden dat als hij veel president is, hij waarschijnlijk ook vaak vice-president is, en minder scum of high-scum. Om te testen resetten we de ranks van de spelers na 100 episodes. TODO: episodes = 1 game?
+We vermenigvuldigen met 100 om het resultaat als percentage uit te drukken. Dit is een goede maat aangezien we hieruit vaak ook kunnen afleiden dat als hij veel president is, hij waarschijnlijk ook vaak vice-president is, en minder scum of high-scum. De maat is echter niet perfect omdat hij afhangt van hoe goed de tegensplers zijn, maar het geeft een goed beeld.
 
 \subsection{Heuristiek en random}
 Het is belangrijk om te weten hoe de heuristieke speler het doet tegenover random spelers, en omgekeerd. Zo kunnen we goed vergelijken en hopelijk zelfs streven naar gelijkaardige of betere resultaten. In onderstaande tabel worden de resultaten van simulaties voor deze situatie geïllustreerd.
@@ -138,7 +138,7 @@ We willen, net zoals bij de heuristieke speler, dat de agent een ronde zo goed m
 $r = amount\_of\_cards\_played * 0.5 + amount\_of\_cards\_played\_in\_round * 0.2$
 \end{center}
 In de rewardfunctie zien we ook de term $amount\_of\_cards\_played\_in\_round$ bevat. Ookal zit dit niet in de state gebruiken we dit om acties die vaak leiden tot meer kaarten gespeeld in een ronde extra te belonen.\\\\
-Met $\alpha = 0.1$ en $\gamma = 0.75$ (gaven de beste resultaten in het onderzoek in appendix A), behaalt de Q-learning agent volgende resultaten. 
+Met $\alpha = 0.1$ en $\gamma = 0.75$ (parameters komen uit onderzoek in appendix \ref{appendix:parameters}), behaalt de Q-learning agent volgende resultaten. 
 \begin{table}[h]
         \centering
         \begin{tabular}{|c|c|c|}
@@ -267,8 +267,9 @@ Bellman Equations
 
 
 \appendix
-\section{\\De beste learning rate en discount factor vinden}
+\section{\\Studie learning rate en discount factor voor state met 2 velden}
 % the \\ insures the section title is centered below the phrase: AppendixA
+\label{appendix:parameters}
 Voor de juiste learning rate en discount factor kunnen we simulaties laten lopen om zo de optimale parameters te vinden. Hieronder zien we de W/L voor alle mogelijke parameters voor $\alpha$ en $\gamma$ met stappen van $0.1$.
 \begin{figure}[h]
 \centering
@@ -286,6 +287,7 @@ We zien nu dat er voor $\gamma \in [0.5, 0.8] $ en $\alpha \in [0.1, 0.3] $ meer
 Uit bovenstaande afbeeldingen kunnen we besluiten dat de optimale parameters, voor de gebruikte rewardfunctie, $\alpha = 0.1$ en $\gamma = 0.75$ zijn.
 
 \section{\\Epsilon-decay TODO}
+\label{appendix:epsilon}
 Aangezien we met $\epsilon$ decay werken, illustreren we hieronder dat het belangrijk is om je $epsilon\_decay$ factor dicht genoeg bij 1 te nemen. Anders zal $\epsilon$ al snel zijn minimum hebben bereikt en zal er misschien niet genoeg exploratie geweest zijn.\\
 \begin{figure}[h]
 \centering
