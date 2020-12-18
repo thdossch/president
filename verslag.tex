@@ -3,7 +3,7 @@
 \usepackage{float}
 \usepackage{graphicx}
 \usepackage{hyperref}
-\usepackage[margin=1in,footskip=0.25in]{geometry}
+\usepackage[margin=0.95in,footskip=0.25in]{geometry}
 \graphicspath{{./images/}}
 \usepackage[dutch]{babel}
 \usepackage{graphicx}
@@ -332,5 +332,5 @@ En we initialiseren de state-actie paren op 10 voor de acties op een state die d
 Bij presidenten komt er dan nog een extra probleem, namelijk dat er heel wat zeldzame states en bijhorende acties zijn, vooral als je de state uitbreidt. Het zal bijvoorbeeld niet erg veel voorkomen dat je 4 koningen kan leggen, waardoor de Q-waarde van deze actie niet veel aangepast gaat worden bij het trainen, en nog minder als deze actie over veel states kan gedaan worden (dus in het geval van een grote Q-table).\\\\
 Als we dan positieve rewards geven, en we beginnen met alle state-actie waarden op 0, dan worden de waarden van de vaak voorkomende state-actie paren groter dan de waarden van zeldzame paren. Echter zijn vaak de zeldzame zetten zeer goed, maar zullen ze niet genomen worden omdat ze een lagere Q-waarde hebben. \\\\
 Neem als voorbeeld dat de state bestaat uit $(rang, aantal, aantal\_kaarten\_in\_hand)$ en (3,2,4) is. Onze agent heeft 3 Q'en en een A in zijn hand. De beste zet is de 3 Q'en leggen, waarmee de ronde waarschijnlijk gewonnen zou worden, en dan de A leggen waarmee hij het spel wint. Maar, de actie 3Q zal voor een hand van 4 kaarten hoogstwaarschijnlijk nog niet of nog maar heel weinig zijn voorgekomen waardoor dit een lagere Q-waarde zal hebben dan bijvoorbeeld 1Q leggen in het geval dat je nog maar 4 kaarten hebt. Daarom zal de agent niet de optimale actie kiezen.\\\\
-We kunnen ook negatieve rewards geven, en alles initialiseren op 0. Stel de agent heeft alle 4 de jokers. Dit komt zelden voor, waardoor de Q-waarde nog een redelijk "hoge" waarde dicht bij 0 zal hebben. Dit betekent dat de agent het leggen van de 4 jokers in 1 zet als een goede actie ziet. Dit is echter niet het geval want dan is hij zijn 4 jokers kwijt. Bij een te grote Q-table kan het dus zijn dat deze actie bij veel states nog niet is voorgekomen. \\\\
+We kunnen ook negatieve rewards geven, en alles initialiseren op 0. Stel de agent heeft alle 4 de jokers. Dit komt zelden voor, waardoor de Q-waarde nog een redelijk "hoge" waarde dicht bij 0 zal hebben. Dit betekent dat de agent het leggen van de 4 jokers in 1 zet als een goede actie ziet. Dit is echter niet het geval want dan is hij zijn 4 jokers kwijt. Bij een te grote Q-table kan het dus zijn dat deze actie bij veel states nog niet is voorgekomen. 
 \end{document}
