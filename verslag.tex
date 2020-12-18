@@ -5,7 +5,7 @@
 \usepackage{hyperref}
 \usepackage[margin=1in,footskip=0.25in]{geometry}
 \graphicspath{{./images/}}
-\usepackage[dutch, english]{babel}
+\usepackage[dutch]{babel}
 \usepackage{graphicx}
 \usepackage{subfig}
 \usepackage{lipsum}
@@ -70,7 +70,7 @@ Daarbij hebben we nog een extra speler geïmplementeerd: de random speler. Deze 
 \subsection{Q-learning}
 \subsubsection{Theorie: todo eerste alinea is ok?}
 Q-learning helpt ons zoeken naar een optimale policy, om dus een zo hoog mogelijke totale reward in de huidige environment te krijgen. De letter $Q$ staat voor de functie die de utility geeft van een gegeven state en actie vanuit die state. Deze utility is eigenlijk de verwachte reward voor het state-actie paar, er van uitgaande dat de agent daarna optimaal handelt (of dus de beste policy volgt).\\\\
-Op basis van de Bellman equation \cite{bellman-equations}, kunnen we een update regel definiëren die er als de formule in Figure \ref{fig:qfunction} uitziet. Een Q-waarde van een bepaald state-actie paar zal dus kunnen veranderen met de tijd, en krijgt in het begin dus een initiële waarde.
+Op basis van de Bellman equation \cite{bellman-equations}, kunnen we een update regel definiëren die er als de formule in Figuur \ref{fig:qfunction} uitziet. Een Q-waarde van een bepaald state-actie paar zal dus kunnen veranderen met de tijd, en krijgt in het begin dus een initiële waarde.
 \begin{figure}[H]
 \centering
 \includegraphics[scale=0.70]{images/qformula.png}
@@ -97,7 +97,7 @@ In een poging om geheugen te besparen als we met grote states en acties werken, 
 \subsubsection{Theorie}
 In plaats van een tabel volledig op te slaan, benaderen we in het DQN-algoritme de tabel met een functie-approximator, wat hier een neuraal netwerk is.\\\\
 Het updaten van dit neuraal netwerk werkt dan als volgt. Stel dat de agent zich bevindt in een toestand $s$, dan wordt er een actie $a$ gekozen op basis van een $\epsilon$-greedy policy (hier kan dat ook met $\epsilon$-decay). Door deze actie uit te voeren, komen we in een nieuwe state $s'$ terecht en wordt daarvoor een reward $r$ gegegeven. Bij Q-learning kunnne we hiermee de Q-table updaten, maar hier is het niet zo simpel. Merk wel op dat hier de discount factor en learning rate ook een belangrijke rol spelen, net zoals bij Q-learning.\\\\
-De volgende stap is om deze originele state, de actie, de nieuwe state en de reward op te slaan in een replay memory. In dit replay memory krijgen we een verzameling van tuples van de vorm $(s,a,r,s')$. In elke stap worden samples uit het replay memory genomen en worden er voor deze samples $targets$ opgesteld. Deze targets worden op dezelfde manier berekend als de temporal difference targets bij Q-learning (zie Figure ~\ref{fig:qfunction}), maar de targets zijn van de vorm `reward + estimate of optimal future value', dus eigenlijk is dit tweede deel niet meer nodig als we aan het einde van de episode zijn. In dit geval houden we enkel de reward over als target. \\\\
+De volgende stap is om deze originele state, de actie, de nieuwe state en de reward op te slaan in een replay memory. In dit replay memory krijgen we een verzameling van tuples van de vorm $(s,a,r,s')$. In elke stap worden samples uit het replay memory genomen en worden er voor deze samples $targets$ opgesteld. Deze targets worden op dezelfde manier berekend als de temporal difference targets bij Q-learning (zie Figuur ~\ref{fig:qfunction}), maar de targets zijn van de vorm `reward + estimate of optimal future value', dus eigenlijk is dit tweede deel niet meer nodig als we aan het einde van de episode zijn. In dit geval houden we enkel de reward over als target. \\\\
 Daarna wordt het netwerk geüpdate aan de hand van een gradient descent stap, met een loss functie die de net berekende targets en de huidige Q-waarden van de samples gebruikt. Daarop kan ook nog een optimalisatie stap volgen. Het trainen van het netwerk aan de hand van samples uit het replay memory wordt ook wel experience replay genoemd.
 
 \subsubsection{Implementatie}
@@ -236,8 +236,9 @@ In het vorige deel hebben we een vrij gedetailleerde reward functie gemaakt, die
     \qquad
     \subfloat[Langer trainen met $lr = 0.0001$]{{\includegraphics[width=6.9cm]{images/big_dqn_extended_training.png}} }
     \caption{Resultaten met $\gamma = 0.7$ doorheen de tijd.}
+    \label{fig:results_bigdqn_in_time}
 \end{figure}
-\noindent Net als bij de kleine DQN zien we opnieuw grote bewegingen in de prestatie, maar er is geen learning rate die een betere stabiliteit biedt. De oorzaak van deze grote schommelingen ligt ook niet aan dat er nog niet genoeg is getraind (zie Figuur 6b). Ook met langere training is het netwerk zeer onstabiel: soms krijgen we een 5\% W/L en dan iets later een 42\% W/L. Wat nog opviel was dat het trainen van de grote DQN al wat langer duurde dan het trainen van de kleine DQN, wat op zich al heel wat meer tijd innam dan het trainen van de agent met een Q-table.\\\\
+\noindent Net als bij de kleine DQN zien we opnieuw grote bewegingen in de prestatie, maar er is geen learning rate die een betere stabiliteit biedt. De oorzaak van deze grote schommelingen ligt ook niet aan dat er nog niet genoeg is getraind (zie Figuur \ref{fig:results_bigdqn_in_time}(b)). Ook met langere training is het netwerk zeer onstabiel: soms krijgen we een 5\% W/L en dan iets later een 42\% W/L. Wat nog opviel was dat het trainen van de grote DQN al wat langer duurde dan het trainen van de kleine DQN, wat op zich al heel wat meer tijd innam dan het trainen van de agent met een Q-table.\\\\
 Om zeker te zijn dat het niet aan de random tegenstanders ligt, hebben we de agent ook laten trainen tegen 3 heuristieke spelers. Dit gaf zelfs nog mindere prestaties, er werd niet eens meer boven de 15\% W/L gehaald. Een verklaring hiervoor kan zijn dat de speler te weinig wint tegen de heuristiek, en vaak enkel negatieve rewards haalt, waardoor de agent niet echt leert wat hij wél moet doen.\\\\
 Er zijn dus nog duidelijk problemen met de DQN aanpak, maar dit kan aan heel veel liggen. Het zou kunnen dat we de state beter hadden moeten voorstellen door bv. meer of minder velden te gebruiken. Ook de reward functie kan een grote invloed gespeeld hebben, het zou kunnen dat iets kleins zoals een negatieve reward geven bij high-scum het netwerk fout stuurt. Wat ook zeker een probleem kan zijn bij het DQN algoritme is overfitting, waardoor de agent op heel specifieke situaties heeft leren spelen, en bij de rest volledig de mist in gaat. Werken met een neuraal netwerk is dus veel complexer en onvoorspelbaarder dan werken met een simpele Q-table, maar kan als alles zo optimaal mogelijk ingesteld is waarschijnlijk meer opbrengen.
 
@@ -247,24 +248,25 @@ Daarom zien we dus meer potentieel in de DQN agents, waarbij we een grotere stat
 \newpage
 \begin{thebibliography}{9}
 \bibitem{simple-qlearning} 
-Reinforcement learning tutorial using Python and Keras 
+Andrew Thomas. "Reinforcement learning tutorial using Python and Keras"
 \\\texttt{https://adventuresinmachinelearning.com/reinforcement-learning-tutorial-python-keras/}
 
 \bibitem{nn-paper} 
-Application of Self-Play Reinforcement Learning to a Four-Player Game of Imperfect Information
+Henry Charlesworth. "Application of Self-Play Reinforcement Learning to a Four-Player Game of Imperfect Information" (2018) 
 \\\texttt{https://arxiv.org/pdf/1808.10442.pdf}
 
 \bibitem{mct-1} 
-Learning in POMDPs with Monte Carlo Tree Search
+Sammie Katt and Frans A. Oliehoek and Christopher Amato. "Learning in POMDPs with Monte Carlo Tree Search" 
 \\\texttt{http://proceedings.mlr.press/v70/katt17a/katt17a.pdf}
 
 \bibitem{mct-2} 
-todo
+Maxiem Wagenaar. "Learning to play the Game of Hearts using reinforcement Learning and a multi-layer perceptron"
 \\\texttt{https://fse.studenttheses.ub.rug.nl/15440/1/Bachelor\_Thesis\_-\_Maxiem\_Wagen\_1.pdf}
 
 \bibitem{mct-3} 
-todo
-\\\texttt{https://www.researchgate.net/publication/337508729\_Reinforcement\_Learning\_in\_Card\_Game\_Environments\_Using\_Monte\_Carlo\_Methods\_and\_Artificial\_Neural\_Networks}
+Ömer Baykal and Ferda Nur Alpsaslan. "Reinforcement Learning in Card Game Environments Using Monte Carlo Methods and Artificial Neural Networks" (2019)
+\\\texttt{https://www.researchgate.net/publication/337508729\_Reinforcement\_Learning\_in\_Card\_Game\_}
+\\\texttt{Environments\_Using\_Monte\_Carlo\_Methods\_and\_Artificial\_Neural\_Networks}
 
 \bibitem{bellman-equations} 
 Bellman Equations
