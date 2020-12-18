@@ -189,24 +189,15 @@ Omdat we nu de volledige hand in de state bijhouden, kunnen we misschien een bet
 \indent als gepast: $reward = skip\_penalty$\\
 \indent anders: $reward = relative\_hand\_score$\\\\
 De $skip\_penalty$ geeft een hogere straf als er in het begin van de ronde gepast wordt, dan als er op het einde gepast wordt. De $relative\_hand\_score$ geeft een mate van verbetering van de hand aan. Het idee hier achter is dat je zoveel mogelijk je hoge kaarten probeert te behouden (hier is een joker de hoogste rang), en dat alle kaarten leggen van een rang beter is dan minder te leggen. \\\\
-<<<<<<< HEAD
-We hebben deze functie niet in 1 keer gevonden, maar hebben veel verschillende uitgetest. Het valt van deze korte uitleg misschien niet te merken, maar dit is een heel gefabriceerde en gedetailleerde functie. Daarbij is de relatieve hand score een reward die meer gebaseerd is op het korte termijn gedrag van de agent, het is dus interessant om te kijken hoe de discount factor $\gamma$ hier een rol in speelt.\\
-=======
 We hebben deze functie niet in 1 keer gevonden, maar hebben veel verschillende moeten uittesten. Daarbij is de relatieve hand score een reward die meer gebaseerd is op het korte termijn gedrag van de agent, het is dus interessant om te kijken hoe de discount factor $\gamma$ hier een rol in speelt.
->>>>>>> f67622b52b6d23e22eba3892a660a9881f1c0f50
 \begin{figure}[H]
 \centering
 \includegraphics[scale=0.45]{images/gamma-iteratie-dqn.png}
 \caption{Resultaten variëren van parameter $\gamma$}
 \label{fig:gamma_iteratie_small_dqn}
 \end{figure}
-<<<<<<< HEAD
-We zien inderdaad dat voor hogere waarden van gamma de agent het zelfs slechter gaat doen dan de random spelers waar hij tegen speelt. In uit deze grafiek kunnen we stellen dat de discount factor dus beter onder 0.9 blijft.\\\\
-\noindent In Figure \ref{fig:gamma_iteratie_small_dqn} zien we wel dat nadat de prestatie van het netwerk begint te dalen voor $\gamma > 0.5$ de winst terug begint te stijgen. Het is dus moeilijk om te besluiten of gamma nu best kleiner dan 0.9 is of kleiner dan 0.5 moet zijn. Als we de prestatie van het netwerk tijdens het trainen plotten zien we dat dit zeer onstabiel is. Daarom hebben we hieronder bekeken of de learningrate invloed heeft op de stabiliteit en de prestatie van het netwerk. De schommelingen kunnen ook verklaren waarom de prestatie van het netwerk na $\gamma = 0.6$ terug toeneemt. 
-=======
 \noindent We zien dat hogere waarden van $\gamma$ de agent slechter doen presteren, op een punt met zelfs maar 0\% W/L. Door een hoge gamma zal het minder uitmaken wanneer de agent zijn hand verbeterd, en zal hij daarom vaker skippen, ookal krijgt hij daarvoor een straf.\\\\
 \noindent Daarbij zien we dat na de prestatie van het netwerk begint te dalen voor $\gamma > 0.5$, de winst terug stijgt. Het is dus moeilijk om te besluiten of gamma best kleiner dan 0.9 of 0.5 moet zijn, of dat dit gewoon ligt aan schommelingen in het netwerk. Waarschijnlijk het laatste, aangezien de prestatie van het netwerk tijdens het trainen plotten (zie Figuur \ref{fig:kleine-dqn}) aantoont dat het vrij onstabiel is. Vermoedelijk heeft de learning rate $\alpha$ hier een invloed op.
->>>>>>> f67622b52b6d23e22eba3892a660a9881f1c0f50
 \begin{figure}[H]
     \centering
     \subfloat[tegen random spelers]{{\includegraphics[width=7.5cm]{images/lr-iteration-random-small-dqn.png}} }
