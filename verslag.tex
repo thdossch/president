@@ -159,10 +159,10 @@ Met $\alpha = 0.1$ en $\gamma = 0.75$ (parameters komen uit onderzoek in appendi
     \qquad
     \subfloat[alle versies van de q-table tegen random spelers]{{\includegraphics[width=7.5cm]{images/qtable-impl-random.png}} }
     \caption{Resultaten met $\gamma = 0.75$ en $\alpha = 0.1$ doorheen de tijd.}
-    \label{fig:example}
+    \label{fig:q_table_is_a_heuristic_player}
 \end{figure}
-Als we de prestatie van de agent plotten voor meerdere episodes (zie Figuur 2) zien we een opmerkelijk resultaat. Namelijk dat de Q-learning agent de random speler sterk overtreft zelfs zonder training! De oorzaak hiervan ligt bij de implementatie van de Q-table. De acties die voor een state kunnen genomen worden staan in volgorde van laag naar hoog. Als de agent dus een zet moet doen, neemt hij de zet die hij legaal kan doen met de hoogste Q-waarde. Dit wil zeggen dat als de tabel nog maar net geïntialiseerd is (alles op 0), hij de laagste legale zet zal doen die hij kan. Dit op zich is al een kleine heuristiek die beter presteert dan de random keuze van de random agent.\\\\
-Om zeker te zijn dat de agent dus wel degelijk goed leert, hebben we ook de Q-table eens omgekeerd geimplementeerd (waar hij dus eerst de hoogst mogelijke kaarten legt) en ook gezorgd dat hij random kiest uit de acties met de hoogste Q-waarden. Na ongeveer 20 000 episodes convergeren deze implementaties, en blijven ze ongeveer stabiel rond de 50\%.
+\noindent Als we de prestatie van de agent plotten voor meerdere episodes zien we een opmerkelijk resultaat. Namelijk dat de Q-learning agent de random speler sterk overtreft zelfs zonder training! De oorzaak hiervan ligt bij de implementatie van de Q-learning agent. Als de agent een zet moet doen, genereren wij alle mogelijke legale zetten voor de kaarten in zijn hand. Deze staan in volgorde van laagste kaarten naar hoogste kaarten. Als de Q-table nog maar net geïnitialiseerd is staan alle Q-waarden op 0 en zal de agent de zet met de hoogste waarde nemen, de zet die als eerste is gegenereerd. Dit zal altijd de laagste kaart zijn. Dit op zich is al een kleine heuristiek die beter presteert dan de random keuze van de random agent.\\\\
+Om zeker te zijn dat de agent dus wel degelijk goed leert, hebben we ook de de zetten eens omgekeerd geïmplementeerd (waar hij dus eerst de hoogst mogelijke kaarten legt) en ook eens dat hij random kiest uit de acties met de hoogste Q-waarde. Bij het laatste zien we dat hij precies even goed presteert als de random spelers (streepjeslijn = 25\%). Dus hebben we hier, als alle waarden in de Q-table op 0 staan, een random agent via Q-learning geïmplementeerd. Na ongeveer 20 000 episodes convergeren deze implementaties, en blijven ze ongeveer stabiel rond de 50\%.
 
 \subsubsection{Uitgebreide state}
 Idealiter bevat de state ook de kaarten in je hand. Dit gaat alweer iets meer naar de richting de heuristieke speler, die ook op basis van zijn hand een beslissing maakt. Na wat zorgvuldig rekenwerk zou dit neerkomen op 2872 mogelijke starthanden, nog zonder alle mogelijke states na het leggen van 1,2,... kaarten. Dit zijn heel veel states! Er moet dus veralgemeend worden, zoals het bijhouden van het aantal kaarten in je hand, en niet de kaarten exact.\\\\
@@ -192,12 +192,12 @@ Omdat we nu de volledige hand in de state bijhouden, kunnen we misschien een bet
 \indent anders: return $relative\_hand\_score$\\\\
 De $skip\_penalty$ geeft een hogere straf als er in het begin van de ronde gepast wordt, dan als er op het einde gepast wordt. De $relative\_hand\_score$ geeft een mate van verbetering van de hand aan. Het idee hier achter is dat je zoveel mogelijk je hoge kaarten probeert te behouden (hier is een joker de hoogste rang), en dat alle kaarten leggen van een rang beter is dan minder te leggen. \\\\
 We hebben deze functie niet in 1 keer gevonden, maar hebben veel verschillende uitgetest. Het valt van deze korte uitleg misschien niet te merken, maar dit is een heel gefabriceerde en gedetailleerde functie. Daarbij is de relatieve hand score een reward die meer gebaseerd is op het korte termijn gedrag van de agent, het is dus interessant om te kijken hoe de discount factor $\gamma$ hier een rol in speelt.\\
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \includegraphics[scale=0.45]{images/gamma-iteratie-dqn.png}
 \caption{Resultaten variëren van parameter $\gamma$}
 \label{fig:gamma_iteratie_small_dqn}
-\end{figure}\\
+\end{figure}
 We zien inderdaad dat voor hogere waarden van gamma de agent het zelfs slechter gaat doen dan de random spelers waar hij tegen speelt. In uit deze grafiek kunnen we stellen dat de discount factor dus beter onder 0.9 blijft.\\\\
 \noindent In Figure \ref{fig:gamma_iteratie_small_dqn} zien we wel dat nadat de prestatie van het netwerk begint te dalen voor $\gamma > 0.5$ de winst terug begint te stijgen. Het is dus moeilijk om te besluiten of gamma nu best kleiner dan 0.9 is of kleiner dan 0.5 moet zijn. Als we de prestatie van het netwerk tijdens het trainen plotten zien we dat dit zeer onstabiel is. Daarom hebben we hieronder bekeken of de learningrate invloed heeft op de stabiliteit en de prestatie van het netwerk. De schommelingen kunnen ook verklaren waarom de prestatie van het netwerk na $\gamma = 0.6$ terug toeneemt. 
 \begin{figure}[H]
