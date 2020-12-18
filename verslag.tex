@@ -321,21 +321,20 @@ Aangezien we met $\epsilon$ decay werken, illustreren we hieronder dat het belan
 \includegraphics[scale=0.5]{images/epsilon_decay.png}
 \caption{Illustratie van epsilondecay met een minimum $\epsilon$ van 0.05}
 \end{figure}\\
-Voor ons model kozen wij voor een $epsilon\_decay$ factor van 0.9999 omdat we merken dat na 100000 (TODO:eig niet, er is convergentie na 30k dus een epsilon van 0.9999 is goed genoeg) episodes het model zo goed als stabiel is. Met 0.9999 bereiken we de minimale epsilon na ongeveer 30000 episodes wat betekent dat we na 30\% van de episodes voornamelijk exploitatie hebben.\\\\
-In onderstaande tabel hebben we een simulatie gedaan voor de $epsilon\_decay$ factoren die in bovenstaande grafiek zijn geïllustreerd, met $\alpha = 0.1$ en $\gamma = 0.75$. Dit zijn de waarden voor de parameters die in het onderzoek in appendix A (TODO: reference) de beste resultaten gaven.
+Voor ons model kozen wij voor een $epsilon\_decay$ factor van 0.9999. Als we 100000 episodes trainen, bereiken we de minimale epsilon dan na ongeveer 30000 episodes. Dat betekent dat er na 30\% van de episodes voornamelijk exploitatie is. Het blijkt echter dat ons model al na 30000 episodes geconvergeerd is. Daarom bekijken we of een kleinere $epsilon\_decay$ factor niet betere resultaten oplevert.\\\\
+In onderstaande tabel staan de resultaten van simulaties gedaan voor de $epsilon\_decay$ factoren uit bovenstaande grafiek, voor een model met $\alpha = 0.1$ en $\gamma = 0.75$ (\ref{appendix:parameters})
 \begin{table}[H]
         \centering
         \begin{tabular}{|c|c|c|c|c|}
                 \hline
                                 & 0.99&0.999&0.9999&0.99999\\
                                 \hline
-                3 heuristieke speler  &52.83&50.65&51.1&52.41\\
-                3 random spelers      &14.77&14.87&14.49&15.12\\
+                3 random speler  &52.83&50.65&51.1&52.41\\
+                3 heuristieke spelers      &14.77&14.87&14.49&15.12\\
                 \hline
         \end{tabular}
         \caption{W/L voor Q-table agent in \% voor verschillende epsilondecay factoren na 100000 episodes}
 \end{table}
-We zien dat zelfs voor een $epsilon\_decay$ factor van 0.99 de agent goed presteert. Ook voor $epsilon\_decay = 0.99999$, waarbij er nog veel exploratie is na 100000 episodes, is dit het geval. We kunnen dus besluiten dat de $\epsilon$ parameter een beperkte invloed heeft op de prestatie van de agent.\\\\
+\noindent We zien dat zelfs voor een $epsilon\_decay$ factor van 0.99 de agent even goed presteert als onze initiele agent die met 0.9999 is getraind. Ook voor $epsilon\_decay = 0.99999$, waarbij er nog veel exploratie is na 100000 episodes, is dit het geval. We kunnen dus besluiten dat de $\epsilon$ en $epsilon\_decay$ parameters een beperkte invloed hebben op de prestatie van de agent.\\\\
 
 \end{document}
-
