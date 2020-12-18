@@ -117,6 +117,7 @@ We vermenigvuldigen met 100 om het resultaat als percentage uit te drukken. Dit 
 Het is belangrijk om te weten hoe de heuristieke speler het doet tegenover random spelers, en omgekeerd. Zo kunnen we goed vergelijken en hopelijk zelfs streven naar gelijkaardige of betere resultaten.
 \begin{table}[H]
         \centering
+        \resizebox{9cm}{!}{
         \begin{tabular}{|c|c|c|}
                 \hline
                   vs                & 3 heuristieke spelers & 3 random spelers \\
@@ -125,6 +126,7 @@ Het is belangrijk om te weten hoe de heuristieke speler het doet tegenover rando
                  random spelers     & 6         & 25\\
                 \hline
         \end{tabular}
+        }
         \caption{W/L in \% voor heuristieke agents}
 \end{table}
 \noindent In bovenstaande tabel zien we dat de heuristieke speler het al zeer goed doet, wat wel te verwachten was tegen random spelers. Een goed doel voor de reinforcement learning agents is dus minstens beter zijn dan de random speler of zelfs de heuristieke speler te evenaren, al dan niet te overtreffen.
@@ -137,9 +139,10 @@ We willen, net zoals bij de heuristieke speler, dat de agent een ronde zo goed m
 $r = amount\_of\_cards\_played * 0.5 + amount\_of\_cards\_played\_in\_round * 0.2$
 \end{center}
 In de rewardfunctie zien we ook de term $amount\_of\_cards\_played\_in\_round$ bevat. Ookal zit dit niet in de state gebruiken we dit om acties die vaak leiden tot meer kaarten gespeeld in een ronde extra te belonen.\\\\
-Met learning rate $\alpha = 0.1$ en discount factor $\gamma = 0.75$ (parameters komen uit onderzoek in appendix \ref{appendix:parameters}), behaalt de Q-learning agent volgende resultaten. 
+Met learning rate $\alpha = 0.1$ en discount factor $\gamma = 0.75$ (deze optimale parameters komen uit onderzoek in appendix \ref{appendix:parameters}), behaalt de Q-learning agent volgende resultaten. 
 \begin{table}[H]
         \centering
+        \resizebox{13cm}{!}{
         \begin{tabular}{|c|c|c|}
                 \hline
                   vs           & 3 heuristieke spelers & 3 random spelers \\
@@ -148,30 +151,30 @@ Met learning rate $\alpha = 0.1$ en discount factor $\gamma = 0.75$ (parameters 
                  Q-learning agent getraind tegen heuristieke spelers & 15.4 & 52.7\\
                 \hline
         \end{tabular}
+        }
         \caption{W/L in \% voor Q-table agent}
 \end{table}
 \noindent Dit zijn vrij goede resultaten, aangezien de random speler slechts een 6\% en 25\% haalt in deze situaties. Ook tegen de heuristieke speler zijn dit redelijk goede resultaten, aangezien de heuristieke speler een voordeel heeft: hij legt enkel jokers als dat nodig is. De Q-learning agent houdt hier geen rekening mee, wat een gedeeltelijke verklaring kan zijn voor het lagere resultaat.
 \begin{figure}[H]
     \centering
-    \subfloat[met gesorteerde q-table]{{\includegraphics[width=7.5cm]{images/wins_in_time.png}} }
+    \subfloat[met gesorteerde q-table]{{\includegraphics[width=7cm]{images/wins_in_time.png}} }
     \qquad
-    \subfloat[alle versies van de q-table tegen random spelers]{{\includegraphics[width=7.5cm]{images/qtable-impl-random.png}} }
+    \subfloat[alle versies van de q-table tegen random spelers]{{\includegraphics[width=7cm]{images/qtable-impl-random.png}} }
     \caption{Resultaten met $\gamma = 0.75$ en $\alpha = 0.1$ doorheen de tijd.}
     \label{fig:q_table_is_a_heuristic_player}
 \end{figure}
-\noindent De prestatie van de agent plotten voor meerdere episodes geeft een opmerkelijk resultaat. Namelijk dat de Q-learning agent de random speler sterk overtreft zelfs zonder training! De oorzaak hiervan ligt bij de implementatie van de Q-learning agent. Als de agent een zet moet doen, genereren wij alle mogelijke legale zetten voor de kaarten in zijn hand. Deze staan in volgorde van laagste kaarten naar hoogste kaarten. Als de Q-table nog maar net geïnitialiseerd is staan alle Q-waarden op 0 en zal de agent de zet met de hoogste waarde nemen, de zet die als eerste is gegenereerd. Dit zal altijd de laagste kaart zijn. Dit op zich is al een kleine heuristiek die beter presteert dan de random keuze van de random agent.\\\\
-Om zeker te zijn dat de agent wel degelijk goed leert, hebben we ook de de zetten eens omgekeerd geïmplementeerd (waar hij dus eerst de hoogst mogelijke kaarten legt) en ook eens dat hij willekeurig kiest uit de acties met de hoogste Q-waarde. Bij het laatste presteert hij precies even goed als de random spelers (streepjeslijn = 25\%). Dus hebben we hier, als alle waarden in de Q-table op 0 staan, een random agent via Q-learning geïmplementeerd. Na ongeveer 20 000 episodes convergeren deze implementaties, en blijven ze ongeveer stabiel rond de 50\%.
+\noindent De prestatie van de agent plotten voor meerdere episodes geeft een opmerkelijk resultaat. Namelijk dat de Q-learning agent de random speler sterk overtreft zelfs zonder training! De oorzaak hiervan ligt bij de implementatie van de Q-learning agent. Als de agent een zet moet doen, genereren wij alle mogelijke legale zetten voor de kaarten in zijn hand. Deze staan in volgorde van laagste kaarten naar hoogste kaarten. Als de Q-table nog maar net geïnitialiseerd is staan alle Q-waarden op 0 en zal de agent de zet met de hoogste waarde nemen, de zet die als eerste is gegenereerd. Dit zal altijd de laagste kaart zijn. Dit op zich is al een kleine heuristiek die beter presteert dan de random keuze van de random agent. \\\\
+Om zeker te zijn dat de agent wel genoeg leert, hebben we ook de zetten eens omgekeerd geïmplementeerd (waar hij dus eerst de hoogst mogelijke kaarten legt) en ook eens dat hij willekeurig kiest uit de acties met de hoogste Q-waarde. Bij het laatste presteert hij precies even goed als de random spelers (streepjeslijn = 25\%). Dus hebben we hier, als alle waarden in de Q-table op 0 staan, een random agent via Q-learning geïmplementeerd. Na ongeveer 20 000 episodes convergeren deze implementaties, en blijven ze ongeveer stabiel rond de 50\%.
 
 \subsubsection{Uitgebreide state}
-Het probleem met een uitgebreide state, en dus een grote Q-table, is dat het moeilijk is om alle delen te exploreren. In het geval van presidenten komt er dan nog bij dat er delen van de tabel nauwelijks bezocht worden. Methodes met een grote Q-table zijn dus niet geschikt voor een spel als presidenten. Meer info over de uitgebreide state is te vinden in \ref{appendix:extended_state}.
+Bij het testen van een Q-table met een grotere state waren de restulaten nooit zo goed als bij de kleinere Q-table. We merkten vaak op dat er delen van de Q-table helemaal niet upgedate waren. Het probleem met een uitgebreide state, is dus dat er veel delen van de tabel niet of amper geëxploreerd kunnen worden, omdat de Q-table gewoonweg te groot wordt. Hierdoor zullen er veel Q-waarden niet aangepast zijn en nog op hun initiële waarde staan, waardoor de agent geen goede beslissing kan nemen. Bij presidenten is dit nog een groter probleem, aangezien het spel op zich al veel zeldzame states heeft, waardoor die zelfs nog minder zullen bezocht worden.\\\\ 
+Dit is dus een grote beperking van Q-learning. In appendix \ref{appendix:extended_state} is meer geschreven over de bevindingen van het experimenteren met een uitgebreide state, en geven we ook voorbeeld van die "zeldzame" states bij presidenten.
 
 \subsection{DQN}
 Waar we nog niet in geslaagd zijn is om de prestatie van de heuristieke speler te evenaren. Een mogelijke verklaring is de beperkte state, waarin we niet eens met de volledige hand kunnen rekening houden. Nu we werken met een deep Q-network, is het mogelijk om dit wel te doen.
-TODO: kleine dqn en grote dqn benaming uitleggen
 \subsubsection{Kleine DQN}
 We werken hier met een state van 15 velden, de eerste 13 stellen de hand voor, de laatste 2 representeren de laatst gelegde kaart(en). Dit is even veel informatie als de heuristieke speler heeft, wat we tot nu toe nog niet hebben kunnen bereiken op een functionele manier.\\\\
-Als eerste testen we de reward functie die al goed heeft gepresteerd bij Q-learning. In deze context lijkt die niet zo succesvol te zijn, aangezien die ongeveer 24\% W/L geeft tegen 3 random spelers. \\\\
-Omdat we nu de volledige hand in de state bijhouden, kunnen we misschien een betere reward functie construeren op basis van de hand. De reward functie ziet er als volgt uit:\\\\
+Als eerste testen we de reward functie die al goed heeft gepresteerd bij Q-learning. In deze context lijkt die niet zo succesvol te zijn, aangezien die ongeveer 24\% W/L geeft tegen 3 random spelers. Omdat we nu de volledige hand in de state bijhouden, kunnen we misschien een betere reward functie construeren op basis van de hand. De reward functie ziet er als volgt uit:\\\\
 \indent als uitgespeeld: $reward = 10$\\
 \indent als gepast: $reward = skip\_penalty$\\
 \indent anders: $reward = relative\_hand\_score$\\\\
@@ -179,7 +182,7 @@ De $skip\_penalty$ geeft een hogere straf als er in het begin van de ronde gepas
 We hebben deze functie niet in 1 keer gevonden, maar hebben veel verschillende moeten uittesten. Daarbij is de relatieve hand score een reward die meer gebaseerd is op het korte termijn gedrag van de agent, het is dus interessant om te kijken hoe de discount factor $\gamma$ hier een rol in speelt.
 \begin{figure}[H]
 \centering
-\includegraphics[scale=0.40]{images/gamma-iteratie-dqn.png}
+\includegraphics[scale=0.38]{images/gamma-iteratie-dqn.png}
 \caption{Resultaten variëren van parameter $\gamma$}
 \label{fig:gamma_iteratie_small_dqn}
 \end{figure}
@@ -187,7 +190,7 @@ We hebben deze functie niet in 1 keer gevonden, maar hebben veel verschillende m
 \noindent Daarbij zien we dat na de prestatie van het netwerk begint te dalen voor $\gamma > 0.5$, de winst terug stijgt. Het is dus moeilijk om te besluiten of gamma best kleiner dan 0.9 of 0.5 moet zijn, of dat dit gewoon ligt aan schommelingen in het netwerk. Waarschijnlijk het laatste, aangezien de prestatie van het netwerk tijdens het trainen plotten (zie Figuur \ref{fig:kleine-dqn}) aantoont dat het vrij onstabiel is. Vermoedelijk heeft de learning rate $\alpha$ hier een invloed op.
 \begin{figure}[H]
     \centering
-    \subfloat[tegen random spelers]{{\includegraphics[width=7.5cm]{images/lr-iteration-random-small-dqn.png}} }
+    \subfloat[Resultaten variëren van parameter $\gamma$]{{\includegraphics[width=7.5cm]{images/lr-iteration-random-small-dqn.png}} }
     \qquad
     \subfloat[tegen heuristieke spelers]{{\includegraphics[width=7.5cm]{images/lr-iteration-heur-small-dqn.png}} }
     \caption{Resultaten met $\gamma = 0.5$ en $\alpha = \{0.01, 0.001, 0.0001\}$ doorheen de tijd.}
@@ -197,6 +200,7 @@ We hebben deze functie niet in 1 keer gevonden, maar hebben veel verschillende m
 Nu de optimale parameters gekend zijn, kunnen de prestaties samengevat worden:
 \begin{table}[H]
         \centering
+         \resizebox{13cm}{!}{
         \begin{tabular}{|c|c|c|}
                 \hline
                   vs           & 3 heuristieke spelers & 3 random spelers \\
@@ -205,52 +209,41 @@ Nu de optimale parameters gekend zijn, kunnen de prestaties samengevat worden:
                  DQN agent getraind tegen heuristieke spelers & 11.3 & 39.9\\
                 \hline
         \end{tabular}
+        }
         \caption{gemiddelde W/L in \% voor DQN agent met $\gamma=0.5$, $lr=0.0001$}
 \end{table}
 \noindent Merk op dat we met het construeren van een heel specifieke reward functie, maar een W/L percentage van ongeveer 40\% behalen tegenover de random spelers. Daarbij is het engineeren van een reward functie misschien niet de beste manier van aanpak. De agent volgt namelijk exact wat we aangeven in de reward functie, een kleine redeneringsfout kan de agent leiden tot heel vreemde acties.
 \subsubsection{Grote DQN}
-In het vorige deel hebben we een vrij gedetailleerde reward functie gemaakt, die elke stap een reward geeft. We willen echter de agent minder zelf sturen, en zelf de taktiek van het spel laten ontdekken. Daarvoor gebruiken we volgende, simpele reward functie:\\\\
+In het vorige deel hebben we een vrij gedetailleerde reward functie gemaakt, die elke stap een reward geeft. We willen echter de agent minder zelf sturen, en zelf de taktiek van het spel laten ontdekken. Daarvoor gebruiken we volgende, simpele reward functie:\\
 \indent als president: $reward = 10$\\
 \indent als vice-president: $reward = 5$\\
 \indent als high-scum: $reward = -5$\\
 \indent als scum: $reward = -10 - 3*amount\_cards\_in\_hand$\\
 \indent anders: $reward = 0$\\
 
-\noindent De agent krijgt enkel een reward op het einde van het spel, en krijgt voor alle andere stappen een 0. De state houdt vanaf nu ook alle gelegde kaarten bij in het spel. Er zijn dus 13 velden voor de eigen hand, 13 velden (op dezelfde manier als eigen hand) voor de gelegde kaarten in het spel, en 2 voor de laatst gelegde kaart(en). Aangezien we nu enkel rewards geven voor de finale actie van een spel vermoeden we dat een hogere gamma voor betere resultaten zal zorgen.
+\noindent De agent krijgt dus enkel een reward op het einde van het spel. De state houdt vanaf nu ook alle gelegde kaarten bij in het spel. Er zijn 13 velden voor de eigen hand, 13 velden voor de gelegde kaarten in het spel, en 2 voor de laatst gelegde kaart(en). Aangezien we nu enkel rewards geven voor de finale actie van een spel, vermoeden we dat een hogere gamma betere resultaten zal geven.
 \begin{figure}[H]
     \centering
-    \subfloat[tegen random spelers]{{\includegraphics[width=7cm]{images/gamma_bigdqn_20k.png}} }
+    \subfloat[na 20 000 episodes training]{{\includegraphics[width=6.9cm]{images/gamma_bigdqn_20k.png}} }
     \qquad
-    \subfloat[tegen heuristieke spelers]{{\includegraphics[width=7cm]{images/gamma_bigdqn_100k.png}} }
+    \subfloat[na 100 000 episodes training]{{\includegraphics[width=6.9cm]{images/gamma_bigdqn_100k.png}} }
     \caption{Resultaten variëren van $\gamma$.}
 \end{figure}
 \noindent Bij het simuleren van het netwerk met verschillende waarden van $\gamma$, zien we dat voor lage $\gamma$ inderdaad lage resultaten worden behaald, maar de $\gamma$ mag ook niet te hoog zijn. Hier ook zijn schommelingen te zien in de prestatie, waardoor het niet erg duidelijk is welke $\gamma$ exacht het best zou presteren. Daarom moet opnieuw de invloed van de learning rate parameter onderzocht worden. 
 \begin{figure}[H]
     \centering
-    \subfloat[tegen random spelers]{{\includegraphics[width=7cm]{images/lr-iteration-random-big-dqn.png}} }
+    \subfloat[Variëren van learning rate]{{\includegraphics[width=6.9cm]{images/lr-iteration-random-big-dqn.png}} }
     \qquad
-    \subfloat[tegen heuristieke spelers]{{\includegraphics[width=7cm]{images/lr-iteration-heur-big-dqn.png}} }
-    \caption{Resultaten met $\gamma = 0.7$ en $\alpha = \{0.01, 0.001, 0.0001\}$ doorheen de tijd.}
+    \subfloat[Langer trainen met $lr = 0.0001$]{{\includegraphics[width=6.9cm]{images/big_dqn_extended_training.png}} }
+    \caption{Resultaten met $\gamma = 0.7$ doorheen de tijd.}
 \end{figure}
-\noindent Net als bij de kleine DQN zien we opnieuw grote bewegingen in de prestatie, maar er is geen learning rate die een betere stabiliteit biedt. De oorzaak van deze grote schommelingen is misschien omdat er nog niet genoeg getraind is, de state is groter dan de kleine DQN maar het aantal trainingen is gelijk gebleven. Om te kijken of de stabiliteit van het model zou verbeteren, hebben we het netwerk met $ lr = 0.0001$ langer laten trainen.
-\begin{figure}[H]
-\centering
-\includegraphics[scale=0.45]{images/big_dqn_extended_training.png}
-\caption{Resulaten langere training met $lr = 0.0001, \gamma = 0.7$}
-\end{figure}
-\noindent Ook met langere training is het netwerk zeer onstabiel, daarom gaan we geen besluitende prestatieresultaten geven. We zouden hier het beste resultaat kunnen "cherry picken" en besluiten dat ons netwerk 42\% tegen random spelers behaalt. Dit is echter niet altijd het geval, aangezien het goed mogelijk is dat een aantal trainingen later de W/L maar 5\% meer bedraagt. Het enige wat we hier kunnen besluiten is dat er duidelijk onstabiliteit is in het netwerk.
-\section{conclusie}
-- simpelere rewards die de agent meer zijn ding laten doen lijken het beter te doen
-- zelfs simpelere algoritmen lijken het beter te doen\\\\
+\noindent Net als bij de kleine DQN zien we opnieuw grote bewegingen in de prestatie, maar er is geen learning rate die een betere stabiliteit biedt. De oorzaak van deze grote schommelingen ligt ook niet aan dat er nog niet genoeg is getraind (zie Figuur 6b). Ook met langere training is het netwerk zeer onstabiel: soms krijgen we een 5\% W/L en dan iets later een 42\% W/L. Wat nog opviel was dat het trainen van de grote DQN al wat langer duurde dan het trainen van de kleine DQN, wat op zich al heel wat meer tijd innam dan het trainen van de agent met een Q-table.\\\\
+Om zeker te zijn dat het niet aan de random tegenstanders ligt, hebben we de agent ook laten trainen tegen 3 heuristieke spelers. Dit gaf zelfs nog mindere prestaties, er werd niet eens meer boven de 15\% W/L gehaald. Een verklaring hiervoor kan zijn dat de speler te weinig wint tegen de heuristiek, en vaak enkel negatieve rewards haalt, waardoor de agent niet echt leert wat hij wél moet doen.\\\\
+Er zijn dus nog duidelijk problemen met de DQN aanpak, maar dit kan aan heel veel liggen. Het zou kunnen dat we de state beter hadden moeten voorstellen door bv. meer of minder velden te gebruiken. Ook de reward functie kan een grote invloed gespeeld hebben, het zou kunnen dat iets kleins zoals een negatieve reward geven bij high-scum het netwerk fout stuurt. Wat ook zeker een probleem kan zijn bij het DQN algoritme is overfitting, waardoor de agent op heel specifieke situaties heeft leren spelen, en bij de rest volledig de mist in gaat. Werken met een neuraal netwerk is dus veel complexer en onvoorspelbaarder dan werken met een simpele Q-table, maar kan als alles zo optimaal mogelijk ingesteld is waarschijnlijk meer opbrengen.
 
-Ook interessant om zeker over te praten:\\
-https://www.alexirpan.com/2018/02/14/rl-hard.html\\
-Veel van de observaties in de blogpost komen overeen wat we hier hebben gemerkt zoals\\
-- vinden van een reward functie is niet moeilijk, maar het vinden van de beste reward functie wel\\
-- Een reward functie kan duidelijk een slechte invloed hebben op de agent aangezien die exact doet wat wij specifieren in de reward functie, zo kunnen we dus raar gedrag krijgen waar de agents opeens blijven skippen etc.
-- overfitten kan ook een probleem zijn bij DQN, zeker in de case van presidenten (zie bovenstaande uitleg van thor)
-- nog zo veel mogelijke problemen: states die niet goed zijn voorgesteld, foute parameters, slechte netwerk structuur, ...
-
+\section{Conclusie}
+Alhoewel geen enkel reinforcement learning algoritme de heuristieke speler heeft kunnen overtreffen, zijn de resultaten zeker niet slecht. Wat opvalt en ons vooral heeft verbaasd, is dat het simpelere algoritme, Q-learning, het hier beter heeft gedaan. We hadden niet verwacht dat een simpele state met zo een simpele reward het zo goed zou kunnen doen. Het probleem is hier wel dat we maar een beperkte Q-table kunnen gebruiken. \\\\
+Daarom zien we dus meer potentieel in de DQN agents, waarbij we een grotere state kunnen bijhouden en dus veel meer vrijheid hebben. Hierdoor kan er ook creatiever omgegaan worden met de reward functies, wat zeker een voordeel is. Alhoewel het vinden van een reward functie vrij simpel was, was het vinden van een echt goede reward functie niet zo simpel (laat maar staan dé beste reward functie). Wat het vinden van een reward zo moeilijk maakt, is de feit dat het heel sterk beïvloedt hoe een agent presteert: een kleine redeneringsfout kan al snel een negatieve invloed hebben. Buiten de reward functie, valt er in het algemeen nog veel meer te experimenteren en uit te proberen bij het DQN-algoritme, wat misschien op een punt betere prestaties zou kunnen leveren dan het Q-learning met een Q-table. 
 \newpage
 \begin{thebibliography}{9}
 \bibitem{simple-qlearning} 
@@ -328,14 +321,13 @@ In onderstaande tabel staan de resultaten van simulaties gedaan voor de $epsilon
 \label{appendix:extended_state}
 Idealiter bevat de state ook de kaarten in je hand. Dit gaat alweer iets meer naar de richting de heuristieke speler, die ook op basis van zijn hand een beslissing maakt. Na wat zorgvuldig rekenwerk zou dit neerkomen op 2872 mogelijke starthanden, nog zonder alle mogelijke states na het leggen van 1,2,... kaarten. Dit zijn heel veel states! Er moet dus veralgemeend worden, zoals het bijhouden van het aantal kaarten in je hand, en niet de kaarten exact.\\\\
 We kunnen de state als volgt voorstellen: $(rang, aantal, aantal\_kaarten\_in\_hand)$. Met de reward functie die hierboven zo goede resultaten gaf, krijgen we nu nog maar rond de 30\% W/L tegen 3 random spelers. Dit is dus niet veel beter meer dan een random agent.\\\\
-Er is hier dus duidelijk met een probleem, namelijk de Q-table wordt te groot (ook al hebben we die al sterk vereenvoudigd). Hierdoor zijn er veel delen van de Q-table die amper of zelfs nooit worden bezocht, waardoor veel Q-waarden op hun initiele waarde blijven staan, en de agent dus geen goede beslissingen kan maken.\\\\
-We zouden de state nog meer moeten veralgemenen. Als we werken met een state\\\\
+We kunnen de state nog meer proberen veralgemenen. Als we werken met een state\\\\
 \indent $(rang, aantal, aantal\_kaarten\_in\_hand)$ met
 \begin{center}
 $aantal\_kaarten\_in\_hand = aantal$ $if$ $ aantal <= 4$ $else$ $5$
 \end{center}
 En we initialiseren de state-actie paren op 10 voor de acties op een state die de zorgen dat de speler uitspeelt. Gebruikmakend van dezelfde rewardfunctie als de kleine Q-table, behalen we een W/L van 40\% tegen random spelers. Dit is al een verbetering op het volleidg aantal kaarten bijhouden maar is duidelijk geen verbetering op de kleine Q-table.\\\\
-Het feit dat we de state dus niet veel kunnen uitbreiden is een grote beperking van Q-learning. Een te grote Q-table zorgt namelijk voor states die nooit of amper worden tegengekomen in vergelijking met andere states. Ook met de acties is dit het geval, het zal bijvoorbeeld niet veel voorkomen dat je 4 koningen kan leggen waardoor de Q-waarde van deze actie niet veel aangepast gaat worden bij het trainen, en nog minder als deze actie over veel states kan gedaan worden. \\\\
+We merken dus op dat een grotere Q-table slechtere resultaten geeft. Een te grote Q-table zorgt namelijk voor states die nooit of amper worden tegengekomen in vergelijking met andere states. Ook met de acties is dit het geval, het zal bijvoorbeeld niet veel voorkomen dat je 4 koningen kan leggen waardoor de Q-waarde van deze actie niet veel aangepast gaat worden bij het trainen, en nog minder als deze actie over veel states kan gedaan worden. \\\\
 Als we in dit geval positieve rewards geven, en we beginnen met alle state-actie waarden op 0,  dan worden de waarden van de vaak voorkomende state-actie paren groter dan de waarden van zeldzame paren. Echter zijn vaak de zeldzame zetten zeer goed, maar zullen ze niet genomen worden omdat ze een lagere Q-waarde hebben. \\\\
 Neem als voorbeeld dat de state bestaat uit $(rang, aantal, aantal\_kaarten\_in\_hand)$ en (3,2,4) is. Onze agent heeft 3 Q'en en een A in zijn hand. De beste zet is de 3 Q'en leggen, waarmee de ronde waarschijnlijk gewonnen zou worden, en dan de A leggen waarmee hij het spel wint. Maar, de actie 3Q zal voor een hand van 4 kaarten hoogstwaarschijnlijk nog niet of nog maar heel weinig zijn voorgekomen waardoor dit een lagere Q-waarde zal hebben dan bijvoorbeeld 1Q leggen. Dus zal de agent niet de optimale actie kiezen.\\\\
 We kunnen ook negatieve rewards geven, en alles initialiseren op 0. Stel de agent heeft alle 4 de jokers. Dit komt zelden voor, waardoor de Q-waarde nog een redelijk "hoge" waarde dicht bij 0 zal hebben. Dit betekent dat de agent het leggen van de 4 jokers in 1 zet als een goede actie ziet. Dit is echter niet het geval want dan is hij zijn 4 jokers kwijt.\\\\
