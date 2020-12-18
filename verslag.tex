@@ -5,7 +5,7 @@
 \usepackage{hyperref}
 \usepackage[margin=1in,footskip=0.25in]{geometry}
 \graphicspath{{./images/}}
-\usepackage[dutch, english]{babel}
+\usepackage[dutch]{babel}
 \usepackage{graphicx}
 \usepackage{subfig}
 \usepackage{lipsum}
@@ -167,8 +167,8 @@ Met learning rate $\alpha = 0.1$ en discount factor $\gamma = 0.75$ (deze optima
 Om zeker te zijn dat de agent wel genoeg leert, hebben we ook de zetten eens omgekeerd geïmplementeerd (waar hij dus eerst de hoogst mogelijke kaarten legt) en ook eens dat hij willekeurig kiest uit de acties met de hoogste Q-waarde. Bij het laatste presteert hij precies even goed als de random spelers (streepjeslijn = 25\%). Dus hebben we hier, als alle waarden in de Q-table op 0 staan, een random agent via Q-learning geïmplementeerd. Na ongeveer 20 000 episodes convergeren deze implementaties, en blijven ze ongeveer stabiel rond de 50\%.
 
 \subsubsection{Uitgebreide state}
-Bij het testen van een Q-table met een grotere state waren de restulaten nooit zo goed als bij de kleinere Q-table. We merkten vaak op dat er delen van de Q-table helemaal niet upgedate waren. Het probleem met een uitgebreide state, is dus dat er veel delen van de tabel niet of amper geëxploreerd kunnen worden, omdat de Q-table gewoonweg te groot wordt. Hierdoor zullen er veel Q-waarden niet aangepast zijn en nog op hun initiële waarde staan, waardoor de agent geen goede beslissing kan nemen. Bij presidenten is dit nog een groter probleem, aangezien het spel op zich al veel zeldzame states heeft, waardoor die zelfs nog minder zullen bezocht worden.\\\\ 
-Dit is dus een grote beperking van Q-learning. In appendix \ref{appendix:extended_state} is meer geschreven over de bevindingen van het experimenteren met een uitgebreide state, en geven we ook voorbeeld van die "zeldzame" states bij presidenten.
+Bij het testen van een Q-table met een grotere state waren de restulaten nooit zo goed als bij de kleinere Q-table. We merkten vaak op dat er delen van de Q-table helemaal niet upgedate waren. Het probleem met een uitgebreide state, is dus dat er veel delen van de tabel niet of amper geëxploreerd kunnen worden, omdat de Q-table gewoonweg te groot wordt. Hierdoor zullen er veel Q-waarden niet aangepast zijn en nog op hun initiële waarde staan, waardoor de agent geen goede beslissing kan nemen. Bij presidenten is dit nog een groter probleem, aangezien het spel op zich meer zeldzame state-actie paren krijgt hoe meer we de state uitbreiden, waardoor die zelfs nog minder zullen bezocht worden.\\\\ 
+Dit is dus een grote beperking van Q-learning. In appendix \ref{appendix:extended_state} is meer geschreven over de bevindingen van het experimenteren met een uitgebreide state, en geven we ook meer uitleg over die "zeldzame" state-actie paren bij presidenten.
 
 \subsection{DQN}
 Waar we nog niet in geslaagd zijn is om de prestatie van de heuristieke speler te evenaren. Een mogelijke verklaring is de beperkte state, waarin we niet eens met de volledige hand kunnen rekening houden. Nu we werken met een deep Q-network, is het mogelijk om dit wel te doen.
@@ -274,10 +274,10 @@ Bellman Equations
 
 
 \appendix
-\section{\\Studie learning rate en discount factor voor state met 2 velden}
+\section{\\Learning rate en discount factor voor state met 2 velden}
 % the \\ insures the section title is centered below the phrase: AppendixA
 \label{appendix:parameters}
-Voor de juiste learning rate en discount factor kunnen we simulaties laten lopen om zo de optimale parameters te vinden. Hieronder zien we de W/L voor alle mogelijke parameters voor $\alpha$ en $\gamma$ met stappen van $0.1$.
+Voor de juiste learning rate $\alpha$ en discount factor $\gamma$ kunnen we simulaties laten lopen om zo de optimale parameters te vinden. Hieronder zien we de W/L voor alle mogelijke parameters voor $\alpha$ en $\gamma$ met stappen van $0.1$.
 \begin{figure}[h]
 \centering
 \includegraphics[scale=0.50]{images/qtable_parameter_random.png}
@@ -293,16 +293,16 @@ We zien nu dat er voor $\gamma \in [0.5, 0.8] $ en $\alpha \in [0.1, 0.3] $ meer
 \end{figure}\\
 Uit bovenstaande afbeeldingen kunnen we besluiten dat de optimale parameters, voor de gebruikte rewardfunctie, $\alpha = 0.1$ en $\gamma = 0.75$ zijn.
 
-\section{\\Epsilon-decay TODO}
+\section{\\Epsilon-decay}
 \label{appendix:epsilon}
 Aangezien we met $\epsilon$ decay werken, illustreren we hieronder dat het belangrijk is om je $epsilon\_decay$ factor dicht genoeg bij 1 te nemen. Anders zal $\epsilon$ al snel zijn minimum hebben bereikt en zal er misschien niet genoeg exploratie geweest zijn.\\
 \begin{figure}[h]
 \centering
-\includegraphics[scale=0.5]{images/epsilon_decay.png}
+\includegraphics[scale=0.65]{images/epsilon_decay.png}
 \caption{Illustratie van epsilondecay met een minimum $\epsilon$ van 0.05}
 \end{figure}\\
-Voor ons model kozen wij voor een $epsilon\_decay$ factor van 0.9999. Als we 100000 episodes trainen, bereiken we de minimale epsilon dan na ongeveer 30000 episodes. Dat betekent dat er na 30\% van de episodes voornamelijk exploitatie is. Het blijkt echter dat ons model al na 30000 episodes geconvergeerd is. Daarom bekijken we of een kleinere $epsilon\_decay$ factor niet betere resultaten oplevert.\\\\
-In onderstaande tabel staan de resultaten van simulaties gedaan voor de $epsilon\_decay$ factoren uit bovenstaande grafiek, voor een model met $\alpha = 0.1$ en $\gamma = 0.75$ (\ref{appendix:parameters})
+Voor ons model kozen wij voor een $epsilon\_decay$ factor van 0.9999. Als we 100 000 episodes trainen, bereiken we de minimale epsilon dan na ongeveer 30 000 episodes. Dat betekent dat er na 30\% van de episodes voornamelijk exploitatie is. Het blijkt dat ons model al na 30 000 episodes geconvergeerd is. Daarom bekijken we of een kleinere $epsilon\_decay$ factor niet betere resultaten oplevert.\\\\
+In onderstaande tabel staan de resultaten van simulaties gedaan voor de $epsilon\_decay$ factoren uit bovenstaande grafiek, voor een model met $\alpha = 0.1$ en $\gamma = 0.75$ (zie appendix \ref{appendix:parameters})
 \begin{table}[H]
         \centering
         \begin{tabular}{|c|c|c|c|c|}
@@ -313,22 +313,22 @@ In onderstaande tabel staan de resultaten van simulaties gedaan voor de $epsilon
                 3 heuristieke spelers      &14.77&14.87&14.49&15.12\\
                 \hline
         \end{tabular}
-        \caption{W/L voor Q-table agent in \% voor verschillende epsilondecay factoren na 100000 episodes}
+        \caption{W/L voor Q-table agent in \% voor verschillende epsilon-decay factoren na 100 000 episodes}
 \end{table}
-\noindent We zien dat zelfs voor een $epsilon\_decay$ factor van 0.99 de agent even goed presteert als onze initiele agent die met 0.9999 is getraind. Ook voor $epsilon\_decay = 0.99999$, waarbij er nog veel exploratie is na 100000 episodes, is dit het geval. We kunnen dus besluiten dat de $\epsilon$ en $epsilon\_decay$ parameters een beperkte invloed hebben op de prestatie van de agent.\\\\
+\noindent We zien dat zelfs voor een $epsilon\_decay$ factor van 0.99 de agent even goed presteert als onze initiële agent die met 0.9999 is getraind. Ook voor $epsilon\_decay = 0.99999$, waarbij er nog veel exploratie is na 100 000 episodes, is dit het geval. We kunnen dus besluiten dat de $\epsilon$ en $epsilon\_decay$ parameters een beperkte invloed hebben op de prestatie van de agent.\\\\
 
 \section{\\Q-Table met uitgebreide state}
 \label{appendix:extended_state}
-Idealiter bevat de state ook de kaarten in je hand. Dit gaat alweer iets meer naar de richting de heuristieke speler, die ook op basis van zijn hand een beslissing maakt. Na wat zorgvuldig rekenwerk zou dit neerkomen op 2872 mogelijke starthanden, nog zonder alle mogelijke states na het leggen van 1,2,... kaarten. Dit zijn heel veel states! Er moet dus veralgemeend worden, zoals het bijhouden van het aantal kaarten in je hand, en niet de kaarten exact.\\\\
+Idealiter bevat de state van de agent ook de kaarten in je hand. Dit gaat alweer iets meer naar de richting de heuristieke speler, die ook op basis van zijn hand een beslissing maakt. Na wat zorgvuldig rekenwerk zou dit neerkomen op 2872 mogelijke starthanden, nog zonder alle mogelijke states na het leggen van 1,2,... kaarten. Dit zijn heel veel states! Er moet dus veralgemeend worden, zoals het bijhouden van het aantal kaarten in je hand, en niet de kaarten exact.\\\\
 We kunnen de state als volgt voorstellen: $(rang, aantal, aantal\_kaarten\_in\_hand)$. Met de reward functie die hierboven zo goede resultaten gaf, krijgen we nu nog maar rond de 30\% W/L tegen 3 random spelers. Dit is dus niet veel beter meer dan een random agent.\\\\
 We kunnen de state nog meer proberen veralgemenen. Als we werken met een state\\\\
 \indent $(rang, aantal, aantal\_kaarten\_in\_hand)$ met
 \begin{center}
 $aantal\_kaarten\_in\_hand = aantal$ $if$ $ aantal <= 4$ $else$ $5$
 \end{center}
-En we initialiseren de state-actie paren op 10 voor de acties op een state die de zorgen dat de speler uitspeelt. Gebruikmakend van dezelfde rewardfunctie als de kleine Q-table, behalen we een W/L van 40\% tegen random spelers. Dit is al een verbetering op het volleidg aantal kaarten bijhouden maar is duidelijk geen verbetering op de kleine Q-table.\\\\
-We merken dus op dat een grotere Q-table slechtere resultaten geeft. Een te grote Q-table zorgt namelijk voor states die nooit of amper worden tegengekomen in vergelijking met andere states. Ook met de acties is dit het geval, het zal bijvoorbeeld niet veel voorkomen dat je 4 koningen kan leggen waardoor de Q-waarde van deze actie niet veel aangepast gaat worden bij het trainen, en nog minder als deze actie over veel states kan gedaan worden. \\\\
-Als we in dit geval positieve rewards geven, en we beginnen met alle state-actie waarden op 0,  dan worden de waarden van de vaak voorkomende state-actie paren groter dan de waarden van zeldzame paren. Echter zijn vaak de zeldzame zetten zeer goed, maar zullen ze niet genomen worden omdat ze een lagere Q-waarde hebben. \\\\
-Neem als voorbeeld dat de state bestaat uit $(rang, aantal, aantal\_kaarten\_in\_hand)$ en (3,2,4) is. Onze agent heeft 3 Q'en en een A in zijn hand. De beste zet is de 3 Q'en leggen, waarmee de ronde waarschijnlijk gewonnen zou worden, en dan de A leggen waarmee hij het spel wint. Maar, de actie 3Q zal voor een hand van 4 kaarten hoogstwaarschijnlijk nog niet of nog maar heel weinig zijn voorgekomen waardoor dit een lagere Q-waarde zal hebben dan bijvoorbeeld 1Q leggen. Dus zal de agent niet de optimale actie kiezen.\\\\
-We kunnen ook negatieve rewards geven, en alles initialiseren op 0. Stel de agent heeft alle 4 de jokers. Dit komt zelden voor, waardoor de Q-waarde nog een redelijk "hoge" waarde dicht bij 0 zal hebben. Dit betekent dat de agent het leggen van de 4 jokers in 1 zet als een goede actie ziet. Dit is echter niet het geval want dan is hij zijn 4 jokers kwijt.\\\\
+En we initialiseren de state-actie paren op 10 voor de acties op een state die de zorgen dat de speler uitspeelt. Gebruikmakend van dezelfde reward functie als de kleine Q-table, behalen we een W/L van 40\% tegen random spelers. Dit is al een verbetering, maar is duidelijk nog niet beter dan de kleine Q-table. Het valt op dat een grotere Q-table slechtere resultaten geeft. Er is dus een punt dat de Q-table te groot wordt om hem nog volledig of genoeg te kunnen exploreren.\\\\
+Bij presidenten komt er dan nog een extra probleem, namelijk dat er heel wat zeldzame states en bijhorende acties zijn, vooral als je de state uitbreidt. Het zal bijvoorbeeld niet erg veel voorkomen dat je 4 koningen kan leggen, waardoor de Q-waarde van deze actie niet veel aangepast gaat worden bij het trainen, en nog minder als deze actie over veel states kan gedaan worden (dus in het geval van een grote Q-table).\\\\
+Als we dan positieve rewards geven, en we beginnen met alle state-actie waarden op 0, dan worden de waarden van de vaak voorkomende state-actie paren groter dan de waarden van zeldzame paren. Echter zijn vaak de zeldzame zetten zeer goed, maar zullen ze niet genomen worden omdat ze een lagere Q-waarde hebben. \\\\
+Neem als voorbeeld dat de state bestaat uit $(rang, aantal, aantal\_kaarten\_in\_hand)$ en (3,2,4) is. Onze agent heeft 3 Q'en en een A in zijn hand. De beste zet is de 3 Q'en leggen, waarmee de ronde waarschijnlijk gewonnen zou worden, en dan de A leggen waarmee hij het spel wint. Maar, de actie 3Q zal voor een hand van 4 kaarten hoogstwaarschijnlijk nog niet of nog maar heel weinig zijn voorgekomen waardoor dit een lagere Q-waarde zal hebben dan bijvoorbeeld 1Q leggen in het geval dat je nog maar 4 kaarten hebt. Daarom zal de agent niet de optimale actie kiezen.\\\\
+We kunnen ook negatieve rewards geven, en alles initialiseren op 0. Stel de agent heeft alle 4 de jokers. Dit komt zelden voor, waardoor de Q-waarde nog een redelijk "hoge" waarde dicht bij 0 zal hebben. Dit betekent dat de agent het leggen van de 4 jokers in 1 zet als een goede actie ziet. Dit is echter niet het geval want dan is hij zijn 4 jokers kwijt. Bij een te grote Q-table kan het dus zijn dat deze actie bij veel states nog niet is voorgekomen. \\\\
 \end{document}
